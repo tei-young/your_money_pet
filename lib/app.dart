@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'utils/theme.dart';
 import 'utils/constants.dart';
+import 'screens/onboarding/splash_screen.dart';
 
 // TODO: Providers import (나중에 추가)
 // import 'providers/user_provider.dart';
@@ -26,8 +27,8 @@ class MoneyPetApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
 
-        // 임시 홈 화면 (Splash 개발 전까지)
-        home: const _TemporaryHome(),
+        // Splash 화면으로 시작
+        home: const SplashScreen(),
 
         // TODO: Router 설정 (나중에)
         // routerConfig: appRouter,

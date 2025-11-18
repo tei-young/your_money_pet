@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
+import 'first_learning_intro_screen.dart';
 
 /// 목표 설정 화면
 /// 사용자의 투자 목표 선택
@@ -62,10 +63,17 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
   void _onNext() {
     if (_selectedGoal == null) return;
 
-    // TODO: 첫 학습 소개 화면으로 이동
-    debugPrint('Name: ${widget.userName}');
-    debugPrint('Personality: ${widget.personalityType.displayName}');
-    debugPrint('Goal: $_selectedGoal');
+    // 첫 학습 소개 화면으로 이동
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => FirstLearningIntroScreen(
+          personalityType: widget.personalityType,
+          userName: widget.userName,
+          userGoal: _selectedGoal!,
+        ),
+      ),
+    );
   }
 
   @override

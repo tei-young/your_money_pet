@@ -131,16 +131,28 @@
 
 ## 🏗️ 기술 스택
 
-### 추천 스택 (TBD)
+### 선택된 스택
 ```
 프론트엔드:
-- React Native (Expo) or Flutter
-- 상태관리: Redux Toolkit / Zustand (RN) or Provider (Flutter)
-- 애니메이션: Lottie / Rive
+- Flutter 3.x (Dart)
+- 상태관리: Provider / Riverpod
+- 애니메이션: Rive (추천) / Lottie
+- 로컬 저장소: Hive / SharedPreferences
 
 백엔드:
-- Firebase (Firestore + Authentication + Storage)
-- or Supabase (PostgreSQL + Auth + Storage)
+- Firebase
+  - Firestore (데이터베이스)
+  - Authentication (인증)
+  - Storage (이미지 저장)
+  - Analytics (분석)
+
+주요 패키지:
+- go_router (네비게이션)
+- rive (애니메이션)
+- firebase_core, cloud_firestore, firebase_auth
+- share_plus (SNS 공유)
+- image (이미지 생성)
+- fl_chart (차트 - 진도 표시)
 
 배포:
 - iOS: TestFlight → App Store
@@ -148,8 +160,15 @@
 
 CI/CD:
 - GitHub Actions
-- EAS Build (Expo) or Fastlane
+- Codemagic (Flutter 전용) or Fastlane
 ```
+
+### Flutter 선택 이유
+✅ **애니메이션 강점**: 머니펫의 핵심인 캐릭터 애니메이션에 최적
+✅ **60 FPS 보장**: 부드러운 UI/UX
+✅ **Hot Reload**: 빠른 개발 속도
+✅ **단일 코드베이스**: iOS/Android 동시 개발
+✅ **Rive 지원**: 인터랙티브 애니메이션 제작 도구
 
 ---
 
@@ -387,23 +406,54 @@ CI/CD:
 
 ---
 
-## 📂 프로젝트 구조
+## 📂 프로젝트 구조 (Flutter)
 
 ```
 your_money_pet/
-├── docs/                    # 문서
-│   ├── strategy.md          # 전략 기획서
-│   ├── app_spec.md          # 앱 상세 기획서
-│   └── api.md               # API 명세서 (TBD)
-├── src/
-│   ├── screens/             # 화면
-│   ├── components/          # 공통 컴포넌트
-│   ├── navigation/          # 네비게이션
-│   ├── services/            # API, DB
-│   ├── utils/               # 유틸리티
-│   └── assets/              # 이미지, 폰트
-├── README.md
-└── package.json
+├── docs/                           # 문서
+│   ├── strategy.md                 # 전략 기획서
+│   ├── app_spec.md                 # 앱 상세 기획서
+│   └── dev_guide.md                # 개발 가이드
+├── lib/                            # Flutter 소스
+│   ├── main.dart                   # 앱 진입점
+│   ├── app.dart                    # App Widget
+│   ├── screens/                    # 화면
+│   │   ├── onboarding/             # 온보딩 관련
+│   │   ├── home/                   # 홈 화면
+│   │   ├── learning/               # 학습 화면
+│   │   ├── quiz/                   # 퀴즈 화면
+│   │   └── settings/               # 설정 화면
+│   ├── widgets/                    # 재사용 컴포넌트
+│   │   ├── character_widget.dart   # 캐릭터 표시
+│   │   ├── progress_card.dart      # 진도 카드
+│   │   └── learning_card.dart      # 학습 카드
+│   ├── models/                     # 데이터 모델
+│   │   ├── user_profile.dart
+│   │   ├── learning_record.dart
+│   │   └── content.dart
+│   ├── providers/                  # 상태 관리 (Provider/Riverpod)
+│   │   ├── user_provider.dart
+│   │   ├── learning_provider.dart
+│   │   └── quiz_provider.dart
+│   ├── services/                   # 비즈니스 로직
+│   │   ├── firebase_service.dart   # Firebase 연동
+│   │   ├── storage_service.dart    # 로컬 저장소
+│   │   └── share_service.dart      # SNS 공유
+│   ├── utils/                      # 유틸리티
+│   │   ├── constants.dart          # 상수 (색상, 텍스트)
+│   │   ├── theme.dart              # 테마 정의
+│   │   └── helpers.dart            # 헬퍼 함수
+│   └── routes/                     # 라우팅
+│       └── app_router.dart         # go_router 설정
+├── assets/                         # 리소스
+│   ├── images/                     # 이미지
+│   ├── animations/                 # Rive 애니메이션 파일
+│   └── fonts/                      # 폰트
+├── test/                           # 테스트
+├── android/                        # Android 설정
+├── ios/                            # iOS 설정
+├── pubspec.yaml                    # 패키지 의존성
+└── README.md
 ```
 
 ---
@@ -426,6 +476,459 @@ your_money_pet/
 - Day 365 완성
 - 포트폴리오 연동 (증권사 API)
 - 글로벌 진출 (일본어, 영어)
+
+---
+
+## 🧪 Flutter 테스트 & 배포 가이드
+
+### 1️⃣ 개발 환경 세팅
+
+#### 필수 도구 설치
+```bash
+# Flutter SDK 설치 (https://flutter.dev/docs/get-started/install)
+flutter --version
+
+# Flutter doctor로 환경 확인
+flutter doctor
+
+# 필요한 도구 설치 확인:
+# ✓ Flutter SDK
+# ✓ Android Studio (Android 개발)
+# ✓ Xcode (iOS 개발, Mac 필수)
+# ✓ VS Code or Android Studio (IDE)
+```
+
+#### VS Code 확장 설치 (추천)
+- Flutter
+- Dart
+- Prettier - Code formatter
+
+---
+
+### 2️⃣ 로컬 테스트 환경
+
+#### A. 실기기 테스트 (가장 빠름) ⭐
+
+**iOS (Mac 필요)**:
+```bash
+# iPhone 연결 (USB)
+# 개발자 모드 활성화
+
+# 실행
+flutter run
+# 또는 특기기 지정
+flutter devices
+flutter run -d <device-id>
+
+장점:
+✅ 실제 기기 성능 확인
+✅ Hot Reload (r 키) / Hot Restart (R 키)
+✅ 터치, 제스처 정확한 테스트
+```
+
+**Android**:
+```bash
+# Android 폰 연결 (USB)
+# 개발자 옵션 → USB 디버깅 활성화
+
+# 실행
+flutter run
+
+장점:
+✅ Windows/Mac/Linux 모두 가능
+✅ 실제 기기 테스트
+✅ Hot Reload 지원
+```
+
+#### B. iOS Simulator (Mac 필수)
+```bash
+# Simulator 실행
+open -a Simulator
+
+# Flutter 실행
+flutter run
+
+장점:
+✅ 실기기 없이 테스트
+✅ 다양한 기기 시뮬레이션 (iPhone SE ~ Pro Max)
+
+단점:
+⚠️ Mac 필수
+⚠️ 성능이 실기기와 다름
+```
+
+#### C. Android Emulator
+```bash
+# Android Studio → AVD Manager → 에뮬레이터 생성
+# (권장: Pixel 6, API 33+)
+
+# 에뮬레이터 실행
+flutter emulators --launch <emulator-id>
+
+# Flutter 실행
+flutter run
+
+장점:
+✅ 모든 OS에서 가능
+✅ 다양한 기기 테스트
+
+단점:
+⚠️ 메모리 많이 사용 (8GB+ 권장)
+⚠️ 애니메이션 성능 실기기보다 느림
+```
+
+---
+
+### 3️⃣ 빌드 방법
+
+#### 개발 빌드 (Debug)
+```bash
+# Android APK
+flutter build apk --debug
+
+# iOS (Mac 필수)
+flutter build ios --debug
+```
+
+#### 릴리즈 빌드
+```bash
+# Android App Bundle (Play Store 업로드용)
+flutter build appbundle --release
+
+# Android APK (직접 배포용)
+flutter build apk --release
+
+# iOS (Mac 필수)
+flutter build ipa --release
+```
+
+---
+
+### 4️⃣ 내부 테스트 (팀원)
+
+#### A. Android - APK 직접 배포
+```bash
+# 1. 릴리즈 APK 빌드
+flutter build apk --release
+
+# 2. APK 위치
+build/app/outputs/flutter-apk/app-release.apk
+
+# 3. 팀원에게 전달
+- Google Drive / Dropbox 등에 업로드
+- 다운로드 링크 공유
+- 팀원: "알 수 없는 출처" 허용 후 설치
+
+장점:
+✅ 즉시 배포 가능
+✅ 심사 없음
+✅ 무료
+
+단점:
+⚠️ 보안 경고 (알 수 없는 출처)
+⚠️ 자동 업데이트 불가
+```
+
+#### B. iOS - TestFlight (추천)
+```bash
+# 1. Apple Developer Program 가입 ($99/년)
+
+# 2. Xcode에서 빌드
+flutter build ipa
+
+# 3. Xcode Organizer로 업로드
+- Xcode 열기 → Window → Organizer
+- Archives 탭 → Distribute App
+- TestFlight → Upload
+
+# 4. App Store Connect에서 테스터 초대
+- 이메일 또는 링크로 초대 (최대 100명)
+
+장점:
+✅ 앱스토어와 동일한 환경
+✅ 자동 업데이트
+✅ 크래시 리포트 자동 수집
+
+과정:
+Week 1: Apple Developer 가입
+Week 2: 첫 빌드 업로드
+Week 3-4: 내부 테스터 피드백
+```
+
+---
+
+### 5️⃣ 베타 테스트 (외부 사용자)
+
+#### Android - Google Play 내부 테스트
+
+**초기 설정** (1회만):
+```
+1. Google Play Console 계정 생성 ($25 평생)
+   https://play.google.com/console
+
+2. 앱 만들기
+   - 앱 이름: 머니펫
+   - 기본 언어: 한국어
+
+3. 스토어 등록정보 작성
+   - 간단한 설명
+   - 스크린샷 (필수)
+   - 앱 아이콘
+```
+
+**빌드 업로드**:
+```bash
+# 1. App Bundle 빌드
+flutter build appbundle --release
+
+# 2. Play Console → 프로덕션 → 트랙 만들기
+# → 내부 테스트
+
+# 3. AAB 업로드
+build/app/outputs/bundle/release/app-release.aab
+
+# 4. 테스터 목록 생성
+- 이메일 주소로 초대 (최대 100명)
+
+# 5. 검토 → 출시
+- 즉시 배포 (심사 없음)
+```
+
+**테스터 초대**:
+```
+1. Play Console → 내부 테스트 → 테스터
+2. 이메일 목록 추가
+3. 공유 링크 복사
+4. 테스터에게 링크 전달
+5. 테스터: 링크 접속 → 플레이스토어에서 설치
+```
+
+#### iOS - TestFlight (위와 동일)
+
+---
+
+### 6️⃣ 정식 출시
+
+#### Android - Google Play Store
+```
+1. Play Console → 프로덕션 → 새 버전 만들기
+
+2. App Bundle 업로드 (동일)
+
+3. 출시 노트 작성
+   예: "첫 출시: 투자 학습 앱 머니펫"
+
+4. 검토를 위해 제출
+   - 심사 기간: 평균 1-3일
+
+5. 승인 후 전 세계 배포
+```
+
+#### iOS - App Store
+```
+1. App Store Connect → 앱 → 새 버전
+
+2. 빌드 선택 (TestFlight에서 업로드한 빌드)
+
+3. 스토어 정보 작성
+   - 스크린샷 (필수)
+   - 설명
+   - 키워드
+
+4. 심사를 위해 제출
+   - 심사 기간: 평균 1-7일
+
+5. 승인 후 App Store 배포
+```
+
+---
+
+### 7️⃣ CI/CD 자동화 (선택, 나중에)
+
+#### GitHub Actions (무료)
+```yaml
+# .github/workflows/flutter-ci.yml
+name: Flutter CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.x'
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Run tests
+      run: flutter test
+
+    - name: Build APK
+      run: flutter build apk --release
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-release
+        path: build/app/outputs/flutter-apk/app-release.apk
+```
+
+#### Codemagic (Flutter 전용, 유료)
+- 더 강력한 기능 (iOS 빌드 포함)
+- GUI 설정
+- 자동 TestFlight/Play Store 업로드
+- 무료 플랜: 월 500분
+
+---
+
+### 8️⃣ 추천 테스트 전략
+
+```
+┌─────────────────────────────────────────┐
+│ Phase 1-3 (개발 중)                     │
+│ → 실기기 Hot Reload 테스트 (매일)        │
+│ → iOS Simulator + Android Emulator     │
+│ → flutter run으로 즉시 확인             │
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ Phase 4 (QA)                            │
+│ → 릴리즈 빌드 생성                       │
+│ → APK 직접 배포 (팀원 5-10명)           │
+│ → 버그 수정                             │
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ 베타 출시 (출시 2주 전)                  │
+│ → TestFlight (iOS) 50명                 │
+│ → Google Play 내부 테스트 (Android) 50명│
+│ → 피드백 수집 → 수정                    │
+└─────────────────────────────────────────┘
+
+┌─────────────────────────────────────────┐
+│ 정식 출시                                │
+│ → App Store (심사 1-7일)                │
+│ → Google Play Store (심사 1-3일)        │
+└─────────────────────────────────────────┘
+```
+
+---
+
+### 9️⃣ 테스트 기기 추천
+
+#### 최소 구성
+```
+✅ iPhone 1대 (iOS 14+)
+✅ Android 폰 1대 (API 23+)
+or
+✅ Mac + Simulator + Android 에뮬레이터
+```
+
+#### 이상적 구성
+```
+✅ iPhone 14/15 (최신)
+✅ iPhone SE (구형, 작은 화면)
+✅ Galaxy S23 (최신 Android)
+✅ 중저가 Android (성능 테스트)
+```
+
+---
+
+### 🔟 비용 정리
+
+| 항목 | 비용 | 필수 여부 |
+|------|------|-----------|
+| Flutter SDK | **무료** | ✅ 필수 |
+| Apple Developer | $99/년 | ✅ iOS 배포 필수 |
+| Google Play | $25 (평생) | ✅ Android 배포 필수 |
+| Firebase (Spark) | **무료** | ✅ 충분 |
+| Codemagic | 무료 (월 500분) | ⚠️ 선택사항 |
+| Mac | - | ⚠️ iOS 개발 권장* |
+
+*Mac 없이도 Android만 개발 가능하지만, iOS는 Mac 필수
+
+**MVP 총 비용: $124 (1년)**
+
+---
+
+### 1️⃣1️⃣ 실전 세팅 가이드 (10분)
+
+```bash
+# 1. Flutter 프로젝트 생성
+flutter create money_pet
+cd money_pet
+
+# 2. 필요 패키지 추가 (pubspec.yaml)
+# dependencies:
+#   flutter:
+#     sdk: flutter
+#   provider: ^6.0.0
+#   go_router: ^12.0.0
+#   firebase_core: ^2.24.0
+#   cloud_firestore: ^4.13.0
+#   firebase_auth: ^4.15.0
+#   rive: ^0.12.0
+#   share_plus: ^7.0.0
+
+# 3. 패키지 설치
+flutter pub get
+
+# 4. 개발 서버 시작
+flutter run
+
+# 5. 실기기에서 확인
+# → Hot Reload로 즉시 테스트!
+```
+
+---
+
+### 1️⃣2️⃣ Flutter 개발 팁
+
+#### Hot Reload vs Hot Restart
+```
+Hot Reload (r 키):
+- 코드 변경 즉시 반영 (1초 이내)
+- 상태 유지
+- UI 수정 시 사용
+
+Hot Restart (R 키):
+- 앱 재시작
+- 상태 초기화
+- 상태 관리 변경 시 사용
+```
+
+#### 디버깅
+```bash
+# DevTools 실행
+flutter pub global activate devtools
+flutter pub global run devtools
+
+# 성능 프로파일링
+flutter run --profile
+
+# 레이아웃 디버그
+# Widget Inspector 사용 (DevTools)
+```
+
+#### 애니메이션 최적화
+```dart
+// RepaintBoundary로 리페인트 영역 최소화
+RepaintBoundary(
+  child: CharacterWidget(),
+);
+
+// const 사용으로 리빌드 방지
+const Text('머니펫');
+```
 
 ---
 

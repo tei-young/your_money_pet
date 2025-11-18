@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
+import 'goal_setting_screen.dart';
 
 /// 이름 설정 화면
 /// 사용자 닉네임 입력
@@ -37,9 +38,17 @@ class _NameSettingScreenState extends State<NameSettingScreen> {
     if (!_isNameValid) return;
 
     final name = _nameController.text.trim();
-    // TODO: 목표 설정 화면으로 이동
-    debugPrint('Name: $name');
-    debugPrint('Personality: ${widget.personalityType.displayName}');
+
+    // 목표 설정 화면으로 이동
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => GoalSettingScreen(
+          personalityType: widget.personalityType,
+          userName: name,
+        ),
+      ),
+    );
   }
 
   @override

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../utils/constants.dart';
+import '../../providers/user_provider.dart';
+import '../home/home_screen.dart';
 
 /// 첫 학습 소개 화면
 /// 온보딩 마지막 단계
@@ -16,12 +19,22 @@ class FirstLearningIntroScreen extends StatelessWidget {
     required this.userGoal,
   });
 
-  void _onStartLearning(BuildContext context) {
-    // TODO: 홈 화면 또는 Day 1 학습 화면으로 이동
-    debugPrint('Starting first learning...');
-    debugPrint('User: $userName');
-    debugPrint('Personality: ${personalityType.displayName}');
-    debugPrint('Goal: $userGoal');
+  void _onStartLearning(BuildContext context) async {
+    // 사용자 데이터 저장
+    final userProvider = context.read<UserProvider>();
+    await userProvider.createUser(
+      name: userName,
+      personalityType: personalityType,
+      goal: userGoal,
+    );
+
+    // 홈 화면으로 이동 (온보딩 스택 모두 제거)
+    if (context.mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
+    }
   }
 
   @override

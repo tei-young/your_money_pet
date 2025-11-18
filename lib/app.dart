@@ -3,10 +3,8 @@ import 'package:provider/provider.dart';
 import 'utils/theme.dart';
 import 'utils/constants.dart';
 import 'screens/onboarding/splash_screen.dart';
-
-// TODO: Providers import (나중에 추가)
-// import 'providers/user_provider.dart';
-// import 'providers/learning_provider.dart';
+import 'providers/user_provider.dart';
+import 'providers/learning_provider.dart';
 
 // TODO: Router import (나중에 추가)
 // import 'routes/app_router.dart';
@@ -18,9 +16,8 @@ class MoneyPetApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // TODO: Providers 추가 (나중에)
-        // ChangeNotifierProvider(create: (_) => UserProvider()),
-        // ChangeNotifierProvider(create: (_) => LearningProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => LearningProvider()),
       ],
       child: MaterialApp(
         title: AppConstants.appName,

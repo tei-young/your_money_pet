@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
+import 'personality_test_screen.dart';
 
 /// Welcome 화면 (3개 슬라이드)
 /// 슬라이드 1: 캐릭터 소개
@@ -77,8 +78,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   void _navigateToPersonalityTest() {
-    // TODO: 성향 진단 화면으로 이동
-    debugPrint('TODO: Navigate to Personality Test');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const PersonalityTestScreen()),
+    );
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../utils/constants.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/learning_provider.dart';
+import '../../utils/share_helper.dart';
 import '../learning/learning_screen.dart';
 
 /// 홈 화면
@@ -89,6 +90,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       // 통계 영역
                       _buildStatsSection(user),
+
+                      const SizedBox(height: 24),
+
+                      // 공유 버튼
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          await ShareHelper.shareProgress(user: user);
+                        },
+                        icon: const Icon(Icons.share),
+                        label: const Text('학습 현황 공유하기'),
+                      ),
 
                       const SizedBox(height: 32),
                     ]),

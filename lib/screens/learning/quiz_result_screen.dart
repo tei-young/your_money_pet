@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../utils/constants.dart';
 import '../../providers/user_provider.dart';
+import '../../utils/share_helper.dart';
 
 /// 퀴즈 결과 화면
 /// 점수와 획득 포인트 표시
@@ -268,12 +269,33 @@ class QuizResultScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: ElevatedButton(
-        onPressed: () => _onGoHome(context),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-        ),
-        child: const Text('홈으로'),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 공유 버튼
+          OutlinedButton.icon(
+            onPressed: () async {
+              final user = Provider.of<UserProvider>(context, listen: false).user!;
+              await ShareHelper.shareQuizResult(
+                user: user,
+                dayNumber: dayNumber,
+                score: correctCount,
+                totalQuestions: totalQuestions,
+              );
+            },
+            icon: const Icon(Icons.share),
+            label: const Text('결과 공유하기'),
+          ),
+          const SizedBox(height: 12),
+          // 홈으로 버튼
+          ElevatedButton(
+            onPressed: () => _onGoHome(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: color,
+            ),
+            child: const Text('홈으로'),
+          ),
+        ],
       ),
     );
   }

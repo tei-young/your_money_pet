@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
+import 'welcome_screen.dart';
 
 /// Splash 화면
 /// 2초 동안 표시 후 자동으로 Welcome 화면으로 이동
@@ -58,11 +59,11 @@ class _SplashScreenState extends State<SplashScreen>
         // if (onboardingCompleted) {
         //   Navigator.pushReplacementNamed(context, '/home');
         // } else {
-        //   Navigator.pushReplacementNamed(context, '/welcome');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+        );
         // }
-
-        // 임시: Welcome 화면으로 이동 (나중에 구현)
-        debugPrint('TODO: Navigate to Welcome screen');
       }
     });
   }

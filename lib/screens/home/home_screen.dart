@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../utils/constants.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/learning_provider.dart';
+import '../learning/learning_screen.dart';
 
 /// 홈 화면
 /// 캐릭터 + 오늘의 학습 카드 + 진행 상황
@@ -32,8 +33,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onStartLearning() {
-    // TODO: 학습 화면으로 이동
-    debugPrint('Start learning for today');
+    final user = context.read<UserProvider>().user;
+    if (user == null) return;
+
+    // 학습 화면으로 이동
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LearningScreen(dayNumber: user.currentDay),
+      ),
+    );
   }
 
   @override

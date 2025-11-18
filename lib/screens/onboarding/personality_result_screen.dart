@@ -1,0 +1,425 @@
+import 'package:flutter/material.dart';
+import '../../utils/constants.dart';
+
+/// 성향 진단 결과 화면
+/// 진단된 성향과 캐릭터 표시
+/// 모든 성향별 점수 표시
+/// 다른 성향 보기 가능
+class PersonalityResultScreen extends StatelessWidget {
+  final PersonalityType resultType;
+  final Map<PersonalityType, int> allScores;
+
+  const PersonalityResultScreen({
+    super.key,
+    required this.resultType,
+    required this.allScores,
+  });
+
+  void _onStartWithPersonality(BuildContext context) {
+    // TODO: 이름/목표 설정 화면으로 이동
+    debugPrint('Start with: ${resultType.displayName}');
+  }
+
+  void _onViewOtherPersonalities(BuildContext context) {
+    // 다른 성향 보기 바텀시트
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _OtherPersonalitiesSheet(
+        currentType: resultType,
+        allScores: allScores,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: ScreenSize.paddingHorizontal,
+                ),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 16),
+
+                    // 제목
+                    Text(
+                      '당신의 투자 성향은',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // 성향 이름
+                    Text(
+                      resultType.displayName,
+                      style: theme.textTheme.displayLarge?.copyWith(
+                        color: resultType.color,
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    // 캐릭터 (임시: 원형 아이콘)
+                    _buildCharacter(),
+
+                    const SizedBox(height: 32),
+
+                    // 캐릭터 이름
+                    Text(
+                      resultType.characterName,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // 성향 설명
+                    Text(
+                      resultType.description,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.6,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+
+                    const SizedBox(height: 48),
+
+                    // 점수 분포
+                    _buildScoreDistribution(context),
+
+                    const SizedBox(height: 32),
+                  ],
+                ),
+              ),
+            ),
+
+            // 하단 버튼
+            _buildBottomButtons(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 캐릭터 표시
+  Widget _buildCharacter() {
+    return Container(
+      width: 200,
+      height: 200,
+      decoration: BoxDecoration(
+        color: resultType.color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(100),
+        border: Border.all(
+          color: resultType.color.withOpacity(0.3),
+          width: 4,
+        ),
+      ),
+      child: Icon(
+        Icons.pets,
+        size: 100,
+        color: resultType.color,
+      ),
+    );
+  }
+
+  /// 점수 분포 표시
+  Widget _buildScoreDistribution(BuildContext context) {
+    final theme = Theme.of(context);
+    final maxScore = allScores.values.reduce((a, b) => a > b ? a : b);
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(ScreenSize.borderRadius),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '성향별 점수',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 20),
+          ...PersonalityType.values.map((type) {
+            final score = allScores[type] ?? 0;
+            final percentage = maxScore > 0 ? score / maxScore : 0.0;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 성향 이름 + 점수
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        type.displayName,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: type == resultType
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: type == resultType
+                              ? type.color
+                              : AppColors.textPrimary,
+                        ),
+                      ),
+                      Text(
+                        '$score점',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: type == resultType
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                          color: type == resultType
+                              ? type.color
+                              : AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // 프로그레스 바
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: percentage,
+                      minHeight: 8,
+                      backgroundColor: AppColors.border,
+                      valueColor: AlwaysStoppedAnimation<Color>(type.color),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  /// 하단 버튼
+  Widget _buildBottomButtons(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(ScreenSize.paddingHorizontal),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 시작하기 버튼
+          ElevatedButton(
+            onPressed: () => _onStartWithPersonality(context),
+            child: const Text('이 성향으로 시작'),
+          ),
+
+          const SizedBox(height: 12),
+
+          // 다른 성향 보기 버튼
+          OutlinedButton(
+            onPressed: () => _onViewOtherPersonalities(context),
+            child: const Text('다른 성향 보기'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 다른 성향 보기 바텀시트
+class _OtherPersonalitiesSheet extends StatelessWidget {
+  final PersonalityType currentType;
+  final Map<PersonalityType, int> allScores;
+
+  const _OtherPersonalitiesSheet({
+    required this.currentType,
+    required this.allScores,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 핸들
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.border,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // 제목
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: ScreenSize.paddingHorizontal,
+                vertical: 8,
+              ),
+              child: Text(
+                '다른 성향 살펴보기',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+
+            // 성향 리스트
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: ScreenSize.paddingHorizontal,
+                  vertical: 16,
+                ),
+                children: PersonalityType.values.map((type) {
+                  final score = allScores[type] ?? 0;
+                  final isCurrent = type == currentType;
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: isCurrent
+                          ? type.color.withOpacity(0.1)
+                          : AppColors.background,
+                      borderRadius:
+                          BorderRadius.circular(ScreenSize.borderRadius),
+                      border: Border.all(
+                        color: isCurrent ? type.color : AppColors.border,
+                        width: isCurrent ? 2 : 1,
+                      ),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      leading: Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          color: type.color.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        child: Icon(
+                          Icons.pets,
+                          color: type.color,
+                          size: 28,
+                        ),
+                      ),
+                      title: Row(
+                        children: [
+                          Text(
+                            type.displayName,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: isCurrent ? type.color : null,
+                            ),
+                          ),
+                          if (isCurrent) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: type.color,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                '현재',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Text(
+                            type.characterName,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            type.description,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondary,
+                              height: 1.4,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                      trailing: Text(
+                        '$score점',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: isCurrent ? type.color : AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+}

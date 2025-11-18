@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
+import 'personality_result_screen.dart';
 
 /// 투자 성향 진단 화면 (5문항)
 /// 다크 모드 배경
@@ -175,9 +176,16 @@ class _PersonalityTestScreenState extends State<PersonalityTestScreen> {
       (a, b) => a.value > b.value ? a : b,
     );
 
-    // TODO: 결과 화면으로 이동
-    debugPrint('Result: ${result.key.displayName} (${result.value}점)');
-    debugPrint('All scores: $_scores');
+    // 결과 화면으로 이동
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => PersonalityResultScreen(
+          resultType: result.key,
+          allScores: _scores,
+        ),
+      ),
+    );
   }
 
   void _onBack() {

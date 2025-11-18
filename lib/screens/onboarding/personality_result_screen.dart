@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
+import 'name_setting_screen.dart';
 
 /// 성향 진단 결과 화면
 /// 진단된 성향과 캐릭터 표시
@@ -16,8 +17,13 @@ class PersonalityResultScreen extends StatelessWidget {
   });
 
   void _onStartWithPersonality(BuildContext context) {
-    // TODO: 이름/목표 설정 화면으로 이동
-    debugPrint('Start with: ${resultType.displayName}');
+    // 이름 설정 화면으로 이동
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => NameSettingScreen(personalityType: resultType),
+      ),
+    );
   }
 
   void _onViewOtherPersonalities(BuildContext context) {

@@ -40,7 +40,7 @@ class AppTheme {
       ),
 
       // 카드 테마
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.card,
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -209,7 +209,7 @@ class AppTheme {
       ),
 
       // 다이얼로그 테마
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.card,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(ScreenSize.borderRadius),

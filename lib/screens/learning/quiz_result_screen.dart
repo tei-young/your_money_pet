@@ -101,7 +101,7 @@ class QuizResultScreen extends StatelessWidget {
                     const SizedBox(height: 48),
 
                     // 통계 카드들
-                    _buildStatsCards(theme, personalityColor),
+                    _buildStatsCards(theme, personalityColor, user),
 
                     const SizedBox(height: 32),
                   ],
@@ -162,7 +162,7 @@ class QuizResultScreen extends StatelessWidget {
   }
 
   /// 통계 카드들
-  Widget _buildStatsCards(ThemeData theme, Color color) {
+  Widget _buildStatsCards(ThemeData theme, Color color, user) {
     return Column(
       children: [
         // 정답률
@@ -193,7 +193,7 @@ class QuizResultScreen extends StatelessWidget {
           icon: Icons.local_fire_department,
           iconColor: color,
           label: '현재 연속',
-          value: '${Provider.of<UserProvider>(context, listen: false).user!.currentStreak}일',
+          value: '${user.currentStreak}일',
         ),
       ],
     );

@@ -188,16 +188,6 @@ class _PersonalityTestScreenState extends State<PersonalityTestScreen> {
     );
   }
 
-  void _onBack() {
-    if (_currentQuestion > 0) {
-      setState(() {
-        _currentQuestion--;
-      });
-    } else {
-      Navigator.pop(context);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final question = _questions[_currentQuestion];
@@ -207,7 +197,7 @@ class _PersonalityTestScreenState extends State<PersonalityTestScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // 상단: 네비게이션
+            // 상단: 프로그레스 인디케이터
             _buildTopBar(),
 
             // 중간: 캐릭터 + 질문
@@ -246,45 +236,26 @@ class _PersonalityTestScreenState extends State<PersonalityTestScreen> {
     );
   }
 
-  /// 상단 바 (뒤로가기, 프로그레스, 닫기)
+  /// 상단 바 (프로그레스만 표시)
   Widget _buildTopBar() {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Row(
-        children: [
-          // 뒤로가기
-          IconButton(
-            onPressed: _onBack,
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-          ),
-
-          // 프로그레스 인디케이터 (●●●○○)
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                _questions.length,
-                (index) => Container(
-                  width: 8,
-                  height: 8,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: index <= _currentQuestion
-                        ? AppColors.primary
-                        : const Color(0xFF374151),
-                  ),
-                ),
-              ),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: List.generate(
+          _questions.length,
+          (index) => Container(
+            width: 8,
+            height: 8,
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: index <= _currentQuestion
+                  ? AppColors.primary
+                  : const Color(0xFF374151),
             ),
           ),
-
-          // 닫기
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.close, color: Color(0xFF9CA3AF)),
-          ),
-        ],
+        ),
       ),
     );
   }

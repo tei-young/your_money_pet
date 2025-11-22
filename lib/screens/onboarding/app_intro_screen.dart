@@ -3,7 +3,7 @@ import '../../utils/constants.dart';
 import 'personality_test_screen.dart';
 
 /// 앱 소개 화면
-/// 3개 문장이 스와이프로 자연스럽게 전환
+/// 3개 문장이 페이드 인/아웃으로 전환 (사용자 동작 필요)
 class AppIntroScreen extends StatefulWidget {
   const AppIntroScreen({super.key});
 
@@ -12,8 +12,7 @@ class AppIntroScreen extends StatefulWidget {
 }
 
 class _AppIntroScreenState extends State<AppIntroScreen> {
-  final PageController _pageController = PageController();
-  int _currentPage = 0;
+  int _currentIndex = 0;
 
   final List<String> _messages = [
     '귀여운 친구와 함께',
@@ -21,29 +20,14 @@ class _AppIntroScreenState extends State<AppIntroScreen> {
     '매일 조금씩 성장 🌱',
   ];
 
-  @override
-  void initState() {
-    super.initState();
-
-    // 각 페이지를 2초씩 자동으로 전환
-    _autoAdvance();
-  }
-
-  void _autoAdvance() async {
-    for (int i = 0; i < _messages.length; i++) {
-      await Future.delayed(const Duration(milliseconds: 2000));
-      if (mounted && i < _messages.length - 1) {
-        _pageController.animateToPage(
-          i + 1,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-      }
-    }
-
-    // 마지막 문장 2초 후 성향 진단으로
-    await Future.delayed(const Duration(milliseconds: 2000));
-    if (mounted) {
+  void _onTap() {
+    if (_currentIndex < _messages.length - 1) {
+      // 다음 문장으로
+      setState(() {
+        _currentIndex++;
+      });
+    } else {
+      // 마지막 문장이면 성향 진단으로
       _navigateToTest();
     }
   }
@@ -63,12 +47,6 @@ class _AppIntroScreenState extends State<AppIntroScreen> {
   }
 
   @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -76,45 +54,44 @@ class _AppIntroScreenState extends State<AppIntroScreen> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: GestureDetector(
-          onTap: () {
-            // 탭하면 바로 성향 진단으로
-            if (_currentPage == _messages.length - 1) {
-              _navigateToTest();
-            } else {
-              _pageController.nextPage(
-                duration: const Duration(milliseconds: 500),
-                curve: Curves.easeInOut,
-              );
+          onTap: _onTap,
+          onHorizontalDragEnd: (details) {
+            // 스와이프 제스처 지원
+            if (details.primaryVelocity != null) {
+              if (details.primaryVelocity! < 0) {
+                // 왼쪽으로 스와이프 (다음)
+                _onTap();
+              }
             }
           },
-          child: PageView.builder(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() {
-                _currentPage = index;
-              });
-            },
-            itemCount: _messages.length,
-            itemBuilder: (context, index) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
-                  child: AnimatedOpacity(
-                    opacity: 1.0,
-                    duration: const Duration(milliseconds: 500),
-                    child: Text(
-                      _messages[index],
-                      style: theme.textTheme.displaySmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        height: 1.4,
-                        color: AppColors.primary,
-                      ),
-                      textAlign: TextAlign.center,
+          child: Container(
+            color: Colors.white,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 600),
+                  switchInCurve: Curves.easeIn,
+                  switchOutCurve: Curves.easeOut,
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    );
+                  },
+                  child: Text(
+                    _messages[_currentIndex],
+                    key: ValueKey<int>(_currentIndex),
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      height: 1.4,
+                      color: AppColors.primary,
                     ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
-              );
-            },
+              ),
+            ),
           ),
         ),
       ),

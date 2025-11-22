@@ -40,23 +40,7 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
 
     _controller.forward();
 
-    // 2초 후 자동으로 다음 화면
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const AppIntroScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            transitionDuration: const Duration(milliseconds: 500),
-          ),
-        );
-      }
-    });
+    // ❌ 자동 전환 제거 - 사용자 동작만으로 전환
   }
 
   @override

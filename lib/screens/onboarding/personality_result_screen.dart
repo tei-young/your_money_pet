@@ -35,6 +35,42 @@ class PersonalityResultScreen extends StatelessWidget {
       builder: (context) => _OtherPersonalitiesSheet(
         currentType: resultType,
         allScores: allScores,
+        onSelectPersonality: (selectedType) {
+          // 성향 선택 확인 다이얼로그
+          _showConfirmDialog(context, selectedType);
+        },
+      ),
+    );
+  }
+
+  void _showConfirmDialog(BuildContext context, PersonalityType selectedType) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('성향 변경'),
+        content: Text(
+          '${selectedType.characterName}(${selectedType.displayName})으로 시작하시겠어요?\n\n${selectedType.description}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('취소'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext); // 다이얼로그 닫기
+              Navigator.pop(context); // 바텀시트 닫기
+              // 선택된 성향으로 이름 설정 화면으로 이동
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => NameSettingScreen(personalityType: selectedType),
+                ),
+              );
+            },
+            child: const Text('선택하기'),
+          ),
+        ],
       ),
     );
   }
@@ -266,14 +302,24 @@ class PersonalityResultScreen extends StatelessWidget {
 }
 
 /// 다른 성향 보기 바텀시트
-class _OtherPersonalitiesSheet extends StatelessWidget {
+class _OtherPersonalitiesSheet extends StatefulWidget {
   final PersonalityType currentType;
   final Map<PersonalityType, int> allScores;
+  final Function(PersonalityType) onSelectPersonality;
 
   const _OtherPersonalitiesSheet({
     required this.currentType,
     required this.allScores,
+    required this.onSelectPersonality,
   });
+
+  @override
+  State<_OtherPersonalitiesSheet> createState() =>
+      _OtherPersonalitiesSheetState();
+}
+
+class _OtherPersonalitiesSheetState extends State<_OtherPersonalitiesSheet> {
+  PersonalityType? _selectedType;
 
   @override
   Widget build(BuildContext context) {
@@ -322,98 +368,119 @@ class _OtherPersonalitiesSheet extends StatelessWidget {
                   vertical: 16,
                 ),
                 children: PersonalityType.values.map((type) {
-                  final score = allScores[type] ?? 0;
-                  final isCurrent = type == currentType;
+                  final score = widget.allScores[type] ?? 0;
+                  final isCurrent = type == widget.currentType;
+                  final isSelected = type == _selectedType;
 
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
-                      color: isCurrent
-                          ? type.color.withOpacity(0.1)
-                          : AppColors.background,
+                      color: isSelected
+                          ? type.color.withOpacity(0.15)
+                          : isCurrent
+                              ? type.color.withOpacity(0.1)
+                              : AppColors.background,
                       borderRadius:
                           BorderRadius.circular(ScreenSize.borderRadius),
                       border: Border.all(
-                        color: isCurrent ? type.color : AppColors.border,
-                        width: isCurrent ? 2 : 1,
+                        color: isSelected
+                            ? type.color
+                            : isCurrent
+                                ? type.color
+                                : AppColors.border,
+                        width: isSelected ? 2 : isCurrent ? 2 : 1,
                       ),
                     ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      leading: Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: type.color.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                        child: Icon(
-                          Icons.pets,
-                          color: type.color,
-                          size: 28,
-                        ),
-                      ),
-                      title: Row(
-                        children: [
-                          Text(
-                            type.displayName,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: isCurrent ? type.color : null,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            _selectedType = type;
+                          });
+                        },
+                        borderRadius:
+                            BorderRadius.circular(ScreenSize.borderRadius),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          leading: Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: type.color.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                            child: Icon(
+                              Icons.pets,
+                              color: type.color,
+                              size: 28,
                             ),
                           ),
-                          if (isCurrent) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: type.color,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                '현재',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
+                          title: Row(
+                            children: [
+                              Text(
+                                type.displayName,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: isCurrent ? type.color : null,
                                 ),
                               ),
-                            ),
-                          ],
-                        ],
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 4),
-                          Text(
-                            type.characterName,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textSecondary,
+                              if (isCurrent) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: type.color,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    '진단 결과',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 4),
+                              Text(
+                                type.characterName,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                type.description,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  height: 1.4,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                          trailing: Text(
+                            '$score점',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: isCurrent
+                                  ? type.color
+                                  : AppColors.textSecondary,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            type.description,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                              height: 1.4,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                      trailing: Text(
-                        '$score점',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: isCurrent ? type.color : AppColors.textSecondary,
                         ),
                       ),
                     ),
@@ -422,7 +489,29 @@ class _OtherPersonalitiesSheet extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 16),
+            // 선택하기 버튼
+            if (_selectedType != null)
+              Container(
+                padding: const EdgeInsets.all(ScreenSize.paddingHorizontal),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, -5),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  onPressed: () {
+                    widget.onSelectPersonality(_selectedType!);
+                  },
+                  child: const Text('선택하기'),
+                ),
+              ),
+
+            if (_selectedType == null) const SizedBox(height: 16),
           ],
         ),
       ),

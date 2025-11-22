@@ -1,5 +1,6 @@
 import 'package:share_plus/share_plus.dart';
 import '../models/user_model.dart';
+import 'constants.dart';
 
 /// SNS 공유 헬퍼 클래스
 class ShareHelper {

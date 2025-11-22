@@ -113,26 +113,26 @@ extension PersonalityTypeExtension on PersonalityType {
   String get characterName {
     switch (this) {
       case PersonalityType.safe:
-        return '머니베어';
+        return 'Money Bear 머니베어';
       case PersonalityType.balanced:
-        return '밸런스토끼';
+        return 'Save Sheep 세이브쉽';
       case PersonalityType.aggressive:
-        return '코인캣';
+        return 'Hunter Cat 헌터캣';
       case PersonalityType.challenger:
-        return '세이빙덕';
+        return 'Chaser Fox 체이서폭스';
     }
   }
 
   String get description {
     switch (this) {
       case PersonalityType.safe:
-        return '원금을 지키면서 안정적으로 자산 증식';
+        return '든든하게 지키는 • 원금을 보호하며 안정적으로 자산 증식';
       case PersonalityType.balanced:
-        return '안정성과 수익성, 두 마리 토끼를 모두 잡기';
+        return '부드럽게 균형잡는 • 안정성과 수익성의 균형을 추구';
       case PersonalityType.aggressive:
-        return '높은 수익을 위해 공부하고 분석하기';
+        return '날카롭게 사냥하는 • 기회를 포착하며 높은 수익 추구';
       case PersonalityType.challenger:
-        return '새로운 투자에 도전하며 경험 쌓기';
+        return '영리하게 도전하는 • 새로운 투자 기회에 도전하며 성장';
     }
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/constants.dart';
-import 'welcome_screen.dart';
+import 'character_preview_screen.dart';
 
 /// Splash 화면
 /// 2초 동안 표시 후 자동으로 Welcome 화면으로 이동
@@ -52,7 +52,7 @@ class _SplashScreenState extends State<SplashScreen>
     // 애니메이션 시작
     _controller.forward();
 
-    // 2초 후 Welcome 화면으로 이동
+    // 2초 후 캐릭터 프리뷰 화면으로 이동
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         // TODO: 온보딩 완료 여부 확인 후 분기
@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen>
         // } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+          MaterialPageRoute(builder: (_) => const CharacterPreviewScreen()),
         );
         // }
       }

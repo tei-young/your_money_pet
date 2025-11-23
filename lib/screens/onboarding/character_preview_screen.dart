@@ -49,6 +49,20 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
     super.dispose();
   }
 
+  void _navigateToIntro() {
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const AppIntroScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 500),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -56,89 +70,85 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: GestureDetector(
-          onTap: () {
-            // 탭하면 바로 다음 화면으로
-            Navigator.pushReplacement(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) =>
-                    const AppIntroScreen(),
-                transitionsBuilder:
-                    (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Spacer(flex: 2),
+
+            // 제목
+            Text(
+              '어떤 머니펫과\n함께하게 될까요?',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                height: 1.4,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 60),
+
+            // 캐릭터 4개 그리드
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  return Column(
+                    children: [
+                      // 상단 2개
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildCharacter(
+                            0,
+                            PersonalityType.safe,
+                            '🐻',
+                          ),
+                          _buildCharacter(
+                            1,
+                            PersonalityType.aggressive,
+                            '🐱',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 40),
+                      // 하단 2개
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildCharacter(
+                            2,
+                            PersonalityType.balanced,
+                            '🐑',
+                          ),
+                          _buildCharacter(
+                            3,
+                            PersonalityType.challenger,
+                            '🦊',
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
                 },
-                transitionDuration: const Duration(milliseconds: 500),
               ),
-            );
-          },
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(flex: 2),
+            ),
 
-              // 제목
-              Text(
-                '어떤 머니펫과\n함께하게 될까요?',
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  height: 1.4,
-                ),
-                textAlign: TextAlign.center,
+            const Spacer(flex: 3),
+
+            // 시작하기 버튼
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: ScreenSize.paddingHorizontal,
               ),
-
-              const SizedBox(height: 60),
-
-              // 캐릭터 4개 그리드
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, child) {
-                    return Column(
-                      children: [
-                        // 상단 2개
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildCharacter(
-                              0,
-                              PersonalityType.safe,
-                              '🐻',
-                            ),
-                            _buildCharacter(
-                              1,
-                              PersonalityType.aggressive,
-                              '🐱',
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 40),
-                        // 하단 2개
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            _buildCharacter(
-                              2,
-                              PersonalityType.balanced,
-                              '🐑',
-                            ),
-                            _buildCharacter(
-                              3,
-                              PersonalityType.challenger,
-                              '🦊',
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  },
-                ),
+              child: ElevatedButton(
+                onPressed: _navigateToIntro,
+                child: const Text('시작하기'),
               ),
+            ),
 
-              const Spacer(flex: 3),
-            ],
-          ),
+            const SizedBox(height: 32),
+          ],
         ),
       ),
     );

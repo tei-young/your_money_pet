@@ -303,15 +303,20 @@ class _PersonalityTestScreenState extends State<PersonalityTestScreen> {
 
   /// 질문 텍스트
   Widget _buildQuestion(String question) {
-    return Text(
-      question,
-      style: const TextStyle(
-        fontSize: 22,
-        fontWeight: FontWeight.w700,
-        color: Colors.white,
-        height: 1.4,
+    return SizedBox(
+      height: 70, // 고정 높이로 질문 영역 위치 고정 (최대 2줄 기준)
+      child: Center(
+        child: Text(
+          question,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+            height: 1.4,
+          ),
+          textAlign: TextAlign.center,
+        ),
       ),
-      textAlign: TextAlign.center,
     );
   }
 

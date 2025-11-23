@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/character_animation_config.dart';
 
 /// 머니펫 앱 상수 정의
 class AppConstants {
@@ -146,6 +147,63 @@ extension PersonalityTypeExtension on PersonalityType {
         return '주식투자의 기본과 기업 분석부터 업종 트렌드 예측과 고수익 투자 전략까지';
       case PersonalityType.challenger:
         return '가상자산 이해와 블록체인 기술부터 DeFi, NFT와 혁신기술 투자 전략까지';
+    }
+  }
+
+  CharacterAnimationConfig get animationConfig {
+    switch (this) {
+      case PersonalityType.safe:
+        return const CharacterAnimationConfig(
+          characterId: 'money_bear',
+          introDialogue: '안전하게 함께 시작해요! 🐻',
+          quizGreeting: '함께 성향을 알아볼까요?',
+          quizReactions: {
+            'positive': '좋은 선택이에요!',
+            'negative': '음... 그렇군요!',
+            'neutral': '흥미로운 답변이네요!',
+          },
+          resultDialogueMatch: '우리 딱 맞는 것 같아요! 안전하게 함께 성장해봐요! 🐻',
+          resultDialogueDifferent: '이런 성향도 좋아요! 함께 배워나가요! 🐻',
+        );
+      case PersonalityType.balanced:
+        return const CharacterAnimationConfig(
+          characterId: 'save_sheep',
+          introDialogue: '균형있게 함께해요! 🐑',
+          quizGreeting: '차근차근 알아볼까요?',
+          quizReactions: {
+            'positive': '현명한 선택이에요!',
+            'negative': '그럴 수도 있죠!',
+            'neutral': '생각해볼 만한 답변이네요!',
+          },
+          resultDialogueMatch: '우리 성향이 잘 맞네요! 균형있게 함께 성장해요! 🐑',
+          resultDialogueDifferent: '다양한 투자도 배워봐요! 함께라면 괜찮아요! 🐑',
+        );
+      case PersonalityType.aggressive:
+        return const CharacterAnimationConfig(
+          characterId: 'hunter_cat',
+          introDialogue: '멋지게 시작해볼까요! 🐱',
+          quizGreeting: '어떤 투자자인지 알아볼까요?',
+          quizReactions: {
+            'positive': '공격적이네요! 좋아요!',
+            'negative': '신중한 편이시군요!',
+            'neutral': '재밌는 선택이네요!',
+          },
+          resultDialogueMatch: '역시! 우리 잘 맞을 것 같아요! 함께 높이 올라가요! 🐱',
+          resultDialogueDifferent: '새로운 도전도 함께해요! 재밌을 거예요! 🐱',
+        );
+      case PersonalityType.challenger:
+        return const CharacterAnimationConfig(
+          characterId: 'chaser_fox',
+          introDialogue: '영리하게 도전해봐요! 🦊',
+          quizGreeting: '함께 탐험해볼까요?',
+          quizReactions: {
+            'positive': '도전적이네요! 멋져요!',
+            'negative': '조심스럽게 가는군요!',
+            'neutral': '독특한 관점이네요!',
+          },
+          resultDialogueMatch: '우리 딱이네요! 새로운 세계를 함께 탐험해요! 🦊',
+          resultDialogueDifferent: '다양한 투자를 함께 배워요! 흥미진진할 거예요! 🦊',
+        );
     }
   }
 }

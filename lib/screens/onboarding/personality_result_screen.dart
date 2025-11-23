@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../utils/constants.dart';
+import '../../providers/character_provider.dart';
+import '../../widgets/animated_character.dart';
+import '../../models/character_animation_config.dart';
 import 'name_setting_screen.dart';
 
 /// 성향 진단 결과 화면
@@ -17,6 +21,9 @@ class PersonalityResultScreen extends StatelessWidget {
   });
 
   void _onStartWithPersonality(BuildContext context) {
+    // CharacterProvider에 최종 성향 저장
+    context.read<CharacterProvider>().setPersonalityResult(resultType);
+
     // 이름 설정 화면으로 이동
     Navigator.push(
       context,
@@ -187,8 +194,8 @@ class PersonalityResultScreen extends StatelessWidget {
 
                     const SizedBox(height: 32),
 
-                    // 캐릭터 (임시: 원형 아이콘)
-                    _buildCharacter(),
+                    // 캐릭터 + 대사
+                    _buildCharacter(context),
 
                     const SizedBox(height: 32),
 
@@ -232,23 +239,46 @@ class PersonalityResultScreen extends StatelessWidget {
   }
 
   /// 캐릭터 표시
-  Widget _buildCharacter() {
-    return Container(
-      width: 200,
-      height: 200,
-      decoration: BoxDecoration(
-        color: resultType.color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(100),
-        border: Border.all(
-          color: resultType.color.withOpacity(0.3),
-          width: 4,
+  Widget _buildCharacter(BuildContext context) {
+    final selectedCharacter = context.watch<CharacterProvider>().selectedCharacter;
+
+    // 선택된 캐릭터가 없으면 fallback
+    if (selectedCharacter == null) {
+      return Container(
+        width: 200,
+        height: 200,
+        decoration: BoxDecoration(
+          color: resultType.color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(100),
+          border: Border.all(
+            color: resultType.color.withOpacity(0.3),
+            width: 4,
+          ),
         ),
-      ),
-      child: Icon(
-        Icons.pets,
-        size: 100,
-        color: resultType.color,
-      ),
+        child: Icon(
+          Icons.pets,
+          size: 100,
+          color: resultType.color,
+        ),
+      );
+    }
+
+    final config = selectedCharacter.animationConfig;
+    final isMatch = selectedCharacter == resultType;
+    final dialogue = isMatch
+        ? config.resultDialogueMatch
+        : config.resultDialogueDifferent;
+
+    return Column(
+      children: [
+        // 캐릭터 애니메이션
+        AnimatedCharacter(
+          character: selectedCharacter,
+          state: CharacterAnimationState.selected,
+          customDialogue: dialogue,
+          size: 150,
+        ),
+      ],
     );
   }
 

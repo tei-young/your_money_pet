@@ -5,6 +5,7 @@ import 'utils/constants.dart';
 import 'screens/onboarding/splash_screen.dart';
 import 'providers/user_provider.dart';
 import 'providers/learning_provider.dart';
+import 'providers/character_provider.dart';
 
 // TODO: Router import (나중에 추가)
 // import 'routes/app_router.dart';
@@ -18,6 +19,7 @@ class MoneyPetApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => LearningProvider()),
+        ChangeNotifierProvider(create: (_) => CharacterProvider()),
       ],
       child: MaterialApp(
         title: AppConstants.appName,

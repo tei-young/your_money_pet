@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../utils/constants.dart';
+import '../../providers/character_provider.dart';
+import '../../widgets/animated_character.dart';
+import '../../models/character_animation_config.dart';
 import 'personality_result_screen.dart';
 
 /// 투자 성향 진단 화면 (5문항)
@@ -263,40 +267,35 @@ class _PersonalityTestScreenState extends State<PersonalityTestScreen> {
 
   /// 캐릭터 + 말풍선
   Widget _buildCharacterWithBubble() {
+    final selectedCharacter = context.watch<CharacterProvider>().selectedCharacter;
+
+    // 만약 캐릭터가 선택되지 않았다면 (비정상 상황)
+    if (selectedCharacter == null) {
+      return Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: const Icon(
+          Icons.pets,
+          color: Colors.white,
+          size: 32,
+        ),
+      );
+    }
+
+    final config = selectedCharacter.animationConfig;
+
     return Column(
       children: [
-        // 말풍선
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: const Color(0xFF374151),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFF4B5563)),
-          ),
-          child: const Text(
-            '무엇을 배우시겠어요?',
-            style: TextStyle(
-              fontSize: 14,
-              color: Color(0xFFD1D5DB),
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        // 캐릭터 (임시: 아이콘)
-        Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(30),
-          ),
-          child: const Icon(
-            Icons.pets,
-            color: Colors.white,
-            size: 32,
-          ),
+        // 선택된 캐릭터 표시
+        AnimatedCharacter(
+          character: selectedCharacter,
+          state: CharacterAnimationState.idle,
+          customDialogue: config.quizGreeting,
+          size: 80,
         ),
       ],
     );

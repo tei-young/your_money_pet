@@ -91,6 +91,7 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(), // 스크롤 바운스 애니메이션 제거
                 padding: const EdgeInsets.symmetric(
                   horizontal: ScreenSize.paddingHorizontal,
                 ),

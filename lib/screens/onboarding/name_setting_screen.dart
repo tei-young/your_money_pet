@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../utils/constants.dart';
+import '../../providers/character_provider.dart';
 import 'goal_setting_screen.dart';
 
 /// 이름 설정 화면
-/// 사용자 닉네임 입력
+/// 사용자 닉네임 입력 (선택한 캐릭터 기준)
 class NameSettingScreen extends StatefulWidget {
   final PersonalityType personalityType;
 
@@ -18,14 +20,19 @@ class NameSettingScreen extends StatefulWidget {
 
 class _NameSettingScreenState extends State<NameSettingScreen> {
   final TextEditingController _nameController = TextEditingController();
-  bool _isNameValid = true; // 디폴트값이 있으므로 true로 시작
+  String _defaultName = '';
 
   @override
   void initState() {
     super.initState();
-    // 디폴트 이름: 캐릭터 짧은 이름 설정
-    final defaultName = widget.personalityType.characterName.split(' ').last;
-    _nameController.text = defaultName;
+    // 선택한 캐릭터 기준 디폴트 이름 설정
+    final selectedCharacter = context.read<CharacterProvider>().selectedCharacter;
+    if (selectedCharacter != null) {
+      _defaultName = selectedCharacter.characterName.split(' ').last;
+    } else {
+      // fallback: personalityType 기준
+      _defaultName = widget.personalityType.characterName.split(' ').last;
+    }
   }
 
   @override
@@ -35,17 +42,14 @@ class _NameSettingScreenState extends State<NameSettingScreen> {
   }
 
   void _onNameChanged(String value) {
-    setState(() {
-      // 이름 검증: 1-10자, 공백 제거 후 빈 문자열 아님
-      final trimmedValue = value.trim();
-      _isNameValid = trimmedValue.isNotEmpty && trimmedValue.length <= 10;
-    });
+    setState(() {}); // 글자 수 카운터 업데이트
   }
 
   void _onNext() {
-    if (!_isNameValid) return;
+    final inputName = _nameController.text.trim();
 
-    final name = _nameController.text.trim();
+    // 입력이 비어있으면 디폴트 이름 사용
+    final finalName = inputName.isEmpty ? _defaultName : inputName;
 
     // 목표 설정 화면으로 이동
     Navigator.push(
@@ -53,7 +57,7 @@ class _NameSettingScreenState extends State<NameSettingScreen> {
       MaterialPageRoute(
         builder: (_) => GoalSettingScreen(
           personalityType: widget.personalityType,
-          userName: name,
+          userName: finalName,
         ),
       ),
     );
@@ -113,7 +117,7 @@ class _NameSettingScreenState extends State<NameSettingScreen> {
 
                     // 안내 텍스트
                     Text(
-                      '1-10자 이내로 입력해주세요',
+                      '입력하지 않으면 "$_defaultName"으로 시작해요',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -131,42 +135,48 @@ class _NameSettingScreenState extends State<NameSettingScreen> {
     );
   }
 
-  /// 캐릭터 표시
+  /// 캐릭터 표시 (선택한 캐릭터 기준)
   Widget _buildCharacter() {
+    final selectedCharacter = context.watch<CharacterProvider>().selectedCharacter;
+    final character = selectedCharacter ?? widget.personalityType;
+
     return Center(
       child: Container(
         width: 100,
         height: 100,
         decoration: BoxDecoration(
-          color: widget.personalityType.color.withOpacity(0.1),
+          color: character.color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(50),
           border: Border.all(
-            color: widget.personalityType.color.withOpacity(0.3),
+            color: character.color.withOpacity(0.3),
             width: 3,
           ),
         ),
         child: Icon(
           Icons.pets,
           size: 50,
-          color: widget.personalityType.color,
+          color: character.color,
         ),
       ),
     );
   }
 
-  /// 이름 입력 필드
+  /// 이름 입력 필드 (Placeholder로 디폴트 이름 표시)
   Widget _buildNameInput(ThemeData theme) {
+    final selectedCharacter = context.watch<CharacterProvider>().selectedCharacter;
+    final character = selectedCharacter ?? widget.personalityType;
+
     return TextField(
       controller: _nameController,
       onChanged: _onNameChanged,
       autofocus: true,
       maxLength: 10,
-      keyboardType: TextInputType.name, // 한글 입력 명시적 허용
+      keyboardType: TextInputType.name,
       style: theme.textTheme.headlineMedium?.copyWith(
         fontWeight: FontWeight.w600,
       ),
       decoration: InputDecoration(
-        hintText: '이름을 입력해주세요',
+        hintText: _defaultName,
         hintStyle: theme.textTheme.headlineMedium?.copyWith(
           fontWeight: FontWeight.w600,
           color: AppColors.textSecondary.withOpacity(0.3),
@@ -186,7 +196,7 @@ class _NameSettingScreenState extends State<NameSettingScreen> {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(ScreenSize.borderRadius),
           borderSide: BorderSide(
-            color: widget.personalityType.color,
+            color: character.color,
             width: 2,
           ),
         ),
@@ -198,7 +208,7 @@ class _NameSettingScreenState extends State<NameSettingScreen> {
     );
   }
 
-  /// 하단 버튼
+  /// 하단 버튼 (항상 활성화)
   Widget _buildBottomButton() {
     return Container(
       padding: const EdgeInsets.all(ScreenSize.paddingHorizontal),
@@ -213,7 +223,7 @@ class _NameSettingScreenState extends State<NameSettingScreen> {
         ],
       ),
       child: ElevatedButton(
-        onPressed: _isNameValid ? _onNext : null,
+        onPressed: _onNext, // 항상 활성화
         child: const Text('다음'),
       ),
     );

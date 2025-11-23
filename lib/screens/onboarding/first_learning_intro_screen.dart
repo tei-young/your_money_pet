@@ -136,7 +136,7 @@ class FirstLearningIntroScreen extends StatelessWidget {
       _InfoItem(
         icon: Icons.menu_book,
         title: '하루 3분 학습',
-        description: '부담 없이 읽을 수 있는 카드 형식',
+        description: '부담 없이 카드로 읽어요',
       ),
       _InfoItem(
         icon: Icons.quiz_outlined,

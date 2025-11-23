@@ -156,7 +156,7 @@ class _NameSettingScreenState extends State<NameSettingScreen> {
         fontWeight: FontWeight.w600,
       ),
       decoration: InputDecoration(
-        hintText: '닉네임 입력',
+        hintText: '이름을 입력해주세요',
         hintStyle: theme.textTheme.headlineMedium?.copyWith(
           fontWeight: FontWeight.w600,
           color: AppColors.textSecondary.withOpacity(0.3),

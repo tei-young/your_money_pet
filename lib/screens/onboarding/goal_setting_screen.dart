@@ -25,32 +25,32 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
     GoalOption(
       icon: Icons.home_outlined,
       title: '주택 구매',
-      description: '내 집 마련을 위한 투자',
+      description: '내 집 마련을 위해 투자해요',
     ),
     GoalOption(
       icon: Icons.school_outlined,
       title: '자녀 교육',
-      description: '아이의 미래를 위한 준비',
+      description: '아이의 미래를 준비해요',
     ),
     GoalOption(
       icon: Icons.beach_access_outlined,
       title: '은퇴 준비',
-      description: '여유로운 노후 생활',
+      description: '여유로운 노후를 보내요',
     ),
     GoalOption(
       icon: Icons.flight_takeoff_outlined,
       title: '여행',
-      description: '꿈꿔왔던 여행 실현',
+      description: '꿈꿔왔던 여행을 떠나요',
     ),
     GoalOption(
       icon: Icons.savings_outlined,
       title: '자산 증식',
-      description: '안정적인 자산 성장',
+      description: '안정적으로 자산을 키워요',
     ),
     GoalOption(
       icon: Icons.favorite_outline,
       title: '기타',
-      description: '나만의 특별한 목표',
+      description: '나만의 특별한 목표가 있어요',
     ),
   ];
 

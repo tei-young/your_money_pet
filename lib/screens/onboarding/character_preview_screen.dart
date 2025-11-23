@@ -71,9 +71,8 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Spacer(flex: 2),
+            const SizedBox(height: 80),
 
             // 제목
             Text(
@@ -134,7 +133,7 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
               ),
             ),
 
-            const Spacer(flex: 3),
+            const SizedBox(height: 60),
 
             // 시작하기 버튼
             Padding(
@@ -147,7 +146,7 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
               ),
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: 40),
           ],
         ),
       ),

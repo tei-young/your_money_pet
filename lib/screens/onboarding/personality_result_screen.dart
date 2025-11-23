@@ -376,7 +376,7 @@ class _OtherPersonalitiesSheetState extends State<_OtherPersonalitiesSheet> {
                     margin: const EdgeInsets.only(bottom: 12),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? type.color.withOpacity(0.15)
+                          ? AppColors.primary.withOpacity(0.15)
                           : isCurrent
                               ? type.color.withOpacity(0.1)
                               : AppColors.background,
@@ -384,7 +384,7 @@ class _OtherPersonalitiesSheetState extends State<_OtherPersonalitiesSheet> {
                           BorderRadius.circular(ScreenSize.borderRadius),
                       border: Border.all(
                         color: isSelected
-                            ? type.color
+                            ? AppColors.primary
                             : isCurrent
                                 ? type.color
                                 : AppColors.border,

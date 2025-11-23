@@ -208,12 +208,12 @@ class _PersonalityTestScreenState extends State<PersonalityTestScreen> {
                 ),
                 child: Column(
                   children: [
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 120),
 
                     // 캐릭터 + 말풍선
                     _buildCharacterWithBubble(),
 
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 60),
 
                     // 질문
                     _buildQuestion(question.question),

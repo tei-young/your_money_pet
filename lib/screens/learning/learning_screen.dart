@@ -197,6 +197,7 @@ class _LearningScreenState extends State<LearningScreen> {
   /// 학습 카드
   Widget _buildLearningCard(LearningCard card, ThemeData theme) {
     return SingleChildScrollView(
+      physics: const ClampingScrollPhysics(),
       padding: const EdgeInsets.all(ScreenSize.paddingHorizontal),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

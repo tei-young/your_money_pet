@@ -159,6 +159,7 @@ class PersonalityResultScreen extends StatelessWidget {
           children: [
             Expanded(
               child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(
                   horizontal: ScreenSize.paddingHorizontal,
                 ),
@@ -427,6 +428,7 @@ class _OtherPersonalitiesSheetState extends State<_OtherPersonalitiesSheet> {
             // 성향 리스트
             Flexible(
               child: ListView(
+                physics: const ClampingScrollPhysics(),
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(
                   horizontal: ScreenSize.paddingHorizontal,

@@ -71,6 +71,7 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
           child: Column(
             children: [
               const SizedBox(height: 120),

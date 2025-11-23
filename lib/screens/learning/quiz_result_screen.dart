@@ -56,6 +56,7 @@ class QuizResultScreen extends StatelessWidget {
           children: [
             Expanded(
               child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(
                   horizontal: ScreenSize.paddingHorizontal,
                 ),

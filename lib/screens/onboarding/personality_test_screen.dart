@@ -203,6 +203,7 @@ class _PersonalityTestScreenState extends State<PersonalityTestScreen> {
             // 중간: 캐릭터 + 질문
             Expanded(
               child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(
                   horizontal: ScreenSize.paddingHorizontal,
                 ),

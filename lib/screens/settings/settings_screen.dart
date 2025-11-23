@@ -336,7 +336,7 @@ class SettingsScreen extends StatelessWidget {
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('이름이 변경되었습니다')),
+                    const SnackBar(content: Text('이름이 변경되었어요')),
                   );
                 }
               }
@@ -361,7 +361,7 @@ class SettingsScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('투자 성향을 변경하면 Day 1부터 다시 시작됩니다.'),
+            const Text('투자 성향을 변경하면 Day 1부터 다시 시작해요.'),
             const SizedBox(height: 16),
             ...PersonalityType.values.map((type) {
               return RadioListTile<PersonalityType>(
@@ -379,7 +379,7 @@ class SettingsScreen extends StatelessWidget {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('성향이 변경되었습니다. Day 1부터 시작됩니다.'),
+                          content: Text('성향이 변경되었어요. Day 1부터 시작해요.'),
                         ),
                       );
                     }
@@ -431,7 +431,7 @@ class SettingsScreen extends StatelessWidget {
                   if (context.mounted) {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('목표가 변경되었습니다')),
+                      const SnackBar(content: Text('목표가 변경되었어요')),
                     );
                   }
                 }
@@ -472,7 +472,7 @@ class SettingsScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('로그아웃'),
-        content: const Text('정말 로그아웃하시겠어요?\n모든 데이터가 삭제됩니다.'),
+        content: const Text('정말 로그아웃하시겠어요?\n모든 데이터가 삭제돼요.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

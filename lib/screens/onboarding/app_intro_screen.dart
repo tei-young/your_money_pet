@@ -17,7 +17,7 @@ class _AppIntroScreenState extends State<AppIntroScreen> {
   final List<String> _messages = [
     '귀여운 친구와 함께',
     '투자 여행을 시작해요',
-    '매일 조금씩 성장 🌱',
+    '매일 조금씩 성장해요 🌱',
   ];
 
   void _onTap() {

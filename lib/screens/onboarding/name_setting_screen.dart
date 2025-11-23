@@ -18,7 +18,15 @@ class NameSettingScreen extends StatefulWidget {
 
 class _NameSettingScreenState extends State<NameSettingScreen> {
   final TextEditingController _nameController = TextEditingController();
-  bool _isNameValid = false;
+  bool _isNameValid = true; // 디폴트값이 있으므로 true로 시작
+
+  @override
+  void initState() {
+    super.initState();
+    // 디폴트 이름: 캐릭터 짧은 이름 설정
+    final defaultName = widget.personalityType.characterName.split(' ').last;
+    _nameController.text = defaultName;
+  }
 
   @override
   void dispose() {
@@ -152,6 +160,7 @@ class _NameSettingScreenState extends State<NameSettingScreen> {
       onChanged: _onNameChanged,
       autofocus: true,
       maxLength: 10,
+      keyboardType: TextInputType.name, // 한글 입력 명시적 허용
       style: theme.textTheme.headlineMedium?.copyWith(
         fontWeight: FontWeight.w600,
       ),

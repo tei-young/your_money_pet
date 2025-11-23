@@ -74,6 +74,7 @@ class _NameSettingScreenState extends State<NameSettingScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(
                   horizontal: ScreenSize.paddingHorizontal,
                 ),

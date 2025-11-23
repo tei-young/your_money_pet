@@ -140,6 +140,7 @@ class _QuizScreenState extends State<QuizScreen> {
           // 퀴즈 내용
           Expanded(
             child: SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
               padding: const EdgeInsets.all(ScreenSize.paddingHorizontal),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

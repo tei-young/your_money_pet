@@ -42,7 +42,7 @@ class FirstLearningIntroScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: personalityType.color.withOpacity(0.05),
+      backgroundColor: Colors.white, // 온보딩과 일관된 흰색 배경
       body: SafeArea(
         child: Column(
           children: [

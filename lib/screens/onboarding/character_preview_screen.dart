@@ -70,84 +70,86 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 80),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 80),
 
-            // 제목
-            Text(
-              '어떤 머니펫과\n함께하게 될까요?',
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                height: 1.4,
+              // 제목
+              Text(
+                '어떤 머니펫과\n함께하게 될까요?',
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
 
-            const SizedBox(height: 60),
+              const SizedBox(height: 60),
 
-            // 캐릭터 4개 그리드
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: AnimatedBuilder(
-                animation: _controller,
-                builder: (context, child) {
-                  return Column(
-                    children: [
-                      // 상단 2개
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildCharacter(
-                            0,
-                            PersonalityType.safe,
-                            '🐻',
-                          ),
-                          _buildCharacter(
-                            1,
-                            PersonalityType.aggressive,
-                            '🐱',
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 40),
-                      // 하단 2개
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildCharacter(
-                            2,
-                            PersonalityType.balanced,
-                            '🐑',
-                          ),
-                          _buildCharacter(
-                            3,
-                            PersonalityType.challenger,
-                            '🦊',
-                          ),
-                        ],
-                      ),
-                    ],
-                  );
-                },
+              // 캐릭터 4개 그리드
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return Column(
+                      children: [
+                        // 상단 2개
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildCharacter(
+                              0,
+                              PersonalityType.safe,
+                              '🐻',
+                            ),
+                            _buildCharacter(
+                              1,
+                              PersonalityType.aggressive,
+                              '🐱',
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 40),
+                        // 하단 2개
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildCharacter(
+                              2,
+                              PersonalityType.balanced,
+                              '🐑',
+                            ),
+                            _buildCharacter(
+                              3,
+                              PersonalityType.challenger,
+                              '🦊',
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
 
-            const SizedBox(height: 60),
+              const SizedBox(height: 60),
 
-            // 시작하기 버튼
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: ScreenSize.paddingHorizontal,
+              // 시작하기 버튼
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: ScreenSize.paddingHorizontal,
+                ),
+                child: ElevatedButton(
+                  onPressed: _navigateToIntro,
+                  child: const Text('시작하기'),
+                ),
               ),
-              child: ElevatedButton(
-                onPressed: _navigateToIntro,
-                child: const Text('시작하기'),
-              ),
-            ),
 
-            const SizedBox(height: 40),
-          ],
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );

@@ -51,8 +51,6 @@ class PersonalityResultScreen extends StatelessWidget {
   }
 
   void _showConfirmDialog(BuildContext context, PersonalityType selectedType) {
-    final shortName = selectedType.characterName.split(' ').last; // "머니베어", "세이브쉽" 등
-
     showDialog(
       context: context,
       builder: (dialogContext) => Dialog(
@@ -79,9 +77,9 @@ class PersonalityResultScreen extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  // 선택한 캐릭터
+                  // 선택한 성향
                   Text(
-                    '${selectedType.characterName}을 선택하셨네요!',
+                    '${selectedType.displayName}을 선택하셨네요!',
                     style: Theme.of(dialogContext).textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -98,7 +96,7 @@ class PersonalityResultScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      '📚 $shortName은 ${selectedType.curriculum} 알아볼 수 있어요!',
+                      '📚 ${selectedType.displayName}은 ${selectedType.curriculum} 알아볼 수 있어요!',
                       style: Theme.of(dialogContext).textTheme.bodyMedium?.copyWith(
                         height: 1.5,
                         color: AppColors.textPrimary,
@@ -198,16 +196,6 @@ class PersonalityResultScreen extends StatelessWidget {
                     _buildCharacter(context),
 
                     const SizedBox(height: 32),
-
-                    // 캐릭터 이름
-                    Text(
-                      resultType.characterName,
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-
-                    const SizedBox(height: 16),
 
                     // 성향 설명
                     Text(
@@ -550,13 +538,6 @@ class _OtherPersonalitiesSheetState extends State<_OtherPersonalitiesSheet> {
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const SizedBox(height: 4),
-                              Text(
-                                type.characterName,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
                               const SizedBox(height: 8),
                               Text(
                                 type.description,

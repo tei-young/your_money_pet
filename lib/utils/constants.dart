@@ -135,6 +135,19 @@ extension PersonalityTypeExtension on PersonalityType {
         return '영리하게 도전하는 • 새로운 투자 기회에 도전하며 성장';
     }
   }
+
+  String get curriculum {
+    switch (this) {
+      case PersonalityType.safe:
+        return '예적금의 기본과 복리의 힘부터 인플레이션 대응과 안전한 포트폴리오 구성까지';
+      case PersonalityType.balanced:
+        return '주식과 채권의 기본, ETF 이해부터 글로벌 자산배분과 목표수익률 달성 전략까지';
+      case PersonalityType.aggressive:
+        return '주식투자의 기본과 기업 분석부터 업종 트렌드 예측과 고수익 투자 전략까지';
+      case PersonalityType.challenger:
+        return '가상자산 이해와 블록체인 기술부터 DeFi, NFT와 혁신기술 투자 전략까지';
+    }
+  }
 }
 
 /// 화면 크기 상수

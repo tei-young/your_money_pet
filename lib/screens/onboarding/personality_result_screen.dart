@@ -44,33 +44,98 @@ class PersonalityResultScreen extends StatelessWidget {
   }
 
   void _showConfirmDialog(BuildContext context, PersonalityType selectedType) {
+    final shortName = selectedType.characterName.split(' ').last; // "머니베어", "세이브쉽" 등
+
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('성향 변경'),
-        content: Text(
-          '${selectedType.characterName}(${selectedType.displayName})으로 시작하시겠어요?\n\n${selectedType.description}',
+      builder: (dialogContext) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('취소'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(dialogContext); // 다이얼로그 닫기
-              Navigator.pop(context); // 바텀시트 닫기
-              // 선택된 성향으로 이름 설정 화면으로 이동
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => NameSettingScreen(personalityType: selectedType),
-                ),
-              );
-            },
-            child: const Text('선택하기'),
-          ),
-        ],
+        child: Stack(
+          children: [
+            // 메인 컨텐츠
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(height: 8),
+
+                  // 제목
+                  Text(
+                    '성향 변경',
+                    style: Theme.of(dialogContext).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // 선택한 캐릭터
+                  Text(
+                    '${selectedType.characterName}을 선택하셨네요!',
+                    style: Theme.of(dialogContext).textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // 커리큘럼 설명
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryPale,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '📚 $shortName은 ${selectedType.curriculum} 알아볼 수 있어요!',
+                      style: Theme.of(dialogContext).textTheme.bodyMedium?.copyWith(
+                        height: 1.5,
+                        color: AppColors.textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // 선택하기 버튼
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext); // 다이얼로그 닫기
+                        Navigator.pop(context); // 바텀시트 닫기
+                        // 선택된 성향으로 이름 설정 화면으로 이동
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => NameSettingScreen(personalityType: selectedType),
+                          ),
+                        );
+                      },
+                      child: const Text('선택하기'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // X 버튼 (오른쪽 위)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.pop(dialogContext),
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

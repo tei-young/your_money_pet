@@ -73,7 +73,7 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 80),
+              const SizedBox(height: 120),
 
               // 제목
               Text(
@@ -85,7 +85,7 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
                 textAlign: TextAlign.center,
               ),
 
-              const SizedBox(height: 60),
+              const SizedBox(height: 80),
 
               // 캐릭터 4개 그리드
               Padding(

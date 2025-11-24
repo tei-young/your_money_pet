@@ -26,6 +26,9 @@ class MoneyPetApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
 
+        // 스크롤 바운스 효과 제거
+        scrollBehavior: const _NoOverscrollBehavior(),
+
         // Splash 화면으로 시작
         home: const SplashScreen(),
 
@@ -33,6 +36,27 @@ class MoneyPetApp extends StatelessWidget {
         // routerConfig: appRouter,
       ),
     );
+  }
+}
+
+/// 스크롤 오버스크롤/바운스 효과 제거
+class _NoOverscrollBehavior extends ScrollBehavior {
+  const _NoOverscrollBehavior();
+
+  @override
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    // 오버스크롤 인디케이터(glow effect) 제거
+    return child;
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    // 모든 스크롤에 ClampingScrollPhysics 적용
+    return const ClampingScrollPhysics();
   }
 }
 

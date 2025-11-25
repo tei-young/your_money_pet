@@ -30,10 +30,19 @@ class UserProvider with ChangeNotifier {
 
   /// 사용자 데이터 로드
   Future<void> loadUser() async {
+    // 이미 메모리에 사용자가 있으면 그대로 유지
+    if (_user != null) {
+      debugPrint('User already loaded: ${_user!.name}');
+      return;
+    }
+
     // TODO: SharedPreferences 또는 Firebase에서 로드
-    // 임시로 null 유지 (첫 실행 시 온보딩으로 유도)
-    _user = null;
-    notifyListeners();
+    // final prefs = await SharedPreferences.getInstance();
+    // final userJson = prefs.getString('user');
+    // if (userJson != null) {
+    //   _user = UserModel.fromJson(jsonDecode(userJson));
+    //   notifyListeners();
+    // }
   }
 
   /// 이름 변경

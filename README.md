@@ -945,3 +945,57 @@ TBD
 ---
 
 **© 2025 MoneyPet. All rights reserved.**
+
+---
+
+## 🔄 최신 업데이트 (2025-01-15)
+
+### ✨ 캐릭터 우선 온보딩 플로우 도입
+
+**변경 사항:**
+- 캐릭터를 먼저 선택하고, 그 캐릭터와 함께 성향을 찾아가는 방식으로 변경
+- 캐릭터가 성향 퀴즈에 동행하며 대사 표시
+- 성향 결과에서 캐릭터가 일치/불일치 여부에 따라 다른 반응
+
+**새로운 플로우:**
+```
+스플래시 → 앱 소개 → 캐릭터 선택 ⭐ → 성향 퀴즈 → 성향 결과 → 이름 설정 → 목표 설정
+```
+
+### 🎨 새로운 컴포넌트
+
+#### CharacterProvider
+캐릭터 선택 상태 관리
+- `selectedCharacter`: 처음 선택한 캐릭터
+- `finalPersonality`: 퀴즈 결과 성향
+- `isCharacterMatchingPersonality`: 일치 여부
+
+#### AnimatedCharacter 위젯
+캐릭터 애니메이션 (현재 Placeholder)
+- 숨쉬기 애니메이션
+- 선택 효과
+- 말풍선 통합
+- 🔜 Rive 애니메이션으로 교체 예정
+
+#### SpeechBubble 위젯
+말풍선 UI
+- 슬라이드 업 애니메이션
+- 커스텀 페인터로 꼬리 그리기
+
+### 🐛 버그 수정
+- ✅ 스크롤 바운스 효과 제거 (전역 ScrollBehavior 추가)
+- ✅ 온보딩 완료 후 홈 화면 로딩 이슈 해결
+- ✅ 이름 설정 UX 개선 (Placeholder + 항상 활성화된 다음 버튼)
+
+### 📚 문서화
+- [`docs/DEVELOPMENT_LOG.md`](./docs/DEVELOPMENT_LOG.md) - 상세 개발 로그 및 TODO
+- [`docs/BACKOFFICE_DESIGN.md`](./docs/BACKOFFICE_DESIGN.md) - 백오피스 데이터 구조 설계
+
+### 🔜 다음 단계
+1. **Rive 애니메이션 통합** - 캐릭터 애니메이션 제작 및 적용
+2. **실제 콘텐츠 작성** - Day 1-10 학습 콘텐츠 및 퀴즈
+3. **Firebase 연동** - 사용자 데이터 영구 저장
+4. **백오피스 개발** - 콘텐츠 관리 시스템
+
+자세한 내용은 [`docs/DEVELOPMENT_LOG.md`](./docs/DEVELOPMENT_LOG.md) 참고
+

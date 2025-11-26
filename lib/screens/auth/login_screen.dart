@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// import '../home/main_navigation_screen.dart'; // TODO: 홈 화면 구현 후 활성화
+import '../home/main_navigation_screen.dart';
 
 /// 로그인/회원가입 화면
 ///

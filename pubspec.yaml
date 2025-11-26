@@ -22,7 +22,7 @@ dependencies:
   firebase_auth: ^4.17.8
   firebase_storage: ^11.6.9
   firebase_analytics: ^10.8.9
-  google_sign_in: ^6.1.7  # Downgraded to fix GoogleUtilities version conflict
+  # google_sign_in: ^6.1.7  # TODO: Re-add after Firebase setup complete
 
   # 애니메이션
   rive: ^0.13.1

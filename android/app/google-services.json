@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "990301039716",
+    "project_id": "moneypet-74066",
+    "storage_bucket": "moneypet-74066.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:990301039716:android:a70a9e04f53fbd7128c371",
+        "android_client_info": {
+          "package_name": "com.moneypet.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAzhm05ObrhiSnv8suSMimfxqJ1VV-IcBo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

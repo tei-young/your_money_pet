@@ -951,9 +951,24 @@ TBD
 
 ---
 
-## 🔄 최신 업데이트 (2025-01-15)
+## 🔄 최신 업데이트
 
-### ✨ 캐릭터 우선 온보딩 플로우 도입
+### 2025-11-26: Firebase 기본 설정 완료 🔥
+
+**완료된 작업:**
+- ✅ firebase_options.dart 수동 생성 (Android/iOS 설정)
+- ✅ Android: google-services 플러그인 설정 완료
+- ✅ iOS: GoogleService-Info.plist 설정 완료
+- ✅ main.dart: Firebase.initializeApp() 호출
+
+**다음 단계:**
+- Google OAuth 클라이언트 ID 설정 (Firebase Console)
+- Firebase Auth 연동 (auth_service.dart 생성)
+- Firestore 데이터베이스 연동
+
+---
+
+### 2025-01-15: 캐릭터 우선 온보딩 플로우 도입
 
 **변경 사항:**
 - 캐릭터를 먼저 선택하고, 그 캐릭터와 함께 성향을 찾아가는 방식으로 변경
@@ -1001,12 +1016,15 @@ TBD
 - [`docs/BACKOFFICE_DESIGN.md`](./docs/BACKOFFICE_DESIGN.md) - 백오피스 데이터 구조 설계
 
 ### 🔜 다음 단계
-1. **🔴 Google 로그인/회원가입** (P0) - Firebase Auth 연동, 퀴즈/학습 접근 제어
-2. **Rive 애니메이션 통합** - 캐릭터 애니메이션 제작 및 적용
+1. **🟡 Google OAuth 설정** (P0) - Firebase Console에서 클라이언트 ID 설정
+2. **🔴 Firebase Auth 연동** (P0) - auth_service.dart 생성, 로그인/회원가입 기능
 3. **SharedPreferences 영구 저장** - 로컬 데이터 저장 구현
-4. **실제 콘텐츠 작성** - Day 1-10 학습 콘텐츠 및 퀴즈
-5. **Firebase Firestore 연동** - 사용자 데이터 영구 저장
-6. **백오피스 개발** - 콘텐츠 관리 시스템
+4. **홈 화면 구현** - 학습 시작 진입점
+5. **학습/퀴즈 화면 구현** - 핵심 기능 완성
+6. **Rive 애니메이션 통합** - 캐릭터 애니메이션 제작 및 적용
+7. **실제 콘텐츠 작성** - Day 1-10 학습 콘텐츠 및 퀴즈 (샘플)
+8. **Firestore 연동** - 사용자 데이터 영구 저장
+9. **백오피스 개발** - 콘텐츠 관리 시스템 (v1.1 이후)
 
 자세한 내용은 [`docs/TODO.md`](./docs/TODO.md) 및 [`docs/DEVELOPMENT_LOG.md`](./docs/DEVELOPMENT_LOG.md) 참고
 

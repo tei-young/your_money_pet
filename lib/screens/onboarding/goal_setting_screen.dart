@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../utils/constants.dart';
-import 'first_learning_intro_screen.dart';
+import '../../providers/user_provider.dart';
+import '../auth/login_screen.dart';
 
 /// 목표 설정 화면
 /// 사용자의 투자 목표 선택
@@ -60,18 +62,24 @@ class _GoalSettingScreenState extends State<GoalSettingScreen> {
     });
   }
 
-  void _onNext() {
+  void _onNext() async {
     if (_selectedGoal == null) return;
 
-    // 첫 학습 소개 화면으로 이동
+    // UserProvider에 사용자 생성 (온보딩 데이터 저장)
+    final userProvider = context.read<UserProvider>();
+    await userProvider.createUser(
+      name: widget.userName,
+      personalityType: widget.personalityType,
+      goal: _selectedGoal!,
+    );
+
+    if (!mounted) return;
+
+    // 로그인 화면으로 이동
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => FirstLearningIntroScreen(
-          personalityType: widget.personalityType,
-          userName: widget.userName,
-          userGoal: _selectedGoal!,
-        ),
+        builder: (_) => const LoginScreen(),
       ),
     );
   }

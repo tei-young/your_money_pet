@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../services/auth_service.dart';
+import '../../providers/user_provider.dart';
 import '../home/main_navigation_screen.dart';
 
 /// 로그인/회원가입 화면
@@ -99,28 +102,55 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    // TODO: Firebase Auth 연동
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final authService = AuthService();
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
 
-    if (!mounted) return;
+      if (_isLoginMode) {
+        // 로그인
+        await authService.signInWithEmail(
+          email: email,
+          password: password,
+        );
+      } else {
+        // 회원가입
+        final credential = await authService.signUpWithEmail(
+          email: email,
+          password: password,
+        );
 
-    // 임시: 바로 홈으로 이동 (Firebase 연동 후 제거)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('🚧 Firebase 설정이 필요해요'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+        // 회원가입 후 UserProvider에 사용자 정보 동기화
+        if (credential != null && mounted) {
+          final userProvider = context.read<UserProvider>();
+          // 온보딩에서 생성한 임시 사용자 데이터를 Firebase UID와 연결
+          // TODO: Firestore에 사용자 데이터 저장
+        }
+      }
 
-    setState(() {
-      _isLoading = false;
-    });
+      if (!mounted) return;
 
-    // Firebase 연동 후 활성화
-    // Navigator.pushReplacement(
-    //   context,
-    //   MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-    // );
+      // 로그인/회원가입 성공 → 홈 화면으로 이동
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      // 에러 메시지 표시
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: const Color(0xFFF56565),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   /// Google 로그인
@@ -129,21 +159,46 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    // TODO: Firebase Google Auth 연동
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final authService = AuthService();
+      final credential = await authService.signInWithGoogle();
 
-    if (!mounted) return;
+      // 사용자가 로그인 취소한 경우
+      if (credential == null) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('🚧 Google 로그인은 Firebase 설정이 필요해요'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+      if (!mounted) return;
 
-    setState(() {
-      _isLoading = false;
-    });
+      // Google 로그인 성공 → UserProvider에 사용자 정보 동기화
+      final userProvider = context.read<UserProvider>();
+      // TODO: Firestore에서 사용자 데이터 로드 또는 생성
+
+      // 홈 화면으로 이동
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      // 에러 메시지 표시
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: const Color(0xFFF56565),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
   }
 
   @override

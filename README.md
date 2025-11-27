@@ -953,18 +953,50 @@ TBD
 
 ## 🔄 최신 업데이트
 
+### 2025-11-27: Firebase Authentication 구현 완료 🔐
+
+**완료된 작업:**
+- ✅ Firebase 패키지 업그레이드 (GoogleUtilities 8.x 호환성 확보)
+  - firebase_core: 3.6.0, firebase_auth: 5.3.1
+  - cloud_firestore: 5.4.4, firebase_storage: 12.3.4
+  - firebase_analytics: 11.3.3
+- ✅ AuthService 구현 (`lib/services/auth_service.dart`)
+  - Google Sign-In 연동
+  - 이메일/비밀번호 회원가입/로그인
+  - 한국어 에러 메시지 (14종)
+- ✅ LoginScreen에 Firebase Auth 통합
+- ✅ Android SHA-1 지문 추가 (Firebase Console)
+- ✅ **Android에서 Google Sign-In 테스트 완료** 🎉
+
+**코드 변경사항:**
+```dart
+// lib/services/auth_service.dart
+- Google Sign-In 플로우 구현
+- Firebase Auth credential 생성
+- 이메일/비밀번호 인증
+- 한국어 에러 메시지 매핑
+
+// lib/screens/auth/login_screen.dart
+- AuthService 통합
+- Google 로그인 버튼 활성화
+- 로딩 상태 및 에러 핸들링
+```
+
+**다음 단계:**
+- UserProvider와 Firebase UID 연동
+- Firestore에 사용자 프로필 동기화
+- AuthStateChanges 리스너 추가
+
+---
+
 ### 2025-11-26: Firebase 기본 설정 완료 🔥
 
 **완료된 작업:**
-- ✅ firebase_options.dart 수동 생성 (Android/iOS 설정)
-- ✅ Android: google-services 플러그인 설정 완료
-- ✅ iOS: GoogleService-Info.plist 설정 완료
+- ✅ FlutterFire CLI로 firebase_options.dart 생성
+- ✅ Android: google-services.json + build.gradle 설정
+- ✅ iOS: GoogleService-Info.plist + CocoaPods 설정
 - ✅ main.dart: Firebase.initializeApp() 호출
-
-**다음 단계:**
-- Google OAuth 클라이언트 ID 설정 (Firebase Console)
-- Firebase Auth 연동 (auth_service.dart 생성)
-- Firestore 데이터베이스 연동
+- ✅ iOS CocoaPods 의존성 충돌 해결 (GoogleUtilities 7.x → 8.x)
 
 ---
 

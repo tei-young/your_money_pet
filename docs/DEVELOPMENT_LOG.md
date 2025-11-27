@@ -1,5 +1,245 @@
 # MoneyPet 개발 로그
 
+## 📅 2025-11-27 세션: Firebase Authentication 구현
+
+### 🎯 목표
+Google Sign-In 및 이메일/비밀번호 인증 구현, Android 테스트 완료
+
+---
+
+## ✅ 완료된 작업
+
+### 1. Firebase 패키지 업그레이드 (GoogleUtilities 충돌 해결)
+**목표:** iOS CocoaPods GoogleUtilities 8.x 버전 충돌 해결
+
+#### 문제 상황
+```
+CocoaPods could not find compatible versions for pod "GoogleUtilities/Logger":
+- FirebaseCore (~> 2.x) requires GoogleUtilities (~> 7.12)
+- GoogleSignIn (8.0) requires GoogleUtilities (= 8.0.0)
+```
+
+#### 해결 방법
+Firebase 패키지를 최신 버전으로 업그레이드하여 GoogleUtilities 8.x 지원
+
+**업그레이드된 패키지:**
+```yaml
+# Before
+firebase_core: ^2.27.0
+cloud_firestore: ^4.15.8
+firebase_auth: ^4.17.8
+firebase_storage: ^11.6.9
+firebase_analytics: ^10.8.9
+
+# After
+firebase_core: ^3.6.0
+cloud_firestore: ^5.4.4
+firebase_auth: ^5.3.1
+firebase_storage: ^12.3.4
+firebase_analytics: ^11.3.3
+google_sign_in: ^6.2.1
+```
+
+#### 결과
+- ✅ iOS CocoaPods 설치 성공 (40개 pod 설치)
+- ✅ GoogleUtilities 8.0.0으로 통일
+- ✅ 빌드 에러 해결
+
+---
+
+### 2. AuthService 구현
+**파일:** `lib/services/auth_service.dart`
+
+**기능:**
+- Google Sign-In 연동
+- 이메일/비밀번호 회원가입/로그인
+- 로그아웃
+- 한국어 에러 메시지
+
+**주요 메서드:**
+```dart
+class AuthService {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  // 현재 사용자
+  User? get currentUser => _auth.currentUser;
+
+  // 인증 상태 스트림
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
+
+  // 이메일 회원가입
+  Future<UserCredential?> signUpWithEmail({
+    required String email,
+    required String password,
+  }) async { ... }
+
+  // 이메일 로그인
+  Future<UserCredential?> signInWithEmail({
+    required String email,
+    required String password,
+  }) async { ... }
+
+  // Google Sign-In
+  Future<UserCredential?> signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    if (googleUser == null) return null;
+
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    return await _auth.signInWithCredential(credential);
+  }
+
+  // 로그아웃
+  Future<void> signOut() async {
+    await Future.wait([
+      _auth.signOut(),
+      _googleSignIn.signOut(),
+    ]);
+  }
+}
+```
+
+**한국어 에러 메시지 (14종):**
+- `weak-password`: "비밀번호가 너무 약해요. 6자 이상 입력해주세요."
+- `email-already-in-use`: "이미 사용 중인 이메일이에요."
+- `user-not-found`: "존재하지 않는 계정이에요."
+- `wrong-password`: "비밀번호가 틀렸어요."
+- `invalid-email`: "올바른 이메일 형식이 아니에요."
+- `user-disabled`: "비활성화된 계정이에요."
+- `too-many-requests`: "너무 많은 시도를 했어요. 잠시 후 다시 시도해주세요."
+- `operation-not-allowed`: "이 로그인 방법은 현재 사용할 수 없어요."
+- `account-exists-with-different-credential`: "다른 로그인 방법으로 이미 가입된 이메일이에요."
+- `invalid-credential`: "인증 정보가 올바르지 않아요."
+- `network-request-failed`: "네트워크 연결을 확인해주세요."
+- 기타: "로그인 중 오류가 발생했어요. 다시 시도해주세요."
+
+---
+
+### 3. LoginScreen에 AuthService 통합
+**파일:** `lib/screens/auth/login_screen.dart`
+
+**변경 사항:**
+- Google Sign-In 버튼 활성화
+- AuthService 연동
+- 에러 처리 및 로딩 상태 UI
+
+**Before:**
+```dart
+void _handleGoogleSignIn() {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('Google 로그인은 Firebase 설정 후 사용 가능해요')),
+  );
+}
+```
+
+**After:**
+```dart
+Future<void> _handleGoogleSignIn() async {
+  setState(() => _isLoading = true);
+
+  try {
+    final authService = AuthService();
+    final credential = await authService.signInWithGoogle();
+
+    if (credential == null) {
+      // 사용자가 취소함
+      setState(() => _isLoading = false);
+      return;
+    }
+
+    // 로그인 성공 → 홈 화면 이동
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.toString()),
+        backgroundColor: Color(0xFFF56565),
+      ),
+    );
+    setState(() => _isLoading = false);
+  }
+}
+```
+
+**이메일 로그인/회원가입도 동일하게 구현:**
+```dart
+Future<void> _handleEmailAuth() async {
+  if (!_formKey.currentState!.validate()) return;
+
+  setState(() => _isLoading = true);
+
+  try {
+    final authService = AuthService();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (_isLoginMode) {
+      await authService.signInWithEmail(
+        email: email,
+        password: password,
+      );
+    } else {
+      final credential = await authService.signUpWithEmail(
+        email: email,
+        password: password,
+      );
+
+      // TODO: Firestore에 사용자 프로필 생성
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.toString()),
+        backgroundColor: Color(0xFFF56565),
+      ),
+    );
+    setState(() => _isLoading = false);
+  }
+}
+```
+
+---
+
+### 4. Android SHA-1 지문 추가
+**문제:** Google Sign-In이 Android에서 작동하지 않음
+
+**해결:**
+1. Java 설치 (OpenJDK 17, Homebrew)
+2. SHA-1 지문 생성:
+   ```bash
+   cd android
+   ./gradlew signingReport
+   ```
+3. Firebase Console → Project Settings → Android app → SHA certificate fingerprints에 추가
+
+**결과:**
+- ✅ Android에서 Google Sign-In 정상 작동 확인
+
+---
+
+### 5. iOS 설정
+**자동 완료:** FlutterFire CLI로 이미 설정됨
+- `ios/Runner/GoogleService-Info.plist` 존재
+- URL Schemes 자동 설정
+- 추가 작업 불필요
+
+---
+
 ## 📅 2025-01-15 세션: 온보딩 플로우 리팩토링
 
 ### 🎯 목표

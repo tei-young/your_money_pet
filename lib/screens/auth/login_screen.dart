@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../providers/user_provider.dart';
-import '../home/main_navigation_screen.dart';
+import '../main/main_screen.dart';
 
 /// 로그인/회원가입 화면
 ///
@@ -133,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // 로그인/회원가입 성공 → 홈 화면으로 이동
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+        MaterialPageRoute(builder: (_) => const MainScreen()),
       );
     } catch (e) {
       if (!mounted) return;
@@ -181,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // 홈 화면으로 이동
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+        MaterialPageRoute(builder: (_) => const MainScreen()),
       );
     } catch (e) {
       if (!mounted) return;

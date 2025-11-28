@@ -1,0 +1,34 @@
+{
+  "contentId": "day_XXX_PERSONALITY",
+  "day": 1,
+  "personalityType": "safe",
+  "title": "학습 주제 제목",
+  "cards": [
+    {
+      "order": 1,
+      "type": "text",
+      "content": "# 카드 1 제목\n\n카드 1 내용입니다.\n\n**강조할 내용**은 볼드체로 작성하세요.\n\n- 리스트 항목 1\n- 리스트 항목 2",
+      "imageUrl": null
+    },
+    {
+      "order": 2,
+      "type": "text",
+      "content": "# 카드 2 제목\n\n카드 2 내용입니다.",
+      "imageUrl": null
+    },
+    {
+      "order": 3,
+      "type": "text",
+      "content": "# 카드 3 제목\n\n카드 3 내용입니다.\n\n💡 **팁:** 추가 정보를 제공할 수 있어요!",
+      "imageUrl": null
+    }
+  ],
+  "estimatedMinutes": 3,
+  "points": 50,
+  "isPublished": true,
+  "version": "1.0",
+  "createdAt": "2025-11-28T00:00:00Z",
+  "updatedAt": "2025-11-28T00:00:00Z",
+  "createdBy": "admin",
+  "tags": ["태그1", "태그2"]
+}

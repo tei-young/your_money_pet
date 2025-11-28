@@ -1,0 +1,149 @@
+{
+  "quizId": "day_XXX_PERSONALITY_quiz",
+  "day": 1,
+  "personalityType": "safe",
+  "questions": [
+    {
+      "order": 1,
+      "question": "첫 번째 퀴즈 문제",
+      "options": [
+        {
+          "text": "선택지 1",
+          "isCorrect": false,
+          "explanation": null
+        },
+        {
+          "text": "선택지 2 (정답)",
+          "isCorrect": true,
+          "explanation": "정답입니다! 선택지 2가 맞는 이유는..."
+        },
+        {
+          "text": "선택지 3",
+          "isCorrect": false,
+          "explanation": null
+        },
+        {
+          "text": "선택지 4",
+          "isCorrect": false,
+          "explanation": null
+        }
+      ],
+      "points": 20
+    },
+    {
+      "order": 2,
+      "question": "두 번째 퀴즈 문제",
+      "options": [
+        {
+          "text": "선택지 1",
+          "isCorrect": false,
+          "explanation": null
+        },
+        {
+          "text": "선택지 2",
+          "isCorrect": true,
+          "explanation": "정답 해설..."
+        },
+        {
+          "text": "선택지 3",
+          "isCorrect": false,
+          "explanation": null
+        },
+        {
+          "text": "선택지 4",
+          "isCorrect": false,
+          "explanation": null
+        }
+      ],
+      "points": 20
+    },
+    {
+      "order": 3,
+      "question": "세 번째 퀴즈 문제",
+      "options": [
+        {
+          "text": "선택지 1",
+          "isCorrect": true,
+          "explanation": "정답 해설..."
+        },
+        {
+          "text": "선택지 2",
+          "isCorrect": false,
+          "explanation": null
+        },
+        {
+          "text": "선택지 3",
+          "isCorrect": false,
+          "explanation": null
+        },
+        {
+          "text": "선택지 4",
+          "isCorrect": false,
+          "explanation": null
+        }
+      ],
+      "points": 20
+    },
+    {
+      "order": 4,
+      "question": "네 번째 퀴즈 문제",
+      "options": [
+        {
+          "text": "선택지 1",
+          "isCorrect": false,
+          "explanation": null
+        },
+        {
+          "text": "선택지 2",
+          "isCorrect": false,
+          "explanation": null
+        },
+        {
+          "text": "선택지 3",
+          "isCorrect": true,
+          "explanation": "정답 해설..."
+        },
+        {
+          "text": "선택지 4",
+          "isCorrect": false,
+          "explanation": null
+        }
+      ],
+      "points": 20
+    },
+    {
+      "order": 5,
+      "question": "다섯 번째 퀴즈 문제",
+      "options": [
+        {
+          "text": "선택지 1",
+          "isCorrect": false,
+          "explanation": null
+        },
+        {
+          "text": "선택지 2",
+          "isCorrect": false,
+          "explanation": null
+        },
+        {
+          "text": "선택지 3",
+          "isCorrect": false,
+          "explanation": null
+        },
+        {
+          "text": "선택지 4",
+          "isCorrect": true,
+          "explanation": "정답 해설..."
+        }
+      ],
+      "points": 20
+    }
+  ],
+  "totalPoints": 100,
+  "passingScore": 60,
+  "isPublished": true,
+  "version": "1.0",
+  "createdAt": "2025-11-28T00:00:00Z",
+  "updatedAt": "2025-11-28T00:00:00Z",
+  "createdBy": "admin"
+}

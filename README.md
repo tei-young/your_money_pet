@@ -953,6 +953,47 @@ TBD
 
 ## 🔄 최신 업데이트
 
+### 2025-11-29: 런타임 에러 수정 및 UI 개선 🔧
+
+**완료된 작업:**
+- ✅ **PersonalityType 런타임 에러 수정** (Critical Fix)
+  - Extension 기반 → Enhanced Enum으로 변환
+  - `color`, `lightColor`, `displayName` 등을 compile-time 필드로 변경
+  - "Class 'PersonalityType' has no instance getter 'color'" 에러 해결
+  - 프로덕션 안정성 확보 (런타임 로딩 이슈 제거)
+- ✅ **홈화면 UI 정리**
+  - 성향별 캐릭터 이름 표시 제거
+  - Rive 애니메이션 준비를 위한 UI 간소화
+
+**기술적 변경사항:**
+```dart
+// Before: Extension 방식
+enum PersonalityType { safe, balanced, aggressive, challenger }
+extension PersonalityTypeExtension on PersonalityType {
+  Color get color { /* switch */ }
+}
+
+// After: Enhanced Enum (Dart 2.17+)
+enum PersonalityType {
+  safe(
+    color: AppColors.safeType,
+    displayName: '안전형',
+    // ...
+  );
+
+  final Color color;
+  final String displayName;
+  // ...
+}
+```
+
+**왜 변경했나요?**
+- Extension 메서드는 특정 Flutter 환경에서 런타임 로딩 이슈 발생
+- Enhanced Enum은 컴파일 타임에 필드가 보장되어 안정적
+- 프로덕션 사용자가 동일 에러를 경험하지 않도록 예방
+
+---
+
 ### 2025-11-27: Firebase Authentication 구현 완료 🔐
 
 **완료된 작업:**

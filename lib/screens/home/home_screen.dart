@@ -271,15 +271,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           const SizedBox(height: 16),
-
-          // 캐릭터 이름
-          Text(
-            personalityType.characterName,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: personalityType.color,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
         ],
       ),
     );

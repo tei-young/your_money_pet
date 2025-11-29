@@ -62,93 +62,56 @@ class AppColors {
   static const Color challengerType = Color(0xFF4A5568); // 도전형 (세이빙덕)
 }
 
-/// 투자 성향 타입
+/// 투자 성향 타입 (Enhanced Enum)
 enum PersonalityType {
-  safe, // 안전형
-  balanced, // 밸런스형
-  aggressive, // 공격형
-  challenger, // 도전형
-}
+  safe(
+    color: AppColors.safeType,
+    lightColor: Color(0xFFA0AEC0),
+    displayName: '안전형',
+    characterName: 'Money Bear 머니베어',
+    description: '든든하게 지키는 • 원금을 보호하며 안정적으로 자산 증식',
+    curriculum: '예적금의 기본과 복리의 힘부터 인플레이션 대응과 안전한 포트폴리오 구성까지',
+  ),
+  balanced(
+    color: AppColors.balancedType,
+    lightColor: Color(0xFFD6BCFA),
+    displayName: '밸런스형',
+    characterName: 'Save Sheep 세이브쉽',
+    description: '부드럽게 균형잡는 • 안정성과 수익성의 균형을 추구',
+    curriculum: '주식과 채권의 기본, ETF 이해부터 글로벌 자산배분과 목표수익률 달성 전략까지',
+  ),
+  aggressive(
+    color: AppColors.aggressiveType,
+    lightColor: Color(0xFFD6BCFA),
+    displayName: '공격형',
+    characterName: 'Hunter Cat 헌터캣',
+    description: '날카롭게 사냥하는 • 기회를 포착하며 높은 수익 추구',
+    curriculum: '주식투자의 기본과 기업 분석부터 업종 트렌드 예측과 고수익 투자 전략까지',
+  ),
+  challenger(
+    color: AppColors.challengerType,
+    lightColor: Color(0xFF718096),
+    displayName: '도전형',
+    characterName: 'Chaser Fox 체이서폭스',
+    description: '영리하게 도전하는 • 새로운 투자 기회에 도전하며 성장',
+    curriculum: '가상자산 이해와 블록체인 기술부터 DeFi, NFT와 혁신기술 투자 전략까지',
+  );
 
-/// 성향별 컬러 확장
-extension PersonalityTypeExtension on PersonalityType {
-  Color get color {
-    switch (this) {
-      case PersonalityType.safe:
-        return AppColors.safeType;
-      case PersonalityType.balanced:
-        return AppColors.balancedType;
-      case PersonalityType.aggressive:
-        return AppColors.aggressiveType;
-      case PersonalityType.challenger:
-        return AppColors.challengerType;
-    }
-  }
+  const PersonalityType({
+    required this.color,
+    required this.lightColor,
+    required this.displayName,
+    required this.characterName,
+    required this.description,
+    required this.curriculum,
+  });
 
-  Color get lightColor {
-    switch (this) {
-      case PersonalityType.safe:
-        return const Color(0xFFA0AEC0);
-      case PersonalityType.balanced:
-        return const Color(0xFFD6BCFA);
-      case PersonalityType.aggressive:
-        return const Color(0xFFD6BCFA);
-      case PersonalityType.challenger:
-        return const Color(0xFF718096);
-    }
-  }
-
-  String get displayName {
-    switch (this) {
-      case PersonalityType.safe:
-        return '안전형';
-      case PersonalityType.balanced:
-        return '밸런스형';
-      case PersonalityType.aggressive:
-        return '공격형';
-      case PersonalityType.challenger:
-        return '도전형';
-    }
-  }
-
-  String get characterName {
-    switch (this) {
-      case PersonalityType.safe:
-        return 'Money Bear 머니베어';
-      case PersonalityType.balanced:
-        return 'Save Sheep 세이브쉽';
-      case PersonalityType.aggressive:
-        return 'Hunter Cat 헌터캣';
-      case PersonalityType.challenger:
-        return 'Chaser Fox 체이서폭스';
-    }
-  }
-
-  String get description {
-    switch (this) {
-      case PersonalityType.safe:
-        return '든든하게 지키는 • 원금을 보호하며 안정적으로 자산 증식';
-      case PersonalityType.balanced:
-        return '부드럽게 균형잡는 • 안정성과 수익성의 균형을 추구';
-      case PersonalityType.aggressive:
-        return '날카롭게 사냥하는 • 기회를 포착하며 높은 수익 추구';
-      case PersonalityType.challenger:
-        return '영리하게 도전하는 • 새로운 투자 기회에 도전하며 성장';
-    }
-  }
-
-  String get curriculum {
-    switch (this) {
-      case PersonalityType.safe:
-        return '예적금의 기본과 복리의 힘부터 인플레이션 대응과 안전한 포트폴리오 구성까지';
-      case PersonalityType.balanced:
-        return '주식과 채권의 기본, ETF 이해부터 글로벌 자산배분과 목표수익률 달성 전략까지';
-      case PersonalityType.aggressive:
-        return '주식투자의 기본과 기업 분석부터 업종 트렌드 예측과 고수익 투자 전략까지';
-      case PersonalityType.challenger:
-        return '가상자산 이해와 블록체인 기술부터 DeFi, NFT와 혁신기술 투자 전략까지';
-    }
-  }
+  final Color color;
+  final Color lightColor;
+  final String displayName;
+  final String characterName;
+  final String description;
+  final String curriculum;
 
   CharacterAnimationConfig get animationConfig {
     switch (this) {

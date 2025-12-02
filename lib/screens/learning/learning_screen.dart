@@ -105,59 +105,20 @@ class _LearningScreenState extends State<LearningScreen> {
 
     final theme = Theme.of(context);
     final user = context.watch<UserProvider>().user!;
-    final personalityColor = user.personalityType.color;
 
     return Scaffold(
-      // 1단계: 배경에 연한 성향 컬러 그라데이션
-      backgroundColor: personalityColor.withOpacity(0.05),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Column(
-          children: [
-            Text(
-              'Day ${widget.dayNumber}',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: personalityColor,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            Text(
-              _learningDay!.title,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-        centerTitle: true,
-        actions: [
-          // 진행 표시
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Text(
-                '${_currentCardIndex + 1}/${_learningDay!.cards.length}',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      // 배경: 통일된 진한 다크 퍼플
+      backgroundColor: AppColors.learningBackground,
       body: Column(
         children: [
-          // 진행 바
-          _buildProgressBar(personalityColor),
+          // 미니멀 헤더 (Day + 제목 + 닫기)
+          _buildMinimalHeader(theme),
+
+          // 진행 바 + 카운트 통합
+          _buildProgressBarWithCount(),
 
           // 2단계: 캐릭터 영역
-          _buildCharacterSection(user, personalityColor, theme),
+          _buildCharacterSection(user, theme),
 
           // 카드 영역 (애니메이션 효과 추가)
           Expanded(
@@ -177,7 +138,6 @@ class _LearningScreenState extends State<LearningScreen> {
                   child: _buildLearningCard(
                     _learningDay!.cards[index],
                     theme,
-                    personalityColor,
                     key: ValueKey(index),
                   ),
                 );
@@ -186,32 +146,121 @@ class _LearningScreenState extends State<LearningScreen> {
           ),
 
           // 하단 버튼
-          _buildBottomButtons(personalityColor),
+          _buildBottomButtons(),
         ],
       ),
     );
   }
 
-  /// 진행 바
-  Widget _buildProgressBar(Color color) {
-    final progress = (_currentCardIndex + 1) / _learningDay!.cards.length;
-
+  /// 미니멀 헤더 (Day + 제목 + 닫기)
+  Widget _buildMinimalHeader(ThemeData theme) {
     return Container(
-      height: 4,
-      color: AppColors.background,
-      child: FractionallySizedBox(
-        alignment: Alignment.centerLeft,
-        widthFactor: progress,
-        child: Container(
-          color: color,
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: AppColors.learningBackground,
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.learningAccent.withOpacity(0.2),
+            width: 1,
+          ),
         ),
+      ),
+      child: Row(
+        children: [
+          // 닫기 버튼
+          IconButton(
+            icon: const Icon(Icons.close, size: 20),
+            color: AppColors.learningAccentLight,
+            onPressed: () => Navigator.pop(context),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 32,
+              minHeight: 32,
+            ),
+          ),
+          const SizedBox(width: 8),
+          // Day 번호 + 제목
+          Expanded(
+            child: Text(
+              'Day ${widget.dayNumber} • ${_learningDay!.title}',
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: AppColors.learningAccentLight,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  /// 2단계: 캐릭터 영역 (상단 고정)
-  Widget _buildCharacterSection(
-      dynamic user, Color personalityColor, ThemeData theme) {
+  /// 진행 바 + 카운트 통합
+  Widget _buildProgressBarWithCount() {
+    final progress = (_currentCardIndex + 1) / _learningDay!.cards.length;
+    final percentage = (progress * 100).toInt();
+
+    return Container(
+      height: 28,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.learningBackground,
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.learningAccent.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          // 진행바
+          Expanded(
+            child: Container(
+              height: 6,
+              decoration: BoxDecoration(
+                color: AppColors.learningAccent.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(3),
+              ),
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: progress,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.learningAccent,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // 진행 표시
+          Text(
+            '$percentage%',
+            style: TextStyle(
+              color: AppColors.learningAccentLight,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '${_currentCardIndex + 1}/${_learningDay!.cards.length}',
+            style: TextStyle(
+              color: AppColors.learningAccent.withOpacity(0.6),
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 2단계: 캐릭터 영역 (상단 고정) - 약간 압축
+  Widget _buildCharacterSection(dynamic user, ThemeData theme) {
     // 카드 진행에 따른 메시지
     String message = "함께 배워볼까요? 😊";
     if (_currentCardIndex == _learningDay!.cards.length - 1) {
@@ -221,50 +270,54 @@ class _LearningScreenState extends State<LearningScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.learningBackground,
         border: Border(
-          bottom: BorderSide(color: AppColors.border, width: 1),
+          bottom: BorderSide(
+            color: AppColors.learningAccent.withOpacity(0.2),
+            width: 1,
+          ),
         ),
       ),
       child: Row(
         children: [
-          // 캐릭터 Placeholder (Rive 대기)
+          // 캐릭터 Placeholder (Rive 대기) - 약간 축소
           Container(
-            width: 56,
-            height: 56,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: personalityColor.withOpacity(0.15),
+              color: AppColors.learningAccent.withOpacity(0.15),
               shape: BoxShape.circle,
               border: Border.all(
-                color: personalityColor.withOpacity(0.3),
+                color: AppColors.learningAccent.withOpacity(0.3),
                 width: 2,
               ),
             ),
             child: Icon(
               Icons.pets,
-              color: personalityColor,
-              size: 28,
+              color: AppColors.learningAccent,
+              size: 24,
             ),
           ),
           const SizedBox(width: 12),
           // 말풍선
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: personalityColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
+                color: AppColors.learningAccent.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: personalityColor.withOpacity(0.2),
+                  color: AppColors.learningAccent.withOpacity(0.3),
                 ),
               ),
               child: Text(
                 message,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: personalityColor,
+                  color: AppColors.learningAccentLight,
                   fontWeight: FontWeight.w600,
+                  fontSize: 14,
                 ),
               ),
             ),
@@ -274,36 +327,33 @@ class _LearningScreenState extends State<LearningScreen> {
     );
   }
 
-  /// 학습 카드 (1단계: 카드 그림자, 3단계: 타이포그래피)
+  /// 학습 카드 (통일된 컬러 시스템 적용)
   Widget _buildLearningCard(
     LearningCard card,
-    ThemeData theme,
-    Color personalityColor, {
+    ThemeData theme, {
     Key? key,
   }) {
     return SingleChildScrollView(
       key: key,
       physics: const ClampingScrollPhysics(),
-      padding: const EdgeInsets.all(ScreenSize.paddingHorizontal),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 20),
-
-          // 1단계: 카드 컨테이너 (하얀 바탕 + 그림자)
+          // 카드 컨테이너 (하얀 바탕 + 그림자)
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: personalityColor.withOpacity(0.1),
+                  color: AppColors.learningAccent.withOpacity(0.15),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withOpacity(0.08),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -312,12 +362,12 @@ class _LearningScreenState extends State<LearningScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 3단계: 카드 내용 (타이포그래피 개선)
+                // 카드 내용
                 Text(
                   card.content,
                   style: theme.textTheme.bodyLarge?.copyWith(
-                    height: 1.8,
-                    fontSize: 18, // 17 → 18
+                    height: 1.7,
+                    fontSize: 17,
                     color: AppColors.textPrimary,
                   ),
                 ),
@@ -335,13 +385,13 @@ class _LearningScreenState extends State<LearningScreen> {
                         return Container(
                           height: 200,
                           decoration: BoxDecoration(
-                            color: personalityColor.withOpacity(0.05),
+                            color: AppColors.learningAccent.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Center(
                             child: Icon(
                               Icons.image_not_supported,
-                              color: personalityColor.withOpacity(0.3),
+                              color: AppColors.learningAccent.withOpacity(0.3),
                             ),
                           ),
                         );
@@ -350,16 +400,16 @@ class _LearningScreenState extends State<LearningScreen> {
                   ),
                 ],
 
-                // 팁 (있으면) - 1단계: 성향 컬러 활용
+                // 팁 (있으면)
                 if (card.tip != null) ...[
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: personalityColor.withOpacity(0.08),
+                      color: AppColors.learningAccent.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: personalityColor.withOpacity(0.2),
+                        color: AppColors.learningAccent.withOpacity(0.3),
                       ),
                     ),
                     child: Row(
@@ -367,8 +417,8 @@ class _LearningScreenState extends State<LearningScreen> {
                       children: [
                         Icon(
                           Icons.lightbulb_outline,
-                          color: personalityColor,
-                          size: 24,
+                          color: AppColors.learningAccent,
+                          size: 22,
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -378,8 +428,9 @@ class _LearningScreenState extends State<LearningScreen> {
                               Text(
                                 '💡 Tip',
                                 style: theme.textTheme.titleMedium?.copyWith(
-                                  color: personalityColor,
+                                  color: AppColors.learningAccent,
                                   fontWeight: FontWeight.w700,
+                                  fontSize: 15,
                                 ),
                               ),
                               const SizedBox(height: 6),
@@ -387,7 +438,7 @@ class _LearningScreenState extends State<LearningScreen> {
                                 card.tip!,
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   height: 1.6,
-                                  fontSize: 15,
+                                  fontSize: 14,
                                 ),
                               ),
                             ],
@@ -400,29 +451,26 @@ class _LearningScreenState extends State<LearningScreen> {
               ],
             ),
           ),
-
-          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
   /// 하단 버튼
-  Widget _buildBottomButtons(Color color) {
+  Widget _buildBottomButtons() {
     final isFirstCard = _currentCardIndex == 0;
     final isLastCard = _currentCardIndex == _learningDay!.cards.length - 1;
 
     return Container(
-      padding: const EdgeInsets.all(ScreenSize.paddingHorizontal),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
+        color: AppColors.learningBackground,
+        border: Border(
+          top: BorderSide(
+            color: AppColors.learningAccent.withOpacity(0.2),
+            width: 1,
           ),
-        ],
+        ),
       ),
       child: Row(
         children: [
@@ -431,6 +479,12 @@ class _LearningScreenState extends State<LearningScreen> {
             Expanded(
               child: OutlinedButton(
                 onPressed: _onPreviousCard,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.learningAccentLight,
+                  side: BorderSide(
+                    color: AppColors.learningAccent.withOpacity(0.5),
+                  ),
+                ),
                 child: const Text('이전'),
               ),
             ),
@@ -443,7 +497,8 @@ class _LearningScreenState extends State<LearningScreen> {
             child: ElevatedButton(
               onPressed: _onNextCard,
               style: ElevatedButton.styleFrom(
-                backgroundColor: color,
+                backgroundColor: AppColors.learningAccent,
+                foregroundColor: Colors.white,
               ),
               child: Text(isLastCard ? '학습 완료' : '다음'),
             ),

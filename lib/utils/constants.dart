@@ -55,11 +55,16 @@ class AppColors {
   static const Color border = Color(0xFFE2E8F0);
   static const Color borderLight = Color(0xFFF0F0F0);
 
-  // 성향별 컬러
+  // 학습/퀴즈 전용 컬러 (통일된 디자인)
+  static const Color learningBackground = Color(0xFF1A1625); // 진한 다크 퍼플 (학습 화면 배경)
+  static const Color learningAccent = Color(0xFFB794F6); // 파스텔 보라 (액센트 포인트)
+  static const Color learningAccentLight = Color(0xFFD6BCFA); // 연한 파스텔 보라
+
+  // 성향별 컬러 (캐릭터/프로필용)
   static const Color safeType = Color(0xFF718096); // 안전형 (머니베어)
-  static const Color balancedType = Color(0xFFB794F6); // 밸런스형 (밸런스토끼)
-  static const Color aggressiveType = Color(0xFF9F7AEA); // 공격형 (코인캣)
-  static const Color challengerType = Color(0xFF4A5568); // 도전형 (세이빙덕)
+  static const Color balancedType = Color(0xFFB794F6); // 밸런스형 (세이브쉽)
+  static const Color aggressiveType = Color(0xFF9F7AEA); // 공격형 (헌터캣)
+  static const Color challengerType = Color(0xFF4A5568); // 도전형 (체이서폭스)
 }
 
 /// 투자 성향 타입 (Enhanced Enum)

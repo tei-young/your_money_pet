@@ -97,50 +97,20 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final user = context.watch<UserProvider>().user!;
-    final personalityColor = user.personalityType.color;
 
     return Scaffold(
-      // 1단계: 배경에 연한 성향 컬러
-      backgroundColor: personalityColor.withOpacity(0.05),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () {
-            _showExitDialog(context);
-          },
-        ),
-        title: Text(
-          '퀴즈',
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: personalityColor,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Text(
-                '${_currentQuestionIndex + 1}/${widget.learningDay.quizQuestions.length}',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      // 배경: 통일된 진한 다크 퍼플
+      backgroundColor: AppColors.learningBackground,
       body: Column(
         children: [
-          // 진행 바
-          _buildProgressBar(personalityColor),
+          // 미니멀 헤더
+          _buildMinimalHeader(theme),
+
+          // 진행 바 + 카운트 통합
+          _buildProgressBarWithCount(),
 
           // 2단계: 캐릭터 영역
-          _buildCharacterSection(user, personalityColor, theme),
+          _buildCharacterSection(user, theme),
 
           // 퀴즈 내용 (애니메이션 효과)
           Expanded(
@@ -155,26 +125,24 @@ class _QuizScreenState extends State<QuizScreen> {
               child: SingleChildScrollView(
                 key: ValueKey(_currentQuestionIndex),
                 physics: const ClampingScrollPhysics(),
-                padding: const EdgeInsets.all(ScreenSize.paddingHorizontal),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 20),
-
-                    // 1단계: 질문 카드 (하얀 바탕 + 그림자)
+                    // 질문 카드 (하얀 바탕 + 그림자)
                     Container(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: personalityColor.withOpacity(0.1),
+                            color: AppColors.learningAccent.withOpacity(0.15),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withOpacity(0.08),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -183,17 +151,17 @@ class _QuizScreenState extends State<QuizScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // 3단계: 질문 (타이포그래피 개선)
+                          // 질문
                           Text(
                             _currentQuestion.question,
-                            style: theme.textTheme.headlineMedium?.copyWith(
+                            style: theme.textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.w700,
                               height: 1.4,
-                              fontSize: 22,
+                              fontSize: 20,
                             ),
                           ),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 20),
 
                           // 선택지
                           ..._currentQuestion.options
@@ -206,20 +174,17 @@ class _QuizScreenState extends State<QuizScreen> {
                               index: index,
                               option: option,
                               theme: theme,
-                              personalityColor: personalityColor,
                             );
                           }),
                         ],
                       ),
                     ),
 
-                    // 해설 (답변 후)
+                    // 해설 (답변 후) - 피드백 제거, 해설만 표시
                     if (_hasAnswered) ...[
-                      const SizedBox(height: 20),
-                      _buildExplanation(theme, personalityColor),
+                      const SizedBox(height: 16),
+                      _buildExplanation(theme),
                     ],
-
-                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -227,15 +192,121 @@ class _QuizScreenState extends State<QuizScreen> {
           ),
 
           // 하단 버튼
-          if (_hasAnswered) _buildBottomButton(personalityColor),
+          if (_hasAnswered) _buildBottomButton(),
         ],
       ),
     );
   }
 
-  /// 2단계: 캐릭터 영역 (상단 고정)
-  Widget _buildCharacterSection(
-      dynamic user, Color personalityColor, ThemeData theme) {
+  /// 미니멀 헤더
+  Widget _buildMinimalHeader(ThemeData theme) {
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: AppColors.learningBackground,
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.learningAccent.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          // 닫기 버튼
+          IconButton(
+            icon: const Icon(Icons.close, size: 20),
+            color: AppColors.learningAccentLight,
+            onPressed: () => _showExitDialog(context),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 32,
+              minHeight: 32,
+            ),
+          ),
+          const SizedBox(width: 8),
+          // 퀴즈 타이틀
+          Expanded(
+            child: Text(
+              '퀴즈',
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: AppColors.learningAccentLight,
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 진행 바 + 카운트 통합
+  Widget _buildProgressBarWithCount() {
+    final progress =
+        (_currentQuestionIndex + 1) / widget.learningDay.quizQuestions.length;
+    final percentage = (progress * 100).toInt();
+
+    return Container(
+      height: 28,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.learningBackground,
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.learningAccent.withOpacity(0.2),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          // 진행바
+          Expanded(
+            child: Container(
+              height: 6,
+              decoration: BoxDecoration(
+                color: AppColors.learningAccent.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(3),
+              ),
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: progress,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.learningAccent,
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // 진행 표시
+          Text(
+            '$percentage%',
+            style: TextStyle(
+              color: AppColors.learningAccentLight,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '${_currentQuestionIndex + 1}/${widget.learningDay.quizQuestions.length}',
+            style: TextStyle(
+              color: AppColors.learningAccent.withOpacity(0.6),
+              fontSize: 11,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 2단계: 캐릭터 영역 - 정답/오답 피드백은 여기서만 표시
+  Widget _buildCharacterSection(dynamic user, ThemeData theme) {
     // 정답/오답에 따른 메시지
     String message = "신중하게 생각해봐요! 🤔";
     if (_hasAnswered) {
@@ -251,50 +322,54 @@ class _QuizScreenState extends State<QuizScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: AppColors.learningBackground,
         border: Border(
-          bottom: BorderSide(color: AppColors.border, width: 1),
+          bottom: BorderSide(
+            color: AppColors.learningAccent.withOpacity(0.2),
+            width: 1,
+          ),
         ),
       ),
       child: Row(
         children: [
-          // 캐릭터 Placeholder (Rive 대기)
+          // 캐릭터 Placeholder (Rive 대기) - 약간 축소
           Container(
-            width: 56,
-            height: 56,
+            width: 48,
+            height: 48,
             decoration: BoxDecoration(
-              color: personalityColor.withOpacity(0.15),
+              color: AppColors.learningAccent.withOpacity(0.15),
               shape: BoxShape.circle,
               border: Border.all(
-                color: personalityColor.withOpacity(0.3),
+                color: AppColors.learningAccent.withOpacity(0.3),
                 width: 2,
               ),
             ),
             child: Icon(
               Icons.pets,
-              color: personalityColor,
-              size: 28,
+              color: AppColors.learningAccent,
+              size: 24,
             ),
           ),
           const SizedBox(width: 12),
-          // 말풍선
+          // 말풍선 - 피드백은 여기서만 표시
           Expanded(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
-                color: personalityColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
+                color: AppColors.learningAccent.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: personalityColor.withOpacity(0.2),
+                  color: AppColors.learningAccent.withOpacity(0.3),
                 ),
               ),
               child: Text(
                 message,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: personalityColor,
+                  color: AppColors.learningAccentLight,
                   fontWeight: FontWeight.w600,
+                  fontSize: 14,
                 ),
               ),
             ),
@@ -304,30 +379,11 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 
-  /// 진행 바
-  Widget _buildProgressBar(Color color) {
-    final progress =
-        (_currentQuestionIndex + 1) / widget.learningDay.quizQuestions.length;
-
-    return Container(
-      height: 4,
-      color: AppColors.background,
-      child: FractionallySizedBox(
-        alignment: Alignment.centerLeft,
-        widthFactor: progress,
-        child: Container(
-          color: color,
-        ),
-      ),
-    );
-  }
-
   /// 선택지 카드
   Widget _buildOptionCard({
     required int index,
     required String option,
     required ThemeData theme,
-    required Color personalityColor,
   }) {
     final isSelected = _selectedAnswerIndex == index;
     final isCorrect = index == _currentQuestion.correctAnswerIndex;
@@ -348,9 +404,9 @@ class _QuizScreenState extends State<QuizScreen> {
         backgroundColor = Colors.white;
       }
     } else {
-      borderColor = isSelected ? personalityColor : AppColors.border;
+      borderColor = isSelected ? AppColors.learningAccent : AppColors.border;
       backgroundColor = isSelected
-          ? personalityColor.withOpacity(0.1)
+          ? AppColors.learningAccent.withOpacity(0.1)
           : Colors.white;
     }
 
@@ -370,13 +426,13 @@ class _QuizScreenState extends State<QuizScreen> {
           onTap: () => _onAnswerSelected(index),
           borderRadius: BorderRadius.circular(ScreenSize.borderRadius),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             child: Row(
               children: [
                 // 번호
                 Container(
-                  width: 32,
-                  height: 32,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
                     color: showResult
                         ? (isCorrect
@@ -385,22 +441,22 @@ class _QuizScreenState extends State<QuizScreen> {
                                 ? AppColors.error
                                 : AppColors.background)
                         : (isSelected
-                            ? personalityColor
+                            ? AppColors.learningAccent
                             : AppColors.background),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: Center(
                     child: showResult && isCorrect
                         ? const Icon(
                             Icons.check,
                             color: Colors.white,
-                            size: 20,
+                            size: 18,
                           )
                         : showResult && isSelected
                             ? const Icon(
                                 Icons.close,
                                 color: Colors.white,
-                                size: 20,
+                                size: 18,
                               )
                             : Text(
                                 '${index + 1}',
@@ -409,19 +465,21 @@ class _QuizScreenState extends State<QuizScreen> {
                                       ? Colors.white
                                       : AppColors.textSecondary,
                                   fontWeight: FontWeight.w700,
+                                  fontSize: 13,
                                 ),
                               ),
                   ),
                 ),
 
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
 
                 // 선택지 텍스트
                 Expanded(
                   child: Text(
                     option,
-                    style: theme.textTheme.bodyLarge?.copyWith(
+                    style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      fontSize: 15,
                     ),
                   ),
                 ),
@@ -433,26 +491,18 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 
-  /// 해설 (1단계: 카드 스타일, 3단계: 타이포그래피)
-  Widget _buildExplanation(ThemeData theme, Color personalityColor) {
-    final isCorrect =
-        _selectedAnswerIndex == _currentQuestion.correctAnswerIndex;
-
+  /// 해설 (피드백 제거, 해설만 표시)
+  Widget _buildExplanation(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isCorrect ? AppColors.success : AppColors.error,
-          width: 2,
-        ),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: (isCorrect ? AppColors.success : AppColors.error)
-                .withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: AppColors.learningAccent.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -461,43 +511,29 @@ class _QuizScreenState extends State<QuizScreen> {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: isCorrect
-                      ? AppColors.success.withOpacity(0.1)
-                      : AppColors.error.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  isCorrect ? Icons.check_circle : Icons.cancel,
-                  color: isCorrect ? AppColors.success : AppColors.error,
-                  size: 24,
-                ),
+              Icon(
+                Icons.lightbulb_outline,
+                color: AppColors.learningAccent,
+                size: 20,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Text(
-                isCorrect ? '정답입니다! 🎉' : '아쉬워요! 💪',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: isCorrect ? AppColors.success : AppColors.error,
+                '해설',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: AppColors.learningAccent,
                   fontWeight: FontWeight.w700,
+                  fontSize: 15,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              _currentQuestion.explanation,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                height: 1.7,
-                fontSize: 16,
-              ),
+          const SizedBox(height: 12),
+          Text(
+            _currentQuestion.explanation,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              height: 1.6,
+              fontSize: 14,
+              color: AppColors.textPrimary,
             ),
           ),
         ],
@@ -506,23 +542,23 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   /// 하단 버튼
-  Widget _buildBottomButton(Color color) {
+  Widget _buildBottomButton() {
     return Container(
-      padding: const EdgeInsets.all(ScreenSize.paddingHorizontal),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
+        color: AppColors.learningBackground,
+        border: Border(
+          top: BorderSide(
+            color: AppColors.learningAccent.withOpacity(0.2),
+            width: 1,
           ),
-        ],
+        ),
       ),
       child: ElevatedButton(
         onPressed: _onNext,
         style: ElevatedButton.styleFrom(
-          backgroundColor: color,
+          backgroundColor: AppColors.learningAccent,
+          foregroundColor: Colors.white,
         ),
         child: Text(_isLastQuestion ? '결과 보기' : '다음 문제'),
       ),

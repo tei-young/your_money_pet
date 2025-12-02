@@ -100,7 +100,8 @@ class _QuizScreenState extends State<QuizScreen> {
     final personalityColor = user.personalityType.color;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      // 1단계: 배경에 연한 성향 컬러
+      backgroundColor: personalityColor.withOpacity(0.05),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -114,6 +115,7 @@ class _QuizScreenState extends State<QuizScreen> {
           '퀴즈',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
+            color: personalityColor,
           ),
         ),
         centerTitle: true,
@@ -137,53 +139,166 @@ class _QuizScreenState extends State<QuizScreen> {
           // 진행 바
           _buildProgressBar(personalityColor),
 
-          // 퀴즈 내용
+          // 2단계: 캐릭터 영역
+          _buildCharacterSection(user, personalityColor, theme),
+
+          // 퀴즈 내용 (애니메이션 효과)
           Expanded(
-            child: SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
-              padding: const EdgeInsets.all(ScreenSize.paddingHorizontal),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 32),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: child,
+                );
+              },
+              child: SingleChildScrollView(
+                key: ValueKey(_currentQuestionIndex),
+                physics: const ClampingScrollPhysics(),
+                padding: const EdgeInsets.all(ScreenSize.paddingHorizontal),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
 
-                  // 질문
-                  Text(
-                    _currentQuestion.question,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      height: 1.4,
+                    // 1단계: 질문 카드 (하얀 바탕 + 그림자)
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: personalityColor.withOpacity(0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 3단계: 질문 (타이포그래피 개선)
+                          Text(
+                            _currentQuestion.question,
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              height: 1.4,
+                              fontSize: 22,
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          // 선택지
+                          ..._currentQuestion.options
+                              .asMap()
+                              .entries
+                              .map((entry) {
+                            final index = entry.key;
+                            final option = entry.value;
+                            return _buildOptionCard(
+                              index: index,
+                              option: option,
+                              theme: theme,
+                              personalityColor: personalityColor,
+                            );
+                          }),
+                        ],
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 32),
+                    // 해설 (답변 후)
+                    if (_hasAnswered) ...[
+                      const SizedBox(height: 20),
+                      _buildExplanation(theme, personalityColor),
+                    ],
 
-                  // 선택지
-                  ..._currentQuestion.options.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final option = entry.value;
-                    return _buildOptionCard(
-                      index: index,
-                      option: option,
-                      theme: theme,
-                      personalityColor: personalityColor,
-                    );
-                  }),
-
-                  // 해설 (답변 후)
-                  if (_hasAnswered) ...[
-                    const SizedBox(height: 24),
-                    _buildExplanation(theme, personalityColor),
+                    const SizedBox(height: 20),
                   ],
-
-                  const SizedBox(height: 24),
-                ],
+                ),
               ),
             ),
           ),
 
           // 하단 버튼
           if (_hasAnswered) _buildBottomButton(personalityColor),
+        ],
+      ),
+    );
+  }
+
+  /// 2단계: 캐릭터 영역 (상단 고정)
+  Widget _buildCharacterSection(
+      dynamic user, Color personalityColor, ThemeData theme) {
+    // 정답/오답에 따른 메시지
+    String message = "신중하게 생각해봐요! 🤔";
+    if (_hasAnswered) {
+      final isCorrect =
+          _selectedAnswerIndex == _currentQuestion.correctAnswerIndex;
+      if (isCorrect) {
+        message = "정답이에요! 👏";
+      } else {
+        message = "아쉬워요! 다시 도전해봐요 💪";
+      }
+    } else if (_currentQuestionIndex > 0) {
+      message = "잘하고 있어요! 👍";
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(color: AppColors.border, width: 1),
+        ),
+      ),
+      child: Row(
+        children: [
+          // 캐릭터 Placeholder (Rive 대기)
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: personalityColor.withOpacity(0.15),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: personalityColor.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: Icon(
+              Icons.pets,
+              color: personalityColor,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 12),
+          // 말풍선
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              decoration: BoxDecoration(
+                color: personalityColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: personalityColor.withOpacity(0.2),
+                ),
+              ),
+              child: Text(
+                message,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: personalityColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -318,47 +433,71 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 
-  /// 해설
+  /// 해설 (1단계: 카드 스타일, 3단계: 타이포그래피)
   Widget _buildExplanation(ThemeData theme, Color personalityColor) {
     final isCorrect =
         _selectedAnswerIndex == _currentQuestion.correctAnswerIndex;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: isCorrect
-            ? AppColors.success.withOpacity(0.1)
-            : AppColors.error.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(ScreenSize.borderRadius),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: isCorrect ? AppColors.success : AppColors.error,
+          width: 2,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: (isCorrect ? AppColors.success : AppColors.error)
+                .withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                isCorrect ? Icons.check_circle : Icons.cancel,
-                color: isCorrect ? AppColors.success : AppColors.error,
-                size: 24,
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isCorrect
+                      ? AppColors.success.withOpacity(0.1)
+                      : AppColors.error.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isCorrect ? Icons.check_circle : Icons.cancel,
+                  color: isCorrect ? AppColors.success : AppColors.error,
+                  size: 24,
+                ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Text(
-                isCorrect ? '정답입니다!' : '아쉬워요!',
-                style: theme.textTheme.titleMedium?.copyWith(
+                isCorrect ? '정답입니다! 🎉' : '아쉬워요! 💪',
+                style: theme.textTheme.titleLarge?.copyWith(
                   color: isCorrect ? AppColors.success : AppColors.error,
                   fontWeight: FontWeight.w700,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            _currentQuestion.explanation,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              height: 1.6,
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              _currentQuestion.explanation,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                height: 1.7,
+                fontSize: 16,
+              ),
             ),
           ),
         ],

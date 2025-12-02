@@ -972,6 +972,71 @@ TBD
 
 ## 🔄 최신 업데이트
 
+### 2025-12-02: 학습/퀴즈 화면 디자인 대폭 개선 🎨
+
+**완료된 작업:**
+- ✅ **학습 화면 3단계 디자인 개선** (`lib/screens/learning/learning_screen.dart`)
+  - **1단계: 컬러 시스템**
+    - 배경에 성향별 컬러 그라데이션 적용 (personalityColor.withOpacity(0.05))
+    - 카드에 성향별 그림자 효과 추가 (하얀 카드 + 컬러 그림자)
+    - Tip 영역에 성향 컬러 테마 적용
+  - **2단계: 캐릭터 상호작용**
+    - 상단 고정 캐릭터 영역 추가 (56x56 원형 Placeholder)
+    - 진행 상황에 따른 동적 말풍선 메시지
+    - "함께 배워볼까요? 😊" → "잘하고 있어요! 👍" → "거의 다 왔어요! 💪"
+  - **3단계: 타이포그래피**
+    - 본문 폰트 크기 17→18px, line-height 1.8
+    - 타이틀 titleSmall → titleMedium
+    - 카드 padding 및 spacing 개선
+  - **애니메이션 효과**
+    - AnimatedSwitcher + FadeTransition (300ms)
+    - 카드 전환 시 부드러운 fade in/out 효과
+    - ValueKey를 통한 정확한 위젯 식별
+
+- ✅ **퀴즈 화면 동일 개선 적용** (`lib/screens/learning/quiz_screen.dart`)
+  - 학습 화면과 동일한 3단계 개선 + 애니메이션
+  - 정답/오답에 따른 캐릭터 반응 메시지
+    - 답변 전: "신중하게 생각해봐요! 🤔"
+    - 정답: "정답이에요! 👏"
+    - 오답: "아쉬워요! 다시 도전해봐요 💪"
+  - 질문 카드 디자인 개선 (headlineMedium, fontSize 22px)
+  - 해설 카드 스타일링 강화 (정답/오답별 테두리 색상)
+
+**기술적 세부사항:**
+```dart
+// 배경 그라데이션
+backgroundColor: personalityColor.withOpacity(0.05)
+
+// 카드 그림자
+BoxShadow(
+  color: personalityColor.withOpacity(0.1),
+  blurRadius: 20,
+  offset: const Offset(0, 8),
+)
+
+// 애니메이션 전환
+AnimatedSwitcher(
+  duration: const Duration(milliseconds: 300),
+  transitionBuilder: (child, animation) {
+    return FadeTransition(opacity: animation, child: child);
+  },
+  child: Widget(key: ValueKey(index)), // 정확한 위젯 식별
+)
+```
+
+**디자인 철학:**
+- **시각적 계층**: 하얀 카드 + 컬러 배경으로 콘텐츠에 집중
+- **성향별 정체성**: 사용자 성향 컬러를 은은하게 활용
+- **캐릭터 동행**: 상단 고정으로 학습 내내 함께하는 느낌
+- **부드러운 전환**: 300ms fade 효과로 전문적인 UX
+
+**다음 단계:**
+- Rive 애니메이션 통합 시 Placeholder 교체
+- 실제 콘텐츠 투입 후 가독성 테스트
+- 사용자 피드백 수집 및 미세 조정
+
+---
+
 ### 2025-11-29: 런타임 에러 수정 및 UI 개선 🔧
 
 **완료된 작업:**

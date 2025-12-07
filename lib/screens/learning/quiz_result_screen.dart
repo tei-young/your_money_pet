@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../utils/constants.dart';
 import '../../providers/user_provider.dart';
 import '../../utils/share_helper.dart';
+import '../home/main_navigation_screen.dart';
 
 /// 퀴즈 결과 화면
 /// 점수와 획득 포인트 표시
@@ -39,8 +40,11 @@ class QuizResultScreen extends StatelessWidget {
   }
 
   void _onGoHome(BuildContext context) {
-    // 홈 화면으로 돌아가기 (모든 학습 스택 제거)
-    Navigator.popUntil(context, (route) => route.isFirst);
+    // 홈 화면으로 돌아가기 (모든 학습 스택 제거하고 MainNavigationScreen으로 이동)
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+      (route) => false,
+    );
   }
 
   @override

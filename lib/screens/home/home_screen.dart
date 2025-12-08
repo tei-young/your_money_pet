@@ -46,6 +46,36 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _onReviewLesson() {
+    final user = context.read<UserProvider>().user;
+    if (user == null) return;
+
+    // 오늘 완료한 Day를 복습 모드로 열기
+    final completedDay = user.currentDay - 1;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LearningScreen(
+          dayNumber: completedDay,
+          isReview: true, // 복습 모드
+        ),
+      ),
+    );
+  }
+
+  void _onViewAllLessons() {
+    // 학습 탭으로 전환 (MainScreen의 탭 변경)
+    // MainScreen이 부모이므로 직접 접근할 수 없음
+    // 대신 DefaultTabController를 사용하거나, MainScreen에 전역 키를 사용해야 함
+    // 간단하게: 학습 탭 화면으로 직접 이동
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const LearningTabScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -281,7 +311,108 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildTodayLearningCard(user, bool hasLearnedToday) {
     final theme = Theme.of(context);
     final currentDay = user.currentDay;
+    final completedDay = currentDay - 1; // 오늘 완료한 Day
 
+    // 오늘 학습 완료한 경우
+    if (hasLearnedToday) {
+      return Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.success.withOpacity(0.1),
+              AppColors.success.withOpacity(0.05),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(ScreenSize.borderRadius),
+          border: Border.all(
+            color: AppColors.success.withOpacity(0.3),
+            width: 2,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              // 완료 아이콘
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: AppColors.success,
+                  borderRadius: BorderRadius.circular(32),
+                ),
+                child: const Icon(
+                  Icons.check_circle,
+                  color: Colors.white,
+                  size: 36,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // 완료 메시지
+              Text(
+                '🎉 오늘의 학습 완료!',
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.success,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 12),
+
+              Text(
+                'Day $completedDay을 완료했어요!',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 8),
+
+              Text(
+                '내일은 Day $currentDay로 함께해요 🌟',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 24),
+
+              // 복습하기 버튼
+              ElevatedButton.icon(
+                onPressed: _onReviewLesson,
+                icon: const Icon(Icons.refresh),
+                label: Text('Day $completedDay 복습하기'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.success,
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // 이전 학습 보기 버튼
+              TextButton.icon(
+                onPressed: _onViewAllLessons,
+                icon: const Icon(Icons.list),
+                label: const Text('이전 학습 보기'),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // 아직 학습 안 한 경우 (기존 UI)
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -298,7 +429,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: hasLearnedToday ? null : _onStartLearning,
+          onTap: _onStartLearning,
           borderRadius: BorderRadius.circular(ScreenSize.borderRadius),
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -327,36 +458,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-
-                    // 완료 상태
-                    if (hasLearnedToday)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.success.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.check_circle,
-                              color: AppColors.success,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '완료',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: AppColors.success,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                   ],
                 ),
 
@@ -383,21 +484,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                if (!hasLearnedToday) ...[
-                  const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-                  // 시작 버튼
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _onStartLearning,
-                          child: const Text('학습 시작하기'),
-                        ),
+                // 시작 버튼
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _onStartLearning,
+                        child: const Text('학습 시작하기'),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ],
             ),
           ),

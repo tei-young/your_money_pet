@@ -10,10 +10,12 @@ import 'quiz_screen.dart';
 /// 카드 스와이프 방식으로 학습 진행
 class LearningScreen extends StatefulWidget {
   final int dayNumber;
+  final bool isReview; // 복습 모드 여부
 
   const LearningScreen({
     super.key,
     required this.dayNumber,
+    this.isReview = false, // 기본값: 일반 학습
   });
 
   @override
@@ -75,10 +77,13 @@ class _LearningScreenState extends State<LearningScreen> {
   }
 
   Future<void> _onLearningComplete() async {
-    final learningProvider = context.read<LearningProvider>();
-    await learningProvider.completeLearning(widget.dayNumber);
+    // 복습 모드가 아닐 때만 학습 완료 처리
+    if (!widget.isReview) {
+      final learningProvider = context.read<LearningProvider>();
+      await learningProvider.completeLearning(widget.dayNumber);
+    }
 
-    // 퀴즈 화면으로 이동
+    // 퀴즈 화면으로 이동 (복습 모드 플래그 전달)
     if (mounted) {
       Navigator.pushReplacement(
         context,
@@ -86,6 +91,7 @@ class _LearningScreenState extends State<LearningScreen> {
           builder: (_) => QuizScreen(
             dayNumber: widget.dayNumber,
             learningDay: _learningDay!,
+            isReview: widget.isReview, // 복습 모드 전달
           ),
         ),
       );
@@ -180,16 +186,41 @@ class _LearningScreenState extends State<LearningScreen> {
             ),
           ),
           const SizedBox(width: 8),
-          // Day 번호 + 제목
+          // Day 번호 + 제목 (복습 모드 표시)
           Expanded(
-            child: Text(
-              'Day ${widget.dayNumber} • ${_learningDay!.title}',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: AppColors.learningAccentLight,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-              overflow: TextOverflow.ellipsis,
+            child: Row(
+              children: [
+                Text(
+                  'Day ${widget.dayNumber} • ${_learningDay!.title}',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: AppColors.learningAccentLight,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (widget.isReview) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.orange.withOpacity(0.5),
+                      ),
+                    ),
+                    child: Text(
+                      '복습',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
         ],
@@ -261,12 +292,26 @@ class _LearningScreenState extends State<LearningScreen> {
 
   /// 2단계: 캐릭터 영역 (상단 고정) - 약간 압축
   Widget _buildCharacterSection(dynamic user, ThemeData theme) {
-    // 카드 진행에 따른 메시지
-    String message = "함께 배워볼까요? 😊";
-    if (_currentCardIndex == _learningDay!.cards.length - 1) {
-      message = "거의 다 왔어요! 💪";
-    } else if (_currentCardIndex > _learningDay!.cards.length ~/ 2) {
-      message = "잘하고 있어요! 👍";
+    // 복습 모드와 일반 모드에 따른 메시지
+    String message;
+    if (widget.isReview) {
+      // 복습 모드 메시지
+      if (_currentCardIndex == _learningDay!.cards.length - 1) {
+        message = "복습 완료! 📚";
+      } else if (_currentCardIndex > _learningDay!.cards.length ~/ 2) {
+        message = "다시 보니 어때요? 🤔";
+      } else {
+        message = "다시 복습해봐요! 📖";
+      }
+    } else {
+      // 일반 학습 메시지
+      if (_currentCardIndex == _learningDay!.cards.length - 1) {
+        message = "거의 다 왔어요! 💪";
+      } else if (_currentCardIndex > _learningDay!.cards.length ~/ 2) {
+        message = "잘하고 있어요! 👍";
+      } else {
+        message = "함께 배워볼까요? 😊";
+      }
     }
 
     return Container(

@@ -1,5 +1,86 @@
 # MoneyPet 개발 로그
 
+## 📅 2024-12-08 세션: 학습 완료 UI 및 복습 모드 구현
+
+### 🎯 목표
+학습 완료 후 사용자 경험 개선 및 복습 기능 구현
+
+---
+
+## ✅ 완료된 작업
+
+### 1. 학습 완료 UI 구현 (방안 1 + 3 혼합)
+**목표:** 오늘 학습 완료 시 명확한 피드백과 복습 유도
+
+#### 구현 내용
+**HomeScreen (`lib/screens/home/home_screen.dart`)**
+- `hasLearnedToday = true` 상태에 따른 UI 분기 추가
+- 학습 완료 시 새로운 카드 UI:
+  - 🎉 완료 축하 메시지
+  - 내일 학습 예고 (Day X로 함께해요)
+  - [복습하기] 버튼 (Primary, 초록색)
+  - [이전 학습 보기] 버튼 (Secondary, 학습 탭으로 이동)
+
+#### 설계 원칙
+- **1일 1학습 원칙 유지**: 하루에 하나의 Day만 정식 학습
+- **복습 유도**: 학습 강화 목적의 복습 기능 제공
+- **명확한 피드백**: 완료 상태를 시각적으로 명확하게 전달
+
+---
+
+### 2. 복습 모드 (Review Mode) 구현
+**목표:** 완료한 Day를 복습할 수 있는 기능, 포인트 없이 학습 강화 목적
+
+#### 구현된 파일
+1. **LearningScreen** (`lib/screens/learning/learning_screen.dart`)
+   - `isReview` 플래그 추가 (기본값: false)
+   - 복습 모드 시 헤더에 "복습" 배지 표시 (주황색)
+   - 캐릭터 메시지 변경 ("다시 복습해봐요! 📖")
+   - 복습 모드일 때 `completeLearning` 스킵
+
+2. **QuizScreen** (`lib/screens/learning/quiz_screen.dart`)
+   - `isReview` 플래그 추가 및 전달
+   - 복습 모드일 때 포인트 획득 스킵
+   - QuizResultScreen에 `isReview` 플래그 전달
+
+3. **QuizResultScreen** (`lib/screens/learning/quiz_result_screen.dart`)
+   - `isReview` 플래그 추가
+   - 복습 모드 시 "Day X 복습 완료" 배지 (주황색)
+   - "획득 포인트" 대신 "복습 모드 - 포인트 없음" 카드 표시
+
+#### 복습 모드 특징
+- ✅ 이미 완료한 Day를 언제든 복습 가능
+- ✅ 포인트/스트릭 증가 없음 (1일 1학습 원칙 유지)
+- ✅ 시각적 구분 (주황색 배지, 다른 메시지)
+- ✅ 학습 강화 목적 (README 기획서 "복습 시 포인트 미지급" 반영)
+
+---
+
+### 3. 버그 수정 및 네비게이션 개선
+**수정된 버그:**
+1. ✅ 성향 확인 완료 페이지 X 버튼 제거 (검은 화면 문제)
+2. ✅ 퀴즈 결과 '홈으로' 버튼 → MainScreen 이동 (placeholder 제거)
+3. ✅ MainNavigationScreen (placeholder) 삭제
+4. ✅ MainScreen 백버튼 비활성화 (PopScope)
+5. ✅ HomeScreen AppBar 백버튼 제거 (automaticallyImplyLeading: false)
+
+---
+
+## 📊 업데이트된 문서
+- ✅ README.md: 주요 기능에 복습 설명 추가
+- ✅ README.md: "7. 학습 완료 후 플로우" 섹션 추가
+- ✅ README.md: 메인 기능 체크리스트 업데이트 (복습 모드 완료 표시)
+
+---
+
+## 🎯 다음 우선순위
+1. **Firestore 콘텐츠 시스템 구현** (P0)
+2. **UserProvider ↔ Firebase UID 연동** (P0)
+3. **실제 학습 콘텐츠 작성** (Day 1-30, 외부 전문가)
+4. **Rive 애니메이션 제작 및 통합** (외부 전문가)
+
+---
+
 ## 📅 2025-11-27 세션: Firebase Authentication 구현
 
 ### 🎯 목표

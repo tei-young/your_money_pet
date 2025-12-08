@@ -5,6 +5,7 @@ import '../../providers/user_provider.dart';
 import '../../providers/learning_provider.dart';
 import '../../utils/share_helper.dart';
 import '../learning/learning_screen.dart';
+import '../learning/learning_tab_screen.dart';
 
 /// 홈 화면
 /// 캐릭터 + 오늘의 학습 카드 + 진행 상황

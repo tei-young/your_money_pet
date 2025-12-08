@@ -30,12 +30,14 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
+    return PopScope(
+      canPop: false, // 백버튼 비활성화
+      child: Scaffold(
+        body: IndexedStack(
+          index: _currentIndex,
+          children: _screens,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: _onTabChanged,
         type: BottomNavigationBarType.fixed,
@@ -68,6 +70,7 @@ class _MainScreenState extends State<MainScreen> {
             label: '설정',
           ),
         ],
+      ),
       ),
     );
   }

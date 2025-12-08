@@ -11,11 +11,13 @@ import 'quiz_result_screen.dart';
 class QuizScreen extends StatefulWidget {
   final int dayNumber;
   final LearningDayModel learningDay;
+  final bool isReview; // 복습 모드 여부
 
   const QuizScreen({
     super.key,
     required this.dayNumber,
     required this.learningDay,
+    this.isReview = false, // 기본값: 일반 학습
   });
 
   @override
@@ -63,21 +65,24 @@ class _QuizScreenState extends State<QuizScreen> {
   }
 
   Future<void> _onQuizComplete() async {
-    final learningProvider = context.read<LearningProvider>();
-    final userProvider = context.read<UserProvider>();
+    // 복습 모드가 아닐 때만 퀴즈 완료 처리 및 포인트 획득
+    if (!widget.isReview) {
+      final learningProvider = context.read<LearningProvider>();
+      final userProvider = context.read<UserProvider>();
 
-    // 퀴즈 완료 처리
-    await learningProvider.completeQuiz(
-      dayNumber: widget.dayNumber,
-      score: _correctCount,
-    );
+      // 퀴즈 완료 처리
+      await learningProvider.completeQuiz(
+        dayNumber: widget.dayNumber,
+        score: _correctCount,
+      );
 
-    // 포인트 획득
-    await userProvider.completeLearningDay(
-      earnedPoints: widget.learningDay.points,
-    );
+      // 포인트 획득
+      await userProvider.completeLearningDay(
+        earnedPoints: widget.learningDay.points,
+      );
+    }
 
-    // 결과 화면으로 이동
+    // 결과 화면으로 이동 (복습 모드 플래그 전달)
     if (mounted) {
       Navigator.pushReplacement(
         context,
@@ -86,7 +91,8 @@ class _QuizScreenState extends State<QuizScreen> {
             dayNumber: widget.dayNumber,
             totalQuestions: widget.learningDay.quizQuestions.length,
             correctCount: _correctCount,
-            earnedPoints: widget.learningDay.points,
+            earnedPoints: widget.isReview ? 0 : widget.learningDay.points, // 복습은 0P
+            isReview: widget.isReview, // 복습 모드 전달
           ),
         ),
       );

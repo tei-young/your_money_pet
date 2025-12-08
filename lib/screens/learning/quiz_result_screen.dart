@@ -12,6 +12,7 @@ class QuizResultScreen extends StatelessWidget {
   final int totalQuestions;
   final int correctCount;
   final int earnedPoints;
+  final bool isReview; // 복습 모드 여부
 
   const QuizResultScreen({
     super.key,
@@ -19,6 +20,7 @@ class QuizResultScreen extends StatelessWidget {
     required this.totalQuestions,
     required this.correctCount,
     required this.earnedPoints,
+    this.isReview = false, // 기본값: 일반 학습
   });
 
   double get _score => (correctCount / totalQuestions) * 100;
@@ -75,13 +77,15 @@ class QuizResultScreen extends StatelessWidget {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: personalityColor.withOpacity(0.2),
+                        color: isReview
+                            ? Colors.orange.withOpacity(0.2)
+                            : personalityColor.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        'Day $dayNumber 완료',
+                        isReview ? 'Day $dayNumber 복습 완료' : 'Day $dayNumber 완료',
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: personalityColor,
+                          color: isReview ? Colors.orange : personalityColor,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -181,14 +185,23 @@ class QuizResultScreen extends StatelessWidget {
 
         const SizedBox(height: 12),
 
-        // 획득 포인트
-        _buildStatCard(
-          theme: theme,
-          icon: Icons.stars,
-          iconColor: Colors.amber,
-          label: '획득 포인트',
-          value: '+$earnedPoints P',
-        ),
+        // 획득 포인트 (복습 모드일 때는 다르게 표시)
+        if (!isReview)
+          _buildStatCard(
+            theme: theme,
+            icon: Icons.stars,
+            iconColor: Colors.amber,
+            label: '획득 포인트',
+            value: '+$earnedPoints P',
+          ),
+        if (isReview)
+          _buildStatCard(
+            theme: theme,
+            icon: Icons.refresh,
+            iconColor: Colors.orange,
+            label: '복습 모드',
+            value: '포인트 없음',
+          ),
 
         const SizedBox(height: 12),
 

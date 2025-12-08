@@ -123,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.white,
       elevation: 0,
       pinned: true,
+      automaticallyImplyLeading: false, // 백버튼 제거
       title: Row(
         children: [
           Text(

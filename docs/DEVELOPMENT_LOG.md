@@ -1,5 +1,224 @@
 # MoneyPet 개발 로그
 
+## 📅 2024-12-09 세션: 학습 콘텐츠 타이포그래피 개선 및 마크업 시스템 구축
+
+### 🎯 목표
+학습 콘텐츠의 가독성과 강조 효과 개선, 백오피스 콘텐츠 관리 준비
+
+---
+
+## ✅ 완료된 작업
+
+### 1. Pretendard 폰트 도입
+**목표:** 브랜드 아이덴티티 강화 및 가독성 개선
+
+#### 구현 내용
+- **폰트 설정** (`pubspec.yaml`)
+  - Pretendard Regular (W400)
+  - Pretendard Medium (W500)
+  - Pretendard SemiBold (W600)
+  - Pretendard Bold (W700)
+
+- **전역 폰트 적용** (`lib/utils/theme.dart`)
+  - 모든 TextTheme에 `fontFamily: 'Pretendard'` 추가
+  - AppBar, Button, Dialog, SnackBar 등 전체 UI 일관성 유지
+
+- **폰트 다운로드 가이드** (`assets/fonts/README.md`)
+  - Pretendard 다운로드 링크 및 설치 방법 안내
+
+#### 디자인 결정
+- **본문**: W500 (Medium) - 존재감 있으면서 편안한 가독성
+- **키워드**: W700 (Bold) - 명확한 강조 효과
+- **이유**: 교육 콘텐츠 특성상 장시간 읽기에 적합한 굵기
+
+---
+
+### 2. 콘텐츠 마크업 시스템 구축
+**목표:** 백오피스에서 텍스트 서식 제어 가능하도록 확장 가능한 시스템 구축
+
+#### 구현된 파일
+1. **ContentTextRenderer** (`lib/utils/text_renderer.dart`)
+   - 마크다운 스타일 마크업 파싱 및 렌더링
+   - **현재 지원**: `**텍스트**` (볼드)
+   - **향후 확장 준비**:
+     - `[color:#HEX]텍스트[/color]` (색상)
+     - `[size:크기]텍스트[/size]` (크기)
+     - 복합 마크업 처리
+
+   - **주요 메서드**:
+     ```dart
+     ContentTextRenderer.render(
+       content,
+       baseStyle: TextStyle(...),
+       boldWeight: FontWeight.w700,
+     )
+     ```
+
+2. **학습 화면 적용** (`lib/screens/learning/learning_screen.dart`)
+   - 학습 카드 `content` 필드에 마크업 렌더링 적용
+   - Tip 영역에도 마크업 렌더링 적용
+   - Pretendard W500 본문 + W700 키워드
+
+#### 사용 예시
+**백오피스 입력:**
+```
+**예금**은 자유롭게 입출금이 가능하고, **적금**은 정해진 기간 동안 저축해요.
+```
+
+**앱 렌더링:**
+- "예금", "적금" → Pretendard W700 (볼드)
+- 나머지 텍스트 → Pretendard W500 (중간)
+
+---
+
+### 3. 백오피스 가이드 문서 작성
+**목표:** 콘텐츠 관리자가 마크업을 쉽게 사용할 수 있도록 가이드 제공
+
+#### 작성된 문서
+1. **콘텐츠 마크업 가이드** (`docs/CONTENT_MARKUP_GUIDE.md`)
+   - 현재 지원 문법 (볼드)
+   - 향후 지원 예정 문법 (색상, 크기)
+   - 실제 사용 예시 및 권장사항
+   - 백오피스 구현 가이드 (3단계)
+   - 기술 스펙 및 테스트 체크리스트
+
+2. **폰트 설치 가이드** (`assets/fonts/README.md`)
+   - Pretendard 다운로드 링크
+   - 필요한 폰트 파일 목록
+   - 설치 후 실행 방법
+
+---
+
+## 🏗️ 아키텍처 설계
+
+### 확장 가능한 마크업 시스템
+```
+ContentTextRenderer
+├── _parseContent()           // 현재: **볼드** 처리
+├── _parseWithColors()        // 준비: 색상 처리
+├── _parseWithSizes()         // 준비: 크기 처리
+└── _parseWithAllMarkups()    // 향후: 복합 처리
+```
+
+### 백오피스 통합 로드맵
+**Phase 1 (현재)**: 텍스트 입력만
+- `<textarea>` 기반 입력
+- 마크업 직접 작성
+
+**Phase 2 (권장)**: 실시간 프리뷰
+- 입력 영역 + 프리뷰 영역 분할
+- 작성 중 실시간 렌더링 확인
+
+**Phase 3 (향후)**: WYSIWYG 에디터
+- 툴바 기반 서식 버튼
+- 드래그 선택 후 클릭으로 마크업 자동 삽입
+- 모바일 화면 프리뷰
+
+---
+
+## 📊 데이터 구조 변경 없음
+
+### Learning Content 구조 유지
+```json
+{
+  "content": "**예금**은 자유롭게...",  // 마크업 포함된 텍스트
+  "tip": "**복리**의 힘은..."
+}
+```
+
+- ✅ 기존 데이터 구조 그대로 사용
+- ✅ Firebase 스키마 변경 불필요
+- ✅ 백오피스 구축 시 별도 수정 불필요
+
+---
+
+## 🎨 디자인 개선 효과
+
+### Before
+- 시스템 기본 폰트
+- Plain text only
+- 강조 없음
+
+### After
+- Pretendard 폰트 (브랜드 아이덴티티)
+- W500 본문 (읽기 편안)
+- W700 키워드 (명확한 강조)
+- 확장 가능한 서식 시스템
+
+---
+
+## 🔧 기술 상세
+
+### 정규식 패턴
+```dart
+// 볼드 패턴 (non-greedy matching)
+final boldPattern = RegExp(r'\*\*(.+?)\*\*');
+
+// 향후 색상 패턴
+final colorPattern = RegExp(r'\[color:(#[0-9A-Fa-f]{6})\](.+?)\[/color\]');
+```
+
+### TextSpan 구조
+```dart
+RichText(
+  text: TextSpan(
+    children: [
+      TextSpan(text: '일반 텍스트', style: baseStyle),
+      TextSpan(text: '볼드 텍스트', style: baseStyle.copyWith(fontWeight: w700)),
+    ],
+  ),
+)
+```
+
+---
+
+## 📝 문서화
+
+### 추가된 문서
+1. `docs/CONTENT_MARKUP_GUIDE.md` - 백오피스 콘텐츠 작성 가이드
+2. `assets/fonts/README.md` - Pretendard 폰트 설치 가이드
+3. `lib/utils/text_renderer.dart` - 코드 내 상세 주석
+
+### 업데이트된 문서
+1. `docs/DEVELOPMENT_LOG.md` - 이 세션 기록 추가
+
+---
+
+## 🚀 다음 단계
+
+### 즉시 필요
+1. **Pretendard 폰트 파일 다운로드 및 추가**
+   - `assets/fonts/` 디렉토리에 .otf 파일 추가
+   - `flutter clean && flutter pub get` 실행
+
+### 백오피스 구축 시
+1. 콘텐츠 입력 UI 구현
+2. 실시간 프리뷰 기능
+3. 색상/크기 마크업 확장
+4. WYSIWYG 에디터 도입
+
+### 향후 개선 가능
+1. 이탤릭, 밑줄 등 추가 서식
+2. 링크, 목록 등 구조적 요소
+3. 이미지 인라인 배치
+4. 커스텀 컴포넌트 삽입
+
+---
+
+## 🐛 이슈 및 해결
+
+### 이슈: 네트워크 제한으로 폰트 자동 다운로드 실패
+**해결:**
+- 폰트 다운로드 가이드 문서 작성
+- 수동 다운로드 및 설치 안내
+
+### 이슈: 폰트 파일 없이도 빌드 가능해야 함
+**해결:**
+- `fontFamily: 'Pretendard'` 설정 시 폰트 없으면 시스템 기본 폰트 사용
+- 개발 중에도 정상 작동 보장
+
+---
+
 ## 📅 2024-12-08 세션: 학습 완료 UI 및 복습 모드 구현
 
 ### 🎯 목표

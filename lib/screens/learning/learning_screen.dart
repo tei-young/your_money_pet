@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../utils/constants.dart';
+import '../../utils/text_renderer.dart';
 import '../../models/learning_day_model.dart';
 import '../../providers/learning_provider.dart';
 import '../../providers/user_provider.dart';
@@ -407,14 +408,23 @@ class _LearningScreenState extends State<LearningScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 카드 내용
-                Text(
+                // 카드 내용 (마크다운 렌더링 + Pretendard 폰트)
+                ContentTextRenderer.render(
                   card.content,
-                  style: theme.textTheme.bodyLarge?.copyWith(
+                  baseStyle: theme.textTheme.bodyLarge?.copyWith(
+                    fontFamily: 'Pretendard',
+                    fontWeight: FontWeight.w500,
+                    height: 1.7,
+                    fontSize: 17,
+                    color: AppColors.textPrimary,
+                  ) ?? const TextStyle(
+                    fontFamily: 'Pretendard',
+                    fontWeight: FontWeight.w500,
                     height: 1.7,
                     fontSize: 17,
                     color: AppColors.textPrimary,
                   ),
+                  boldWeight: FontWeight.w700,
                 ),
 
                 // 이미지 (있으면)
@@ -479,12 +489,20 @@ class _LearningScreenState extends State<LearningScreen> {
                                 ),
                               ),
                               const SizedBox(height: 6),
-                              Text(
+                              ContentTextRenderer.render(
                                 card.tip!,
-                                style: theme.textTheme.bodyMedium?.copyWith(
+                                baseStyle: theme.textTheme.bodyMedium?.copyWith(
+                                  fontFamily: 'Pretendard',
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.6,
+                                  fontSize: 14,
+                                ) ?? const TextStyle(
+                                  fontFamily: 'Pretendard',
+                                  fontWeight: FontWeight.w500,
                                   height: 1.6,
                                   fontSize: 14,
                                 ),
+                                boldWeight: FontWeight.w700,
                               ),
                             ],
                           ),

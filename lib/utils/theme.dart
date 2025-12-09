@@ -32,6 +32,7 @@ class AppTheme {
         centerTitle: true,
         iconTheme: IconThemeData(color: AppColors.textPrimary),
         titleTextStyle: TextStyle(
+          fontFamily: 'Pretendard',
           fontSize: 16,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
@@ -60,6 +61,7 @@ class AppTheme {
           elevation: 2,
           shadowColor: AppColors.primary.withOpacity(0.3),
           textStyle: const TextStyle(
+            fontFamily: 'Pretendard',
             fontSize: 16,
             fontWeight: FontWeight.w700,
           ),
@@ -71,6 +73,7 @@ class AppTheme {
         style: TextButton.styleFrom(
           foregroundColor: AppColors.secondary,
           textStyle: const TextStyle(
+            fontFamily: 'Pretendard',
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
@@ -87,6 +90,7 @@ class AppTheme {
             borderRadius: BorderRadius.circular(ScreenSize.borderRadius),
           ),
           textStyle: const TextStyle(
+            fontFamily: 'Pretendard',
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
@@ -118,15 +122,17 @@ class AppTheme {
           vertical: 16,
         ),
         hintStyle: const TextStyle(
+          fontFamily: 'Pretendard',
           fontSize: 16,
           color: AppColors.textTertiary,
         ),
       ),
 
-      // 텍스트 테마
+      // 텍스트 테마 (Pretendard 폰트 적용)
       textTheme: const TextTheme(
         // H1 - Display Large
         displayLarge: TextStyle(
+          fontFamily: 'Pretendard',
           fontSize: 32,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
@@ -134,6 +140,7 @@ class AppTheme {
         ),
         // H2 - Display Medium
         displayMedium: TextStyle(
+          fontFamily: 'Pretendard',
           fontSize: 24,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
@@ -141,6 +148,7 @@ class AppTheme {
         ),
         // H3 - Title Large
         titleLarge: TextStyle(
+          fontFamily: 'Pretendard',
           fontSize: 20,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
@@ -148,6 +156,7 @@ class AppTheme {
         ),
         // Body 1 - Regular
         bodyLarge: TextStyle(
+          fontFamily: 'Pretendard',
           fontSize: 16,
           fontWeight: FontWeight.w400,
           color: AppColors.textPrimary,
@@ -155,6 +164,7 @@ class AppTheme {
         ),
         // Body 2 - Medium
         bodyMedium: TextStyle(
+          fontFamily: 'Pretendard',
           fontSize: 15,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimary,
@@ -162,6 +172,7 @@ class AppTheme {
         ),
         // Caption
         bodySmall: TextStyle(
+          fontFamily: 'Pretendard',
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: AppColors.textSecondary,
@@ -169,6 +180,7 @@ class AppTheme {
         ),
         // Small
         labelSmall: TextStyle(
+          fontFamily: 'Pretendard',
           fontSize: 12,
           fontWeight: FontWeight.w400,
           color: AppColors.textTertiary,
@@ -198,6 +210,7 @@ class AppTheme {
       snackBarTheme: SnackBarThemeData(
         backgroundColor: AppColors.secondaryDark,
         contentTextStyle: const TextStyle(
+          fontFamily: 'Pretendard',
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: Colors.white,
@@ -215,11 +228,13 @@ class AppTheme {
           borderRadius: BorderRadius.circular(ScreenSize.borderRadius),
         ),
         titleTextStyle: const TextStyle(
+          fontFamily: 'Pretendard',
           fontSize: 18,
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
         contentTextStyle: const TextStyle(
+          fontFamily: 'Pretendard',
           fontSize: 14,
           fontWeight: FontWeight.w400,
           color: AppColors.textSecondary,

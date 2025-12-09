@@ -53,16 +53,20 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # 에셋 (나중에 추가)
-  # assets:
-  #   - assets/images/
-  #   - assets/animations/
-  #   - assets/fonts/
+  # 에셋
+  assets:
+    - assets/images/
+    - assets/animations/
 
-  # 폰트 (나중에 추가)
-  # fonts:
-  #   - family: Pretendard
-  #     fonts:
-  #       - asset: assets/fonts/Pretendard-Regular.ttf
-  #       - asset: assets/fonts/Pretendard-Bold.ttf
-  #         weight: 700
+  # 폰트
+  fonts:
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/Pretendard-Regular.otf
+          weight: 400
+        - asset: assets/fonts/Pretendard-Medium.otf
+          weight: 500
+        - asset: assets/fonts/Pretendard-SemiBold.otf
+          weight: 600
+        - asset: assets/fonts/Pretendard-Bold.otf
+          weight: 700

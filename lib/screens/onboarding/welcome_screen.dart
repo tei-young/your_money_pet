@@ -23,9 +23,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       title: '귀여운 친구가\n함께해요',
       features: [
         '🐻 머니베어: 안전한 투자',
-        '🐱 코인캣: 공격적 투자',
-        '🦆 세이빙덕: 절약 투자',
-        '🐰 밸런스토끼: 균형 투자',
+        '🐑 세이브쉽: 균형 투자',
+        '🐱 헌터캣: 공격적 투자',
+        '🦊 체이서폭스: 도전 투자',
       ],
     ),
     WelcomeSlide(

@@ -191,7 +191,7 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
       child: Opacity(
         opacity: _selectedCharacter != null && !isSelected ? 0.4 : 1.0,
         child: AnimatedCharacter(
-          character: type,
+          characterType: type,
           state: isSelected
               ? CharacterAnimationState.selected
               : CharacterAnimationState.idle,

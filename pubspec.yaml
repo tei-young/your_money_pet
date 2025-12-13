@@ -53,11 +53,36 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # 에셋 (나중에 추가)
-  # assets:
-  #   - assets/images/
-  #   - assets/animations/
-  #   - assets/fonts/
+  # 에셋
+  assets:
+    # 캐릭터 애니메이션 프레임 (프레임 파일 추가 시 자동 인식)
+    # 헌터캣
+    - assets/animations/characters/hunter_cat/idle/
+    - assets/animations/characters/hunter_cat/selected/
+    - assets/animations/characters/hunter_cat/happy/
+    - assets/animations/characters/hunter_cat/thinking/
+    - assets/animations/characters/hunter_cat/confused/
+
+    # 머니베어
+    - assets/animations/characters/money_bear/idle/
+    - assets/animations/characters/money_bear/selected/
+    - assets/animations/characters/money_bear/happy/
+    - assets/animations/characters/money_bear/thinking/
+    - assets/animations/characters/money_bear/confused/
+
+    # 세이브쉽
+    - assets/animations/characters/save_sheep/idle/
+    - assets/animations/characters/save_sheep/selected/
+    - assets/animations/characters/save_sheep/happy/
+    - assets/animations/characters/save_sheep/thinking/
+    - assets/animations/characters/save_sheep/confused/
+
+    # 체이서폭스
+    - assets/animations/characters/chaser_fox/idle/
+    - assets/animations/characters/chaser_fox/selected/
+    - assets/animations/characters/chaser_fox/happy/
+    - assets/animations/characters/chaser_fox/thinking/
+    - assets/animations/characters/chaser_fox/confused/
 
   # 폰트 (나중에 추가)
   # fonts:

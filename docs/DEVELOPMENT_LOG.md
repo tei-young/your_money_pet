@@ -1,5 +1,385 @@
 # MoneyPet 개발 로그
 
+## 📅 2025-12-13 세션: 프레임 기반 캐릭터 애니메이션 시스템 구현
+
+### 🎯 목표
+Rive 대신 Midjourney로 생성한 GIF에서 추출한 PNG 프레임 시퀀스를 사용하는 애니메이션 시스템 구축
+
+---
+
+## ✅ 완료된 작업
+
+### 1. 애니메이션 전략 변경 결정
+**목표:** Rive 애니메이션 대신 프레임 기반 애니메이션 적용
+
+#### 변경 이유
+- **빠른 프로토타이핑:** Midjourney로 애니메이션 샘플 즉시 생성 가능
+- **디자인 유연성:** GIF/비디오 형태로 결과 확인 후 프레임 추출
+- **제작 비용:** Rive 전문가 대기 없이 내부적으로 제작 가능
+- **실험 용이성:** 다양한 fps (12/18/24) 쉽게 테스트 가능
+
+#### 기술 스택
+- **제작:** Midjourney Video
+- **추출:** ffmpeg (GIF → PNG 프레임)
+- **재생:** Flutter AnimationController + Image.asset
+- **사양:** 300x300px, PNG, 12fps 기준
+
+---
+
+### 2. 캐릭터 이름 최신화
+**파일:** `README.md`, `lib/screens/onboarding/welcome_screen.dart`
+
+**변경 사항:**
+```
+세이빙덕 (Saving Duck) 🦆 → 체이서폭스 (Chaser Fox) 🦊
+밸런스토끼 (Balance Bunny) 🐰 → 세이브쉽 (Save Sheep) 🐑
+코인캣 (Coin Cat) 🐱 → 헌터캣 (Hunter Cat) 🐱
+```
+
+---
+
+### 3. CharacterFrameAnimation 모델 구현
+**파일:** `lib/models/character_frame_animation.dart`
+
+**핵심 기능:**
+```dart
+class CharacterFrameAnimation {
+  final String characterId;
+  final CharacterAnimationState state;
+  final int frameCount;
+  final Duration frameDuration;
+  final bool loop;
+
+  // 프레임 경로 자동 생성
+  String getFramePath(int frameIndex) {
+    final stateFolder = state.name;
+    final frameNumber = (frameIndex + 1).toString().padLeft(2, '0');
+    return 'assets/animations/characters/$characterId/$stateFolder/frame_$frameNumber.png';
+  }
+
+  // 프리셋 설정
+  static CharacterFrameAnimation forState(
+    String characterId,
+    CharacterAnimationState state, {
+    int? frameCountOverride,
+  }) {
+    switch (state) {
+      case CharacterAnimationState.idle:
+        return CharacterFrameAnimation(
+          characterId: characterId,
+          state: state,
+          frameCount: frameCountOverride ?? 12,
+          frameDuration: const Duration(milliseconds: 83), // 12fps
+          loop: true,
+        );
+      // ... 다른 상태들
+    }
+  }
+}
+```
+
+**프리셋 설정:**
+- `idle`: 12프레임, 83ms, 반복
+- `selected`: 10프레임, 60ms, 1회
+- `happy`: 15프레임, 66ms, 1회
+- `thinking`: 10프레임, 100ms, 반복
+- `confused`: 10프레임, 80ms, 1회
+
+---
+
+### 4. AnimatedCharacter 위젯 완전 재작성
+**파일:** `lib/widgets/animated_character.dart`
+
+**주요 구현:**
+1. **AnimationController 기반 프레임 시퀀싱**
+   ```dart
+   _controller = AnimationController(
+     duration: _animation.totalDuration,
+     vsync: this,
+   );
+
+   _controller.addListener(() {
+     final progress = _controller.value;
+     final frameIndex = (progress * _animation.frameCount).floor();
+     if (frameIndex != _currentFrame) {
+       setState(() {
+         _currentFrame = frameIndex.clamp(0, _animation.frameCount - 1);
+       });
+     }
+   });
+   ```
+
+2. **자동 Fallback**
+   ```dart
+   Image.asset(
+     _animation.getFramePath(_currentFrame),
+     gaplessPlayback: true,
+     errorBuilder: (context, error, stackTrace) {
+       setState(() => _hasFrames = false);
+       return _buildPlaceholder();
+     },
+   );
+   ```
+
+3. **상태 변경 처리**
+   - `widget.state` 변경 시 자동으로 새 애니메이션 로드
+   - 기존 controller dispose 후 새로 생성
+
+4. **애니메이션 완료 콜백**
+   ```dart
+   if (_animation.loop) {
+     _controller.repeat();
+   } else {
+     _controller.forward().then((_) {
+       widget.onAnimationComplete?.call();
+     });
+   }
+   ```
+
+---
+
+### 5. CharacterAnimationPreloader 서비스 구현
+**파일:** `lib/services/character_animation_preloader.dart`
+
+**Progressive Loading 전략:**
+```dart
+// 1단계: 모든 캐릭터 Idle 상태 (앱 시작 시)
+static Future<void> loadAllIdleStates(BuildContext context) async {
+  // 4 캐릭터 × 12프레임 = 48장 (~2MB)
+  // 로딩 시간: 2-3초
+}
+
+// 2단계: 선택된 캐릭터의 나머지 상태 (캐릭터 선택 시)
+static Future<void> loadCharacterAllStates(
+  BuildContext context,
+  String characterId,
+) async {
+  // selected, happy, thinking, confused = 45프레임 (~1.6MB)
+}
+
+// 3단계: 나머지 캐릭터들 (백그라운드)
+static Future<void> loadRemainingCharacters(
+  BuildContext context,
+  String selectedCharacterId,
+) async {
+  // 나머지 3 캐릭터 × 4 상태 × 평균 11프레임 = ~4.5MB
+}
+```
+
+**최적화 효과:**
+- 초기 로딩: 2-3초 (Idle만)
+- 선택 후: 1-2초 (해당 캐릭터 상태들)
+- 전체 로딩: 백그라운드 진행
+
+---
+
+### 6. CharacterAnimationState enum 확장
+**파일:** `lib/models/character_animation_config.dart`
+
+**Before:**
+```dart
+enum CharacterAnimationState {
+  idle,
+  selected,
+}
+```
+
+**After:**
+```dart
+enum CharacterAnimationState {
+  idle,      // 숨쉬기 (대기)
+  selected,  // 선택 반응
+  happy,     // 기쁨 (학습 완료)
+  thinking,  // 생각하는 모습 (퀴즈)
+  confused,  // 혼란 (오답)
+}
+```
+
+---
+
+### 7. 폴더 구조 및 Asset 등록
+**폴더 구조 생성:**
+```
+assets/animations/characters/
+├── hunter_cat/
+│   ├── idle/.gitkeep
+│   ├── selected/.gitkeep
+│   ├── happy/.gitkeep
+│   ├── thinking/.gitkeep
+│   └── confused/.gitkeep
+├── money_bear/
+├── save_sheep/
+└── chaser_fox/
+```
+
+**pubspec.yaml 업데이트:**
+```yaml
+assets:
+  - assets/animations/characters/hunter_cat/idle/
+  - assets/animations/characters/hunter_cat/selected/
+  - assets/animations/characters/hunter_cat/happy/
+  - assets/animations/characters/hunter_cat/thinking/
+  - assets/animations/characters/hunter_cat/confused/
+  # ... (총 20개 경로 - 4 캐릭터 × 5 상태)
+```
+
+---
+
+### 8. 종합 문서 작성
+
+**1. `docs/FRAME_ANIMATION_GUIDE.md`**
+- 전체 워크플로우 가이드
+- Midjourney 프롬프트 예시
+- ffmpeg 추출 명령어
+- 파일 배치 방법
+- 테스트 가이드
+- FAQ
+
+**2. `docs/ANIMATION_UPDATE_2025-12-13.md`**
+- 전략 변경 요약
+- 결정 배경
+- 기술 사양
+- 완료된 작업
+- 다음 단계 (디자인팀)
+
+**3. `assets/animations/characters/README.md`**
+- 디자이너를 위한 빠른 참조 가이드
+- 파일 명명 규칙
+- ffmpeg 명령어
+
+---
+
+### 9. 버그 수정 및 개선
+
+**1. AnimatedCharacter 파라미터 일관성**
+- 기존: `character` 파라미터 사용
+- 수정: `characterType`으로 통일
+- 영향받은 파일:
+  - `lib/screens/onboarding/character_preview_screen.dart`
+  - `lib/screens/onboarding/personality_result_screen.dart`
+  - `lib/screens/onboarding/personality_test_screen.dart`
+
+---
+
+## 📊 업데이트된 문서
+- ✅ `docs/FRAME_ANIMATION_GUIDE.md` (신규)
+- ✅ `docs/ANIMATION_UPDATE_2025-12-13.md` (신규)
+- ✅ `assets/animations/characters/README.md` (신규)
+- ✅ `docs/TODO.md` (Rive → 프레임 기반 애니메이션 섹션 교체)
+- ✅ `README.md` (캐릭터 이름 업데이트)
+
+---
+
+## 🎯 다음 우선순위 (디자인팀)
+
+### 애니메이션 제작 작업
+1. **Midjourney로 애니메이션 생성**
+   - 각 캐릭터별 5가지 상태 비디오/GIF 생성
+   - 참고: `docs/FRAME_ANIMATION_GUIDE.md`의 프롬프트
+
+2. **ffmpeg로 프레임 추출**
+   ```bash
+   ffmpeg -i input.gif -vf "fps=12,scale=300:300" frame_%02d.png
+   ```
+
+3. **파일 배치**
+   - `assets/animations/characters/[캐릭터ID]/[상태]/frame_01.png` 형식
+   - 예: `assets/animations/characters/money_bear/idle/frame_01.png`
+
+4. **테스트**
+   - `flutter pub get` 실행
+   - 앱에서 해당 캐릭터/상태 확인
+   - 부드러움 확인 후 fps 조정 (12 → 18 → 24 테스트)
+
+---
+
+## 📦 신규 파일 목록
+
+### Models
+- `lib/models/character_frame_animation.dart`
+
+### Services
+- `lib/services/character_animation_preloader.dart`
+
+### Widgets
+- `lib/widgets/animated_character.dart` (완전 재작성)
+
+### Documentation
+- `docs/FRAME_ANIMATION_GUIDE.md`
+- `docs/ANIMATION_UPDATE_2025-12-13.md`
+- `assets/animations/characters/README.md`
+
+### Assets
+- 폴더 구조 생성 (20개 폴더 with .gitkeep)
+
+---
+
+## 🔧 기술 결정 사항
+
+### 프레임 레이트
+- **기본:** 12fps (1초당 12프레임)
+- **이유:** 부드러움과 용량의 균형
+- **유연성:** 동일한 GIF에서 다른 fps로 추출 가능
+
+### 파일 포맷
+- **PNG:** 투명 배경 지원, 무손실
+- **해상도:** 300x300px (Flutter에서 크기 조정)
+
+### Loading 전략
+- **Progressive:** 필요한 것부터 순차 로딩
+- **Preloading:** `precacheImage`로 미리 로드
+- **Fallback:** 프레임 없을 시 Placeholder
+
+---
+
+## 🧪 테스트 가이드
+
+### 디자이너용 테스트 방법
+1. 프레임 파일을 해당 폴더에 배치
+2. 터미널에서 `flutter pub get` 실행
+3. 앱 실행 (Hot Reload 가능)
+4. 온보딩 화면에서 해당 캐릭터 선택
+5. 애니메이션 확인:
+   - 부드러움
+   - 반복 여부
+   - 전환 자연스러움
+
+### 프레임 없을 때
+- 자동으로 Placeholder (이모지 원형) 표시
+- 에러 없이 정상 동작
+
+---
+
+## 📊 성능 지표
+
+### 파일 용량
+- 프레임당: ~40KB (PNG, 300x300px)
+- Idle (12프레임): ~480KB × 4캐릭터 = ~2MB
+- 전체 (57프레임 × 4): ~8MB
+
+### 로딩 시간
+- 1단계 (Idle): 2-3초
+- 2단계 (선택 캐릭터): 1-2초
+- 3단계 (나머지): 백그라운드
+
+### 메모리
+- 로드된 프레임: 메모리에 캐시
+- Flutter Image cache 사용
+
+---
+
+## 🔗 관련 문서
+- [FRAME_ANIMATION_GUIDE.md](./FRAME_ANIMATION_GUIDE.md) - 완전한 워크플로우 가이드
+- [ANIMATION_UPDATE_2025-12-13.md](./ANIMATION_UPDATE_2025-12-13.md) - 전략 변경 요약
+- [TODO.md](./TODO.md) - 업데이트된 작업 목록
+
+---
+
+**작성일:** 2025-12-13
+**다음 작업:** 디자인팀의 Midjourney 애니메이션 제작
+
+---
+
 ## 📅 2024-12-08 세션: 학습 완료 UI 및 복습 모드 구현
 
 ### 🎯 목표

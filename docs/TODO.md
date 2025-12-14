@@ -92,35 +92,70 @@
 
 ---
 
-### 2. Rive 애니메이션 통합
-**상태:** 🟡 대기 중 (Rive 전문가 작업 대기)
+### 2. 프레임 기반 캐릭터 애니메이션 구현
+**상태:** ✅ 코드 완료 (2025-12-13) / 🟡 애니메이션 제작 대기
 **우선순위:** P1
 **담당:**
-  - Rive 전문가: 애니메이션 제작
-  - 개발팀: 통합 작업
-**예상 소요:**
-  - 제작: 전문가 스케줄에 따름
-  - 통합: 1일 (파일 전달 후)
+  - 디자인팀: Midjourney로 애니메이션 제작
+  - 개발팀: 통합 코드 완료 ✅
 
-**현재 상태:**
-- ✅ `AnimatedCharacter` 위젯 Placeholder 구현 완료 (개발팀)
-- ✅ 애니메이션 상태 enum 정의 (`CharacterAnimationState`)
-- ✅ 캐릭터별 대사 시스템 구현
-- 🔴 실제 .riv 파일 없음 (외부 전문가 제작 대기)
+**전략 변경:** Rive → 프레임 기반 PNG 시퀀스 (GIF 추출)
+- **이유:** Midjourney로 빠른 프로토타이핑 가능, 디자인 유연성 향상
+- **상세 문서:** `docs/FRAME_ANIMATION_GUIDE.md`, `docs/ANIMATION_UPDATE_2025-12-13.md`
 
-**필요한 애니메이션 (캐릭터당 5종):**
-1. **Idle** - 숨쉬기 (2초 loop)
-2. **Selected** - 선택됨 (점프, 1회)
-3. **Speaking** - 말하기 (말풍선 동안)
-4. **Happy** - 기쁨 (학습 완료)
-5. **Sad** - 슬픔 (미접속 3일+)
+**애니메이션 사양:**
+- **포맷:** PNG (300x300px, 투명 배경)
+- **프레임 레이트:** 12fps (테스트 후 조정 가능)
+- **제작 툴:** Midjourney Video → ffmpeg 프레임 추출
+- **총 용량:** ~8MB (4 캐릭터 × 5 상태 × 12프레임)
 
-**개발팀 통합 작업 (.riv 파일 전달 시):**
-- [ ] `assets/animations/` 폴더에 .riv 파일 추가
-- [ ] `pubspec.yaml`에 assets 경로 등록
-- [ ] `AnimatedCharacter`에서 `RiveAnimation.asset()` 사용
-- [ ] 상태별 애니메이션 전환 로직
-- [ ] Fallback 로직 유지 (파일 없을 시 Placeholder)
+**완료된 개발 작업 (2025-12-13):**
+- [x] `lib/models/character_frame_animation.dart` 생성
+- [x] `lib/widgets/animated_character.dart` 완전 재작성
+- [x] `lib/services/character_animation_preloader.dart` 생성
+- [x] `CharacterAnimationState` enum 확장 (idle, selected, happy, thinking, confused)
+- [x] 폴더 구조 생성 (`assets/animations/characters/`)
+- [x] `pubspec.yaml` asset 경로 등록
+- [x] Fallback 로직 (프레임 없을 시 Placeholder)
+- [x] Progressive loading 전략 구현
+
+**디자인팀 작업 (대기 중):**
+- [ ] Midjourney로 캐릭터별 5가지 상태 애니메이션 생성
+  - idle: 숨쉬기 루프 (12프레임)
+  - selected: 선택 반응 (10프레임)
+  - happy: 기쁨 표현 (15프레임)
+  - thinking: 생각하는 모습 (10프레임)
+  - confused: 혼란스러운 표현 (10프레임)
+- [ ] ffmpeg로 프레임 추출 (명령어는 `docs/FRAME_ANIMATION_GUIDE.md` 참고)
+- [ ] 프레임 파일을 `assets/animations/characters/[캐릭터ID]/[상태]/` 폴더에 배치
+- [ ] 다양한 fps (12/18/24) 테스트 후 최적값 결정
+
+**파일 배치 예시:**
+```
+assets/animations/characters/
+├── hunter_cat/
+│   ├── idle/
+│   │   ├── frame_01.png
+│   │   ├── frame_02.png
+│   │   └── ... (frame_12.png까지)
+│   ├── selected/
+│   ├── happy/
+│   ├── thinking/
+│   └── confused/
+├── money_bear/
+├── save_sheep/
+└── chaser_fox/
+```
+
+**테스트 방법:**
+1. 프레임 파일 배치
+2. `flutter pub get` 실행
+3. 앱 실행 → 해당 캐릭터/상태 확인
+4. 프레임 없으면 자동으로 Placeholder 표시
+
+**참고:**
+- 파일만 배치하면 자동 인식 (추가 코드 불필요)
+- `CharacterFrameAnimation.forState()`에 프리셋 설정 완료
 
 ---
 

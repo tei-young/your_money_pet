@@ -18,25 +18,25 @@
 
 ## 1. 핵심 결정사항
 
-### ✅ 최종 스펙
+### ✅ 최종 스펙 (2025-12-16 업데이트)
 
 | 항목 | 스펙 | 이유 |
 |------|------|------|
 | **제작 도구** | Midjourney (Video) | 구독 플랜에서 영상 생성 가능 |
-| **프레임 수** | 12fps (테스트 후 조정) | Idle은 충분, 복잡한 건 18fps 고려 |
-| **해상도** | 300x300px | 충분히 선명, 용량 효율적 |
-| **포맷** | PNG | 호환성 최우선 (추후 WebP 고려) |
+| **프레임 수** | 24fps | 영화급 부드러움, Rive 수준 |
+| **해상도** | 600x600px | 고해상도 디바이스 대응 (Retina 3x) |
+| **포맷** | WebP | 용량 50% 절감, PNG 대비 효율적 |
 | **총 캐릭터** | 4개 | 머니베어, 세이브쉽, 헌터캣, 체이서폭스 |
 | **총 상태** | 5개 | Idle, Selected, Happy, Thinking, Confused |
-| **총 용량** | 약 8MB | 4 캐릭터 × 5 상태 × 평균 12프레임 |
+| **총 용량** | 약 12MB | 4 캐릭터 × 5 상태 × 평균 24프레임 (WebP 압축) |
 
 ### ✅ 필수 조건 충족
 
 | 조건 | 충족 여부 |
 |------|-----------|
 | 1. 인터랙티브 (터치, 상태 전환) | ✅ 완벽 지원 |
-| 2. 자연스러운 움직임 | ✅ 12fps (테스트 후 조정) |
-| 3. 높은 해상도 | ✅ 300px (선명) |
+| 2. 자연스러운 움직임 | ✅ 24fps (Rive 수준 부드러움) |
+| 3. 높은 해상도 | ✅ 600px (고해상도 완벽 대응) |
 
 ---
 
@@ -75,7 +75,7 @@ chaser_fox_base.png
 Motion: gentle breathing motion, subtle up and down movement,
 calm and peaceful, looping animation
 
-길이: 1초 (12 frames @ 12fps)
+길이: 1초 (24 frames @ 24fps)
 루프: Yes
 ```
 
@@ -84,7 +84,7 @@ calm and peaceful, looping animation
 Motion: excited waving motion, jumping slightly,
 happy greeting gesture, energetic movement
 
-길이: 0.8초 (10 frames @ 12fps)
+길이: 0.8초 (20 frames @ 24fps)
 루프: No (one-shot)
 ```
 
@@ -93,7 +93,7 @@ happy greeting gesture, energetic movement
 Motion: jump up and down with joy,
 celebratory bounce, stars or sparkles effect
 
-길이: 1초 (12 frames @ 12fps)
+길이: 1.2초 (30 frames @ 24fps)
 루프: No
 ```
 
@@ -102,7 +102,7 @@ celebratory bounce, stars or sparkles effect
 Motion: tilting head left and right,
 thoughtful expression, slow contemplative motion
 
-길이: 0.8초 (10 frames @ 12fps)
+길이: 1초 (24 frames @ 24fps)
 루프: Yes
 ```
 
@@ -111,7 +111,7 @@ thoughtful expression, slow contemplative motion
 Motion: slight wobble, question mark appearing,
 confused head shake, uncertain movement
 
-길이: 0.7초 (8 frames @ 12fps)
+길이: 0.8초 (20 frames @ 24fps)
 루프: No
 ```
 
@@ -130,32 +130,44 @@ brew install ffmpeg
 https://ffmpeg.org/download.html
 ```
 
-**추출 명령어:**
+**추출 명령어 (권장: 24fps, 600x600, WebP):**
 ```bash
-# GIF → PNG 프레임 추출 (12fps, 300x300px)
+# GIF → WebP 프레임 추출 (한 번에 처리)
 ffmpeg -i hunter_cat_idle.gif \
-  -vf "fps=12,scale=300:300" \
+  -vf "fps=24,scale=600:600:flags=lanczos" \
+  -quality 90 \
   -start_number 1 \
-  assets/animations/characters/hunter_cat/idle/frame_%02d.png
+  assets/animations/characters/hunter_cat/idle/frame_%02d.webp
 
-# MP4 → PNG 프레임 추출
+# MP4 → WebP 프레임 추출
 ffmpeg -i hunter_cat_idle.mp4 \
-  -vf "fps=12,scale=300:300" \
+  -vf "fps=24,scale=600:600:flags=lanczos" \
+  -quality 90 \
   -start_number 1 \
-  assets/animations/characters/hunter_cat/idle/frame_%02d.png
+  assets/animations/characters/hunter_cat/idle/frame_%02d.webp
 
 # 결과:
-# frame_01.png, frame_02.png, ..., frame_12.png
+# frame_01.webp, frame_02.webp, ..., frame_24.webp
 ```
 
-**프레임 수 테스트:**
-```bash
-# 다양한 fps로 테스트
-ffmpeg -i idle.mp4 -vf "fps=12" frames_12fps/frame_%02d.png
-ffmpeg -i idle.mp4 -vf "fps=18" frames_18fps/frame_%02d.png
-ffmpeg -i idle.mp4 -vf "fps=24" frames_24fps/frame_%02d.png
+**옵션 설명:**
+- `fps=24`: 24fps로 추출 (영화급 부드러움)
+- `scale=600:600`: 고해상도 (Retina 3x 대응)
+- `flags=lanczos`: 고품질 리샘플링
+- `quality=90`: WebP 품질 (90 = 거의 무손실)
 
-# 앱에 넣어보고 가장 자연스러운 fps 선택
+**2단계 방식 (PNG → WebP):**
+```bash
+# 1단계: GIF → PNG 추출
+ffmpeg -i idle.gif -vf "fps=24,scale=600:600:flags=lanczos" frame_%02d.png
+
+# 2단계: PNG → WebP 변환 (일괄)
+for file in frame_*.png; do
+  ffmpeg -i "$file" -quality 90 "${file%.png}.webp"
+done
+
+# 3단계: PNG 삭제 (선택사항)
+rm frame_*.png
 ```
 
 ---
@@ -168,12 +180,12 @@ ffmpeg -i idle.mp4 -vf "fps=24" frames_24fps/frame_%02d.png
 assets/animations/characters/
 └── hunter_cat/
     └── idle/
-        ├── frame_01.png
-        ├── frame_02.png
+        ├── frame_01.webp
+        ├── frame_02.webp
         └── ... (프레임 수만큼)
 ```
 
-**중요:** 파일명은 반드시 `frame_01.png`, `frame_02.png` 형식!
+**중요:** 파일명은 반드시 `frame_01.webp`, `frame_02.webp` 형식!
 
 ---
 
@@ -184,17 +196,17 @@ assets/animations/characters/
 ```
 assets/animations/characters/
 ├── hunter_cat/
-│   ├── idle/          (12 frames, 1초 루프)
-│   │   ├── frame_01.png
-│   │   ├── frame_02.png
-│   │   └── frame_12.png
-│   ├── selected/      (10 frames, 0.8초 one-shot)
+│   ├── idle/          (24 frames, 1초 루프)
+│   │   ├── frame_01.webp
+│   │   ├── frame_02.webp
+│   │   └── frame_24.webp
+│   ├── selected/      (20 frames, 0.8초 one-shot)
 │   │   └── ...
-│   ├── happy/         (12 frames, 1초 one-shot)
+│   ├── happy/         (30 frames, 1.2초 one-shot)
 │   │   └── ...
-│   ├── thinking/      (10 frames, 0.8초 루프)
+│   ├── thinking/      (24 frames, 1초 루프)
 │   │   └── ...
-│   └── confused/      (8 frames, 0.7초 one-shot)
+│   └── confused/      (20 frames, 0.8초 one-shot)
 │       └── ...
 │
 ├── money_bear/

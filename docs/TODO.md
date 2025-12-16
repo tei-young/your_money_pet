@@ -103,11 +103,11 @@
 - **이유:** Midjourney로 빠른 프로토타이핑 가능, 디자인 유연성 향상
 - **상세 문서:** `docs/FRAME_ANIMATION_GUIDE.md`, `docs/ANIMATION_UPDATE_2025-12-13.md`
 
-**애니메이션 사양:**
-- **포맷:** PNG (300x300px, 투명 배경)
-- **프레임 레이트:** 12fps (테스트 후 조정 가능)
+**애니메이션 사양 (2025-12-16 업데이트):**
+- **포맷:** WebP (600x600px, 투명 배경)
+- **프레임 레이트:** 24fps (영화급 부드러움, Rive 수준)
 - **제작 툴:** Midjourney Video → ffmpeg 프레임 추출
-- **총 용량:** ~8MB (4 캐릭터 × 5 상태 × 12프레임)
+- **총 용량:** ~12MB (4 캐릭터 × 5 상태 × 평균 24프레임, WebP 압축)
 
 **완료된 개발 작업 (2025-12-13):**
 - [x] `lib/models/character_frame_animation.dart` 생성
@@ -121,27 +121,29 @@
 
 **디자인팀 작업 (대기 중):**
 - [ ] Midjourney로 캐릭터별 5가지 상태 애니메이션 생성
-  - idle: 숨쉬기 루프 (12프레임)
-  - selected: 선택 반응 (10프레임)
-  - happy: 기쁨 표현 (15프레임)
-  - thinking: 생각하는 모습 (10프레임)
-  - confused: 혼란스러운 표현 (10프레임)
-- [ ] ffmpeg로 프레임 추출 (명령어는 `docs/FRAME_ANIMATION_GUIDE.md` 참고)
+  - idle: 숨쉬기 루프 (24프레임, 1초)
+  - selected: 선택 반응 (20프레임, 0.8초)
+  - happy: 기쁨 표현 (30프레임, 1.2초)
+  - thinking: 생각하는 모습 (24프레임, 1초)
+  - confused: 혼란스러운 표현 (20프레임, 0.8초)
+- [ ] ffmpeg로 WebP 프레임 추출 (명령어는 `docs/FRAME_ANIMATION_GUIDE.md` 참고)
+  ```bash
+  ffmpeg -i input.gif -vf "fps=24,scale=600:600:flags=lanczos" -quality 90 frame_%02d.webp
+  ```
 - [ ] 프레임 파일을 `assets/animations/characters/[캐릭터ID]/[상태]/` 폴더에 배치
-- [ ] 다양한 fps (12/18/24) 테스트 후 최적값 결정
 
 **파일 배치 예시:**
 ```
 assets/animations/characters/
 ├── hunter_cat/
 │   ├── idle/
-│   │   ├── frame_01.png
-│   │   ├── frame_02.png
-│   │   └── ... (frame_12.png까지)
-│   ├── selected/
-│   ├── happy/
-│   ├── thinking/
-│   └── confused/
+│   │   ├── frame_01.webp
+│   │   ├── frame_02.webp
+│   │   └── ... (frame_24.webp까지)
+│   ├── selected/      (20 frames)
+│   ├── happy/         (30 frames)
+│   ├── thinking/      (24 frames)
+│   └── confused/      (20 frames)
 ├── money_bear/
 ├── save_sheep/
 └── chaser_fox/

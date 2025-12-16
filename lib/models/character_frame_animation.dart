@@ -20,11 +20,11 @@ class CharacterFrameAnimation {
 
   /// 프레임 이미지 경로 생성
   ///
-  /// 예: 'assets/animations/characters/hunter_cat/idle/frame_01.png'
+  /// 예: 'assets/animations/characters/hunter_cat/idle/frame_01.webp'
   String getFramePath(int frameIndex) {
     final stateFolder = state.name; // 'idle', 'selected', etc.
     final frameNumber = (frameIndex + 1).toString().padLeft(2, '0');
-    return 'assets/animations/characters/$characterId/$stateFolder/frame_$frameNumber.png';
+    return 'assets/animations/characters/$characterId/$stateFolder/frame_$frameNumber.webp';
   }
 
   /// 총 애니메이션 길이
@@ -43,8 +43,8 @@ class CharacterFrameAnimation {
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 12,
-          frameDuration: const Duration(milliseconds: 83), // ~12fps
+          frameCount: frameCountOverride ?? 24,
+          frameDuration: const Duration(milliseconds: 42), // 24fps
           loop: true,
         );
 
@@ -52,8 +52,8 @@ class CharacterFrameAnimation {
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 10,
-          frameDuration: const Duration(milliseconds: 80), // 0.8초
+          frameCount: frameCountOverride ?? 20,
+          frameDuration: const Duration(milliseconds: 42), // 24fps, ~0.8초
           loop: false, // one-shot
         );
 
@@ -61,8 +61,8 @@ class CharacterFrameAnimation {
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 12,
-          frameDuration: const Duration(milliseconds: 83), // 1초
+          frameCount: frameCountOverride ?? 30,
+          frameDuration: const Duration(milliseconds: 42), // 24fps, ~1.2초
           loop: false,
         );
 
@@ -70,8 +70,8 @@ class CharacterFrameAnimation {
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 10,
-          frameDuration: const Duration(milliseconds: 80), // 0.8초
+          frameCount: frameCountOverride ?? 24,
+          frameDuration: const Duration(milliseconds: 42), // 24fps, 1초 루프
           loop: true,
         );
 
@@ -79,8 +79,8 @@ class CharacterFrameAnimation {
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 8,
-          frameDuration: const Duration(milliseconds: 87), // 0.7초
+          frameCount: frameCountOverride ?? 20,
+          frameDuration: const Duration(milliseconds: 42), // 24fps, ~0.8초
           loop: false,
         );
 

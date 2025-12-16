@@ -1,37 +1,41 @@
-# 캐릭터 애니메이션 전략 변경 (2025-12-13)
+# 캐릭터 애니메이션 전략 변경
+
+> **최초 작성**: 2025-12-13
+> **마지막 업데이트**: 2025-12-16 (고해상도 최적화)
 
 ## 🎯 핵심 결정
 
-### **Rive → 프레임 기반 (GIF/Video → PNG 추출)**
+### **Rive → 프레임 기반 (GIF/Video → WebP 추출)**
 
 | 항목 | 이전 (Rive) | 현재 (프레임 기반) |
 |------|------------|-------------------|
 | **제작 도구** | Rive Editor | Midjourney Video |
-| **파일 포맷** | .riv (벡터) | PNG (래스터) |
-| **파일 크기** | 200KB-1MB | 8MB (압축 후) |
+| **파일 포맷** | .riv (벡터) | WebP (래스터, 압축) |
+| **파일 크기** | 200KB-1MB | 12MB (WebP 압축) |
 | **제작 난이도** | 높음 (리깅 필요) | 낮음 (AI 자동 생성) |
 | **제작 비용** | $500-2000 | $12/월 (Midjourney) |
 | **제작 시간** | 1-2주 | 1-2일 |
 | **인터랙티브** | ✅ 완벽 | ✅ 완벽 |
-| **해상도** | 벡터 (무한 확대) | 300px (고정) |
+| **해상도** | 벡터 (무한 확대) | 600px (고해상도 대응) |
+| **부드러움** | ✅ 완벽 | ✅ 24fps (Rive 수준) |
 
 ### **왜 변경했나?**
 
 1. ✅ **빠른 제작**: Midjourney로 1-2일이면 완성
 2. ✅ **저렴한 비용**: $12/월 (Rive 외주 대비 1/40)
 3. ✅ **테스트 용이**: 다양한 fps 실험 가능
-4. ✅ **퀄리티 충분**: 12fps로도 부드러운 애니메이션 가능
+4. ✅ **퀄리티 보장**: 24fps + 600px로 Rive 수준 달성
 
 ---
 
-## 📊 최종 스펙
+## 📊 최종 스펙 (2025-12-16 업데이트)
 
 ```
 제작 도구:  Midjourney Video
-프레임 수:   12fps (테스트 후 조정 가능)
-해상도:      300x300px
-포맷:        PNG
-총 용량:     약 8MB (4 캐릭터 × 5 상태)
+프레임 수:   24fps (영화급 부드러움)
+해상도:      600x600px (Retina 3x 대응)
+포맷:        WebP (PNG 대비 용량 50% 절감)
+총 용량:     약 12MB (4 캐릭터 × 5 상태)
 ```
 
 ---
@@ -74,21 +78,17 @@ assets/animations/characters/
 
 1. Midjourney로 헌터캣 베이스 이미지 생성
 2. Midjourney Video로 Idle 영상 생성 (숨쉬기, 1초)
-3. ffmpeg로 12프레임 추출:
+3. ffmpeg로 24프레임 WebP 추출:
    ```bash
-   ffmpeg -i hunter_cat_idle.gif -vf "fps=12,scale=300:300" \
-     assets/animations/characters/hunter_cat/idle/frame_%02d.png
+   ffmpeg -i hunter_cat_idle.gif \
+     -vf "fps=24,scale=600:600:flags=lanczos" \
+     -quality 90 \
+     assets/animations/characters/hunter_cat/idle/frame_%02d.webp
    ```
 4. `flutter pub get` 실행
 5. 앱에서 확인
 
-### **Phase 2: 퀄리티 확인**
-
-- 12fps가 자연스러운지 확인
-- 필요시 18fps 또는 24fps로 재추출
-- 최적 fps 결정
-
-### **Phase 3: 전체 제작**
+### **Phase 2: 전체 제작**
 
 - 나머지 4개 상태 제작 (헌터캣)
 - 나머지 3개 캐릭터 제작
@@ -98,25 +98,33 @@ assets/animations/characters/
 
 ## 📝 사용 방법 (디자인팀용)
 
-### **1. 프레임 파일 생성**
+### **1. 프레임 파일 생성 (권장 방식)**
 
 ```bash
-# Midjourney에서 다운로드한 GIF/MP4를 프레임으로 추출
-ffmpeg -i input.gif -vf "fps=12,scale=300:300" \
+# Midjourney에서 다운로드한 GIF/MP4를 WebP 프레임으로 추출
+ffmpeg -i input.gif \
+  -vf "fps=24,scale=600:600:flags=lanczos" \
+  -quality 90 \
   -start_number 1 \
-  frame_%02d.png
+  frame_%02d.webp
 ```
+
+**옵션 설명:**
+- `fps=24`: 24fps (부드러움)
+- `scale=600:600`: 고해상도
+- `flags=lanczos`: 고품질 리샘플링
+- `quality=90`: WebP 품질 (90 = 거의 무손실)
 
 ### **2. 폴더에 배치**
 
 ```
 assets/animations/characters/hunter_cat/idle/
-├── frame_01.png
-├── frame_02.png
-└── frame_12.png
+├── frame_01.webp
+├── frame_02.webp
+└── frame_24.webp
 ```
 
-**중요:** 파일명은 반드시 `frame_01.png` 형식!
+**중요:** 파일명은 반드시 `frame_01.webp` 형식!
 
 ### **3. flutter pub get 실행**
 
@@ -145,7 +153,7 @@ AnimatedCharacter(
 
 위 코드는 자동으로:
 1. `assets/animations/characters/hunter_cat/idle/` 폴더에서 프레임 로드
-2. 12fps로 재생 (CharacterFrameAnimation 프리셋 기준)
+2. 24fps로 재생 (CharacterFrameAnimation 프리셋 기준)
 3. 루프 재생 (Idle은 loop: true)
 4. 프레임 없으면 Placeholder 표시
 

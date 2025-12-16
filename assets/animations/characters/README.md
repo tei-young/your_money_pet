@@ -1,5 +1,7 @@
 # 캐릭터 애니메이션 프레임
 
+> **업데이트**: 2025-12-16 (24fps, 600x600, WebP)
+
 이 폴더는 프레임 기반 캐릭터 애니메이션 파일을 저장하는 곳입니다.
 
 ## 📁 폴더 구조
@@ -10,11 +12,11 @@ characters/
 ├── money_bear/      (머니베어)
 ├── save_sheep/      (세이브쉽)
 └── chaser_fox/      (체이서폭스)
-    ├── idle/        (숨쉬기, 12 frames)
-    ├── selected/    (손 흔들기, 10 frames)
-    ├── happy/       (점프, 12 frames)
-    ├── thinking/    (고민, 10 frames)
-    └── confused/    (혼란, 8 frames)
+    ├── idle/        (숨쉬기, 24 frames, 1초 루프)
+    ├── selected/    (손 흔들기, 20 frames, 0.8초)
+    ├── happy/       (점프, 30 frames, 1.2초)
+    ├── thinking/    (고민, 24 frames, 1초 루프)
+    └── confused/    (혼란, 20 frames, 0.8초)
 ```
 
 ## 📝 파일 네이밍 규칙
@@ -22,17 +24,17 @@ characters/
 각 상태 폴더 안에 프레임 파일을 배치하세요:
 
 ```
-frame_01.png
-frame_02.png
-frame_03.png
+frame_01.webp
+frame_02.webp
+frame_03.webp
 ...
-frame_12.png
+frame_24.webp
 ```
 
 **중요:**
-- 반드시 `frame_01.png` 형식 (2자리 숫자)
+- 반드시 `frame_01.webp` 형식 (2자리 숫자)
 - 소문자 사용
-- PNG 포맷
+- WebP 포맷 (고품질, 용량 효율적)
 
 ## 🎬 사용 방법
 
@@ -45,28 +47,36 @@ full body, white background, flat color illustration,
 children's book style --ar 1:1 --v 6"
 ```
 
-### 2. ffmpeg로 프레임 추출
+### 2. ffmpeg로 프레임 추출 (권장)
 
 ```bash
-# GIF → PNG 프레임 추출 (12fps, 300x300px)
+# GIF → WebP 프레임 추출 (24fps, 600x600px, 고품질)
 ffmpeg -i hunter_cat_idle.gif \
-  -vf "fps=12,scale=300:300" \
+  -vf "fps=24,scale=600:600:flags=lanczos" \
+  -quality 90 \
   -start_number 1 \
-  hunter_cat/idle/frame_%02d.png
+  hunter_cat/idle/frame_%02d.webp
 
-# MP4 → PNG 프레임 추출
+# MP4 → WebP 프레임 추출
 ffmpeg -i hunter_cat_idle.mp4 \
-  -vf "fps=12,scale=300:300" \
+  -vf "fps=24,scale=600:600:flags=lanczos" \
+  -quality 90 \
   -start_number 1 \
-  hunter_cat/idle/frame_%02d.png
+  hunter_cat/idle/frame_%02d.webp
 ```
+
+**옵션 설명:**
+- `fps=24`: 24fps (부드러움)
+- `scale=600:600`: 고해상도 (Retina 대응)
+- `flags=lanczos`: 고품질 리샘플링
+- `quality=90`: WebP 품질 (90 = 거의 무손실)
 
 ### 3. 폴더에 배치
 
 ```
 assets/animations/characters/hunter_cat/idle/
-├── frame_01.png
-├── frame_02.png
+├── frame_01.webp
+├── frame_02.webp
 └── ...
 ```
 

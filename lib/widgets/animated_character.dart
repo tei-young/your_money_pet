@@ -40,9 +40,10 @@ class AnimatedCharacter extends StatefulWidget {
 class _AnimatedCharacterState extends State<AnimatedCharacter>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late CharacterFrameAnimation _animation;
+  CharacterFrameAnimation? _animation;
   int _currentFrame = 0;
   bool _hasFrames = true; // 프레임 파일 존재 여부
+  bool _isLoading = true; // JSON 로딩 상태
 
   @override
   void initState() {
@@ -50,29 +51,40 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
     _setupAnimation();
   }
 
-  void _setupAnimation() {
+  Future<void> _setupAnimation() async {
     final characterId = widget.characterType.animationConfig.characterId;
-    _animation = CharacterFrameAnimation.forState(characterId, widget.state);
+
+    // JSON 기반 로딩 시도
+    _animation = await CharacterFrameAnimation.forStateAsync(
+      characterId,
+      widget.state,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = false;
+    });
 
     _controller = AnimationController(
-      duration: _animation.totalDuration,
+      duration: _animation!.totalDuration,
       vsync: this,
     );
 
     _controller.addListener(() {
       final progress = _controller.value;
-      final frameIndex = (progress * _animation.frameCount).floor();
+      final frameIndex = (progress * _animation!.frameCount).floor();
 
       if (frameIndex != _currentFrame) {
         setState(() {
-          _currentFrame = frameIndex.clamp(0, _animation.frameCount - 1);
+          _currentFrame = frameIndex.clamp(0, _animation!.frameCount - 1);
         });
       }
     });
 
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        if (_animation.loop) {
+        if (_animation!.loop) {
           _controller.repeat();
         } else {
           // One-shot 애니메이션 완료
@@ -82,7 +94,7 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
     });
 
     // 애니메이션 시작
-    if (_animation.loop) {
+    if (_animation!.loop) {
       _controller.repeat();
     } else {
       _controller.forward();
@@ -96,15 +108,22 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
     // 상태가 변경되면 애니메이션 재설정
     if (oldWidget.state != widget.state ||
         oldWidget.characterType != widget.characterType) {
-      _controller.dispose();
+      if (!_isLoading) {
+        _controller.dispose();
+      }
       _currentFrame = 0;
+      setState(() {
+        _isLoading = true;
+      });
       _setupAnimation();
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (!_isLoading) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -120,7 +139,12 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
         mainAxisSize: MainAxisSize.min,
         children: [
           // 캐릭터 애니메이션
-          _hasFrames ? _buildFrameAnimation() : _buildPlaceholder(),
+          if (_isLoading)
+            _buildPlaceholder() // 로딩 중
+          else if (_hasFrames)
+            _buildFrameAnimation() // 프레임 애니메이션
+          else
+            _buildPlaceholder(), // 프레임 없음
 
           // 말풍선 (선택된 경우에만)
           if (isSelected) ...[
@@ -138,7 +162,7 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
       width: widget.size,
       height: widget.size,
       child: Image.asset(
-        _animation.getFramePath(_currentFrame),
+        _animation!.getFramePath(_currentFrame),
         width: widget.size,
         height: widget.size,
         fit: BoxFit.contain,

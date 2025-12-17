@@ -55,6 +55,12 @@ flutter:
 
   # 에셋
   assets:
+    # 캐릭터 애니메이션 설정 (JSON)
+    - assets/animations/characters/hunter_cat/animation_config.json
+    - assets/animations/characters/money_bear/animation_config.json
+    - assets/animations/characters/save_sheep/animation_config.json
+    - assets/animations/characters/chaser_fox/animation_config.json
+
     # 캐릭터 애니메이션 프레임 (프레임 파일 추가 시 자동 인식)
     # 헌터캣
     - assets/animations/characters/hunter_cat/idle/

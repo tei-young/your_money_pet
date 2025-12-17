@@ -1,4 +1,5 @@
 import 'character_animation_config.dart';
+import '../services/animation_config_loader.dart';
 
 /// 프레임 기반 캐릭터 애니메이션 설정
 ///
@@ -30,9 +31,33 @@ class CharacterFrameAnimation {
   /// 총 애니메이션 길이
   Duration get totalDuration => frameDuration * frameCount;
 
-  /// 상태별 프리셋 생성
+  /// 상태별 프리셋 생성 (JSON 기반) - 권장 방식
   ///
-  /// 프레임 수는 자동으로 감지되며, 없을 경우 기본값 사용
+  /// animation_config.json 파일에서 설정을 로드합니다.
+  /// JSON 파일이 없으면 forState() fallback.
+  ///
+  /// ```dart
+  /// final animation = await CharacterFrameAnimation.forStateAsync(
+  ///   'hunter_cat',
+  ///   CharacterAnimationState.idle,
+  /// );
+  /// ```
+  static Future<CharacterFrameAnimation> forStateAsync(
+    String characterId,
+    CharacterAnimationState state,
+  ) async {
+    try {
+      return await AnimationConfigLoader.createAnimation(characterId, state);
+    } catch (e) {
+      print('⚠️ Failed to load JSON config for $characterId:${state.name}, using defaults');
+      return forState(characterId, state);
+    }
+  }
+
+  /// 상태별 프리셋 생성 (하드코딩) - Fallback 용
+  ///
+  /// JSON 파일이 없을 때 사용되는 기본값.
+  /// 프레임 수는 frameCountOverride로 덮어쓸 수 있습니다.
   static CharacterFrameAnimation forState(
     String characterId,
     CharacterAnimationState state, {

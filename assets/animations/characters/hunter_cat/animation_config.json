@@ -1,0 +1,32 @@
+{
+  "idle": {
+    "frameCount": 125,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "숨쉬기 루프 (5.2초)"
+  },
+  "selected": {
+    "frameCount": 20,
+    "frameDuration": 42,
+    "loop": false,
+    "description": "선택 반응 (0.8초)"
+  },
+  "happy": {
+    "frameCount": 30,
+    "frameDuration": 42,
+    "loop": false,
+    "description": "기쁨 표현 (1.2초)"
+  },
+  "thinking": {
+    "frameCount": 24,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "생각하는 모습 (1초 루프)"
+  },
+  "confused": {
+    "frameCount": 20,
+    "frameDuration": 42,
+    "loop": false,
+    "description": "혼란스러운 표현 (0.8초)"
+  }
+}

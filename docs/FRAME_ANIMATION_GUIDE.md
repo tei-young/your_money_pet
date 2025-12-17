@@ -189,6 +189,42 @@ assets/animations/characters/
 
 ---
 
+### **Step 5: JSON 설정 파일 수정 (선택사항)**
+
+각 캐릭터 폴더의 `animation_config.json` 파일에서 **프레임 수를 코드 수정 없이 변경**할 수 있습니다.
+
+**animation_config.json 예시:**
+```json
+{
+  "idle": {
+    "frameCount": 125,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "숨쉬기 루프 (5.2초)"
+  },
+  "selected": {
+    "frameCount": 20,
+    "frameDuration": 42,
+    "loop": false,
+    "description": "선택 반응 (0.8초)"
+  }
+}
+```
+
+**변경 방법:**
+1. `assets/animations/characters/hunter_cat/animation_config.json` 열기
+2. `frameCount` 값 수정 (예: 24 → 125)
+3. `flutter pub get` 실행 (선택)
+4. 앱 재실행 → 자동 적용 ✅
+
+**장점:**
+- ✅ 코드 수정 불필요
+- ✅ 디자이너가 직접 수정 가능
+- ✅ 캐릭터별 독립적 설정
+- ✅ 영상 길이가 달라도 유연하게 대응
+
+---
+
 ## 3. 폴더 구조 & 파일 규격
 
 ### **최종 폴더 구조**
@@ -196,17 +232,18 @@ assets/animations/characters/
 ```
 assets/animations/characters/
 ├── hunter_cat/
-│   ├── idle/          (24 frames, 1초 루프)
+│   ├── animation_config.json  ← 프레임 수 설정
+│   ├── idle/                  (24 frames, 1초 루프)
 │   │   ├── frame_01.webp
 │   │   ├── frame_02.webp
 │   │   └── frame_24.webp
-│   ├── selected/      (20 frames, 0.8초 one-shot)
+│   ├── selected/              (20 frames, 0.8초 one-shot)
 │   │   └── ...
-│   ├── happy/         (30 frames, 1.2초 one-shot)
+│   ├── happy/                 (30 frames, 1.2초 one-shot)
 │   │   └── ...
-│   ├── thinking/      (24 frames, 1초 루프)
+│   ├── thinking/              (24 frames, 1초 루프)
 │   │   └── ...
-│   └── confused/      (20 frames, 0.8초 one-shot)
+│   └── confused/              (20 frames, 0.8초 one-shot)
 │       └── ...
 │
 ├── money_bear/

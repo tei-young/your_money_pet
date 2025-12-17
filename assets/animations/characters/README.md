@@ -8,15 +8,16 @@
 
 ```
 characters/
-├── hunter_cat/      (헌터캣)
-├── money_bear/      (머니베어)
-├── save_sheep/      (세이브쉽)
-└── chaser_fox/      (체이서폭스)
-    ├── idle/        (숨쉬기, 24 frames, 1초 루프)
-    ├── selected/    (손 흔들기, 20 frames, 0.8초)
-    ├── happy/       (점프, 30 frames, 1.2초)
-    ├── thinking/    (고민, 24 frames, 1초 루프)
-    └── confused/    (혼란, 20 frames, 0.8초)
+├── hunter_cat/              (헌터캣)
+│   ├── animation_config.json  ← 프레임 수 설정 (JSON)
+│   ├── idle/                  (숨쉬기, 24 frames, 1초 루프)
+│   ├── selected/              (손 흔들기, 20 frames, 0.8초)
+│   ├── happy/                 (점프, 30 frames, 1.2초)
+│   ├── thinking/              (고민, 24 frames, 1초 루프)
+│   └── confused/              (혼란, 20 frames, 0.8초)
+├── money_bear/              (머니베어)
+├── save_sheep/              (세이브쉽)
+└── chaser_fox/              (체이서폭스)
 ```
 
 ## 📝 파일 네이밍 규칙
@@ -71,7 +72,25 @@ ffmpeg -i hunter_cat_idle.mp4 \
 - `flags=lanczos`: 고품질 리샘플링
 - `quality=90`: WebP 품질 (90 = 거의 무손실)
 
-### 3. 폴더에 배치
+### 3. animation_config.json 수정 (선택)
+
+프레임 수를 코드 수정 없이 변경할 수 있습니다:
+
+```json
+{
+  "idle": {
+    "frameCount": 125,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "숨쉬기 루프 (5.2초)"
+  }
+}
+```
+
+**영상이 5초라면:** `frameCount`를 125로 변경 (5초 × 24fps)
+**영상이 1초라면:** 24로 유지
+
+### 4. 폴더에 배치
 
 ```
 assets/animations/characters/hunter_cat/idle/

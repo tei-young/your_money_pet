@@ -1,5 +1,267 @@
 # MoneyPet 개발 로그
 
+## 📅 2025-12-16 세션: JSON 기반 애니메이션 설정 시스템 구축
+
+### 🎯 목표
+프레임 수를 코드 수정 없이 JSON 파일로 관리할 수 있는 설정 시스템 구축
+
+---
+
+## ✅ 완료된 작업
+
+### 1. 문제 인식
+**상황:** 5초 영상(125프레임)을 루프하려면 코드 수정이 필요했음
+```dart
+// 하드코딩 방식
+frameCount: 24,  // → 125로 변경하려면 코드 수정 필요
+```
+
+**해결책:** JSON 설정 파일 시스템 도입
+
+---
+
+### 2. AnimationConfigLoader 서비스 구현
+**파일:** `lib/services/animation_config_loader.dart`
+
+**핵심 기능:**
+- JSON 파일 로드 및 캐싱
+- 자동 fallback (JSON 없으면 하드코딩 값 사용)
+- 여러 상태 동시 로딩 지원
+
+```dart
+class AnimationConfigLoader {
+  static final Map<String, Map<String, dynamic>> _configCache = {};
+
+  // JSON 로드
+  static Future<Map<String, dynamic>> loadConfig(String characterId) async {
+    final jsonString = await rootBundle.loadString(
+      'assets/animations/characters/$characterId/animation_config.json',
+    );
+    return json.decode(jsonString);
+  }
+
+  // CharacterFrameAnimation 생성
+  static Future<CharacterFrameAnimation> createAnimation(
+    String characterId,
+    CharacterAnimationState state,
+  ) async {
+    final config = await loadConfig(characterId);
+    final stateConfig = config[state.name];
+
+    return CharacterFrameAnimation(
+      characterId: characterId,
+      state: state,
+      frameCount: stateConfig['frameCount'],
+      frameDuration: Duration(milliseconds: stateConfig['frameDuration']),
+      loop: stateConfig['loop'],
+    );
+  }
+}
+```
+
+---
+
+### 3. JSON 설정 파일 생성 (4개)
+**파일 위치:**
+- `assets/animations/characters/hunter_cat/animation_config.json`
+- `assets/animations/characters/money_bear/animation_config.json`
+- `assets/animations/characters/save_sheep/animation_config.json`
+- `assets/animations/characters/chaser_fox/animation_config.json`
+
+**JSON 구조:**
+```json
+{
+  "idle": {
+    "frameCount": 125,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "숨쉬기 루프 (5.2초)"
+  },
+  "selected": {
+    "frameCount": 20,
+    "frameDuration": 42,
+    "loop": false,
+    "description": "선택 반응 (0.8초)"
+  }
+}
+```
+
+**헌터캣만 특별 설정:**
+- `idle`: 125프레임 (5.2초) - 5초 영상 대응
+- 나머지 캐릭터: 24프레임 (기본값)
+
+---
+
+### 4. CharacterFrameAnimation 업데이트
+**파일:** `lib/models/character_frame_animation.dart`
+
+**추가된 메서드:**
+```dart
+/// JSON 기반 로딩 (권장)
+static Future<CharacterFrameAnimation> forStateAsync(
+  String characterId,
+  CharacterAnimationState state,
+) async {
+  try {
+    return await AnimationConfigLoader.createAnimation(characterId, state);
+  } catch (e) {
+    return forState(characterId, state);  // fallback
+  }
+}
+```
+
+---
+
+### 5. AnimatedCharacter 위젯 업데이트
+**파일:** `lib/widgets/animated_character.dart`
+
+**변경 사항:**
+- `_setupAnimation()` → `Future<void> _setupAnimation()` (async로 변경)
+- `_isLoading` 상태 추가
+- 로딩 중 Placeholder 표시
+- JSON 로딩 실패 시 자동 fallback
+
+```dart
+Future<void> _setupAnimation() async {
+  // JSON 기반 로딩 시도
+  _animation = await CharacterFrameAnimation.forStateAsync(
+    characterId,
+    widget.state,
+  );
+
+  setState(() {
+    _isLoading = false;
+  });
+
+  _controller = AnimationController(...);
+  // ...
+}
+```
+
+---
+
+### 6. pubspec.yaml 업데이트
+**추가된 asset:**
+```yaml
+assets:
+  # JSON 설정 파일
+  - assets/animations/characters/hunter_cat/animation_config.json
+  - assets/animations/characters/money_bear/animation_config.json
+  - assets/animations/characters/save_sheep/animation_config.json
+  - assets/animations/characters/chaser_fox/animation_config.json
+```
+
+---
+
+### 7. 문서 업데이트
+**업데이트된 파일:**
+- `docs/FRAME_ANIMATION_GUIDE.md` - Step 5 추가 (JSON 설정)
+- `docs/ANIMATION_UPDATE_2025-12-13.md` - JSON 시스템 설명 추가
+- `assets/animations/characters/README.md` - JSON 사용법 추가
+
+---
+
+## 🎯 사용 방법
+
+### **디자이너용: 프레임 수 변경**
+
+```bash
+# 1. JSON 파일 열기
+vim assets/animations/characters/hunter_cat/animation_config.json
+
+# 2. frameCount 수정
+{
+  "idle": {
+    "frameCount": 125,  # 24 → 125로 변경
+    ...
+  }
+}
+
+# 3. 앱 재실행 → 자동 적용 ✅
+```
+
+### **개발자용: 새 캐릭터 추가**
+
+```bash
+# 1. animation_config.json 생성
+cp assets/animations/characters/hunter_cat/animation_config.json \
+   assets/animations/characters/new_character/
+
+# 2. pubspec.yaml에 등록
+assets:
+  - assets/animations/characters/new_character/animation_config.json
+
+# 3. 끝! 자동 로딩됨
+```
+
+---
+
+## 📊 장점
+
+| 항목 | 이전 (하드코딩) | 현재 (JSON) |
+|------|---------------|------------|
+| **프레임 수 변경** | 코드 수정 + 재빌드 | JSON 수정만 |
+| **캐릭터별 설정** | 모두 같은 값 | 독립적 설정 |
+| **디자이너 작업** | 개발자 필요 | 직접 수정 가능 |
+| **영상 길이 대응** | 코드 수정 필요 | 유연하게 대응 |
+
+---
+
+## 🔧 기술 결정 사항
+
+### JSON vs 런타임 감지
+**선택:** JSON 설정 파일
+**이유:**
+- ✅ 성능: 빌드 타임에 결정 (런타임 오버헤드 없음)
+- ✅ 명확성: 설정이 파일로 명시됨
+- ✅ 확장성: 나중에 다른 설정도 추가 가능
+- ❌ 런타임 감지: Flutter에서 asset 파일 시스템 접근 불가
+
+### 캐싱 전략
+- 캐릭터별 설정을 메모리에 캐싱
+- 앱 실행 중 JSON 파일 한 번만 로드
+- 개발 중 `AnimationConfigLoader.clearCache()` 호출 가능
+
+---
+
+## 📦 신규 파일 목록
+
+### Services
+- `lib/services/animation_config_loader.dart` (JSON 로더)
+
+### Assets
+- `assets/animations/characters/hunter_cat/animation_config.json`
+- `assets/animations/characters/money_bear/animation_config.json`
+- `assets/animations/characters/save_sheep/animation_config.json`
+- `assets/animations/characters/chaser_fox/animation_config.json`
+
+---
+
+## 🧪 테스트 방법
+
+```bash
+# 1. hunter_cat idle을 125프레임으로 설정 확인
+cat assets/animations/characters/hunter_cat/animation_config.json | grep frameCount
+
+# 2. 앱 실행
+flutter run
+
+# 3. 헌터캣 선택 → idle 애니메이션 확인
+# → 5.2초 루프 재생됨 ✅
+```
+
+---
+
+## 🔗 관련 커밋
+- `4e2c67e`: Implement JSON-based animation configuration system
+
+---
+
+**작성일:** 2025-12-16
+**다음 작업:** 디자인팀의 애니메이션 제작
+
+---
+
 ## 📅 2025-12-13 세션: 프레임 기반 캐릭터 애니메이션 시스템 구현
 
 ### 🎯 목표

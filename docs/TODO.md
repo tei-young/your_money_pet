@@ -109,15 +109,22 @@
 - **제작 툴:** Midjourney Video → ffmpeg 프레임 추출
 - **총 용량:** ~12MB (4 캐릭터 × 5 상태 × 평균 24프레임, WebP 압축)
 
-**완료된 개발 작업 (2025-12-13):**
-- [x] `lib/models/character_frame_animation.dart` 생성
-- [x] `lib/widgets/animated_character.dart` 완전 재작성
-- [x] `lib/services/character_animation_preloader.dart` 생성
-- [x] `CharacterAnimationState` enum 확장 (idle, selected, happy, thinking, confused)
-- [x] 폴더 구조 생성 (`assets/animations/characters/`)
-- [x] `pubspec.yaml` asset 경로 등록
-- [x] Fallback 로직 (프레임 없을 시 Placeholder)
-- [x] Progressive loading 전략 구현
+**완료된 개발 작업:**
+- [x] 2025-12-13: 프레임 기반 애니메이션 시스템 구현
+  - [x] `lib/models/character_frame_animation.dart` 생성
+  - [x] `lib/widgets/animated_character.dart` 완전 재작성
+  - [x] `lib/services/character_animation_preloader.dart` 생성
+  - [x] `CharacterAnimationState` enum 확장 (idle, selected, happy, thinking, confused)
+  - [x] 폴더 구조 생성 (`assets/animations/characters/`)
+  - [x] `pubspec.yaml` asset 경로 등록
+  - [x] Fallback 로직 (프레임 없을 시 Placeholder)
+  - [x] Progressive loading 전략 구현
+- [x] 2025-12-16: JSON 설정 시스템 구축
+  - [x] `lib/services/animation_config_loader.dart` 생성 (JSON 로더)
+  - [x] `animation_config.json` 4개 생성 (캐릭터별)
+  - [x] `CharacterFrameAnimation.forStateAsync()` 추가
+  - [x] `AnimatedCharacter` async 로딩 지원
+  - [x] 코드 수정 없이 프레임 수 변경 가능
 
 **디자인팀 작업 (대기 중):**
 - [ ] Midjourney로 캐릭터별 5가지 상태 애니메이션 생성

@@ -40,26 +40,34 @@
 
 ---
 
-## ✅ 완료된 작업 (개발팀, 2025-12-13)
+## ✅ 완료된 작업
 
-### **1. 코드 구현**
+### **개발팀 (2025-12-13)**
 - [x] `CharacterFrameAnimation` 모델 생성
 - [x] `AnimatedCharacter` 위젯 전면 수정
 - [x] `CharacterAnimationPreloader` 서비스 생성
 - [x] 점진적 로딩 전략 구현
 
+### **개발팀 (2025-12-16 - JSON 설정 시스템 구축)**
+- [x] `AnimationConfigLoader` 서비스 생성 (JSON 로딩 및 캐싱)
+- [x] `animation_config.json` 파일 4개 생성 (캐릭터별)
+- [x] `CharacterFrameAnimation.forStateAsync()` 추가 (JSON 기반)
+- [x] `AnimatedCharacter` async 로딩 지원
+- [x] 코드 수정 없이 프레임 수 변경 가능
+
 ### **2. 폴더 구조**
 ```
 assets/animations/characters/
 ├── hunter_cat/
+│   ├── animation_config.json  ← 신규: 프레임 수 설정
+│   ├── idle/
+│   ├── selected/
+│   └── ...
 ├── money_bear/
+│   ├── animation_config.json
+│   └── ...
 ├── save_sheep/
 └── chaser_fox/
-    ├── idle/
-    ├── selected/
-    ├── happy/
-    ├── thinking/
-    └── confused/
 ```
 
 ### **3. 문서화**
@@ -98,7 +106,33 @@ assets/animations/characters/
 
 ## 📝 사용 방법 (디자인팀용)
 
-### **1. 프레임 파일 생성 (권장 방식)**
+### **1. JSON 설정 수정 (프레임 수 변경 - 신규!)**
+
+**영상 길이가 다른 경우:**
+```bash
+# 1. animation_config.json 파일 열기
+vim assets/animations/characters/hunter_cat/animation_config.json
+
+# 2. frameCount 수정
+{
+  "idle": {
+    "frameCount": 125,  # 5초 영상 = 125프레임 (24fps)
+    "frameDuration": 42,
+    "loop": true
+  }
+}
+
+# 3. 앱 재실행 → 자동 적용 ✅
+```
+
+**장점:**
+- ✅ 코드 수정 불필요
+- ✅ 디자이너가 직접 수정 가능
+- ✅ 캐릭터별 독립적 설정
+
+---
+
+### **2. 프레임 파일 생성 (권장 방식)**
 
 ```bash
 # Midjourney에서 다운로드한 GIF/MP4를 WebP 프레임으로 추출

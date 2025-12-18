@@ -114,6 +114,7 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
       _currentFrame = 0;
       setState(() {
         _isLoading = true;
+        _hasFrames = true; // 새로운 상태에서 다시 체크
       });
       _setupAnimation();
     }

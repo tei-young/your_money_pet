@@ -171,10 +171,14 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
         errorBuilder: (context, error, stackTrace) {
           // 프레임 파일이 없으면 Placeholder로 fallback
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
+            if (mounted && _hasFrames) {
               setState(() {
                 _hasFrames = false;
               });
+              // 애니메이션 정지 (불필요한 프레임 로드 시도 방지)
+              if (!_isLoading) {
+                _controller.stop();
+              }
             }
           });
           return _buildPlaceholder();

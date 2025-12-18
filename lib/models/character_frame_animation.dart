@@ -21,11 +21,11 @@ class CharacterFrameAnimation {
 
   /// 프레임 이미지 경로 생성
   ///
-  /// 예: 'assets/animations/characters/hunter_cat/idle/frame_01.webp'
+  /// 예: 'assets/animations/characters/hunter_cat/idle/frame_01.png'
   String getFramePath(int frameIndex) {
     final stateFolder = state.name; // 'idle', 'selected', etc.
     final frameNumber = (frameIndex + 1).toString().padLeft(2, '0');
-    return 'assets/animations/characters/$characterId/$stateFolder/frame_$frameNumber.webp';
+    return 'assets/animations/characters/$characterId/$stateFolder/frame_$frameNumber.png';
   }
 
   /// 총 애니메이션 길이

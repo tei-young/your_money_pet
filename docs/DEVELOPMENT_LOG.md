@@ -134,44 +134,34 @@ else
 
 ---
 
-### 6. Selected 상태 강조 효과 추가
-**파일:** `lib/widgets/animated_character.dart:188-210`
+### 6. 온보딩 화면 캐릭터 크기 증가
+**파일:**
+- `lib/screens/onboarding/character_preview_screen.dart:199`
+- `lib/screens/onboarding/personality_result_screen.dart:259`
 
 **목적:**
-- selected 상태일 때 캐릭터 강조 (글로우 효과)
-- 프레임 수정 없이 코드로 구현
+- 온보딩 화면에서 캐릭터를 더 크게 표시 (1.8배)
+- 애니메이션 시각적 임팩트 향상
 
-**구현:**
+**변경 사항:**
 ```dart
-// selected 상태면 글로우 효과 추가
-return Container(
-  decoration: isSelected
-    ? BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: characterType.color.withOpacity(0.5),
-            blurRadius: 20,
-            spreadRadius: 5,
-          ),
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
-            blurRadius: 12,
-            spreadRadius: 2,
-          ),
-        ],
-      )
-    : null,
-  child: frameImage,
-);
+// 캐릭터 선택 화면
+AnimatedCharacter(
+  size: 180, // 100 → 180 (1.8배)
+)
+
+// 성향 결과 화면
+AnimatedCharacter(
+  size: 270, // 150 → 270 (1.8배)
+)
 ```
 
 **효과:**
-- 2중 그림자로 빛나는 효과 연출
-- 캐릭터 색상 + 보라색 하이라이트
-- 프레임 작업 없이 즉시 적용 가능
+- 캐릭터 선택 화면: 80% 크기 증가
+- 성향 결과 화면: 80% 크기 증가
+- 애니메이션 디테일 가시성 향상
 
-**커밋:** `34eea1a` - "Add glow effect for selected character state"
+**커밋:** `c874ef2` - "Increase character size in onboarding screens (1.8x)"
 
 ---
 

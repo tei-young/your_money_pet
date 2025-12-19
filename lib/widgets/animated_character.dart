@@ -161,51 +161,29 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
 
   /// 프레임 기반 애니메이션
   Widget _buildFrameAnimation() {
-    final isSelected = widget.state == CharacterAnimationState.selected;
-
-    Widget frameImage = Image.asset(
-      _animation!.getFramePath(_currentFrame),
+    return SizedBox(
       width: widget.size,
       height: widget.size,
-      fit: BoxFit.contain,
-      gaplessPlayback: true, // 깜빡임 방지
-      errorBuilder: (context, error, stackTrace) {
-        // 프레임 파일이 없으면 Placeholder로 fallback
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && _hasFrames) {
-            setState(() {
-              _hasFrames = false;
-            });
-            // 애니메이션 정지 (불필요한 프레임 로드 시도 방지)
-            _controller?.stop();
-          }
-        });
-        return _buildPlaceholder();
-      },
-    );
-
-    // selected 상태면 글로우 효과 추가
-    return Container(
-      width: widget.size,
-      height: widget.size,
-      decoration: isSelected
-          ? BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: widget.characterType.color.withOpacity(0.5),
-                  blurRadius: 20,
-                  spreadRadius: 5,
-                ),
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.3),
-                  blurRadius: 12,
-                  spreadRadius: 2,
-                ),
-              ],
-            )
-          : null,
-      child: frameImage,
+      child: Image.asset(
+        _animation!.getFramePath(_currentFrame),
+        width: widget.size,
+        height: widget.size,
+        fit: BoxFit.contain,
+        gaplessPlayback: true, // 깜빡임 방지
+        errorBuilder: (context, error, stackTrace) {
+          // 프레임 파일이 없으면 Placeholder로 fallback
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && _hasFrames) {
+              setState(() {
+                _hasFrames = false;
+              });
+              // 애니메이션 정지 (불필요한 프레임 로드 시도 방지)
+              _controller?.stop();
+            }
+          });
+          return _buildPlaceholder();
+        },
+      ),
     );
   }
 

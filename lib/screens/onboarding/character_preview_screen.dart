@@ -105,11 +105,11 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
                     textAlign: TextAlign.center,
                   ),
 
-                  const SizedBox(height: 80),
+                  const SizedBox(height: 60), // 80 → 60
 
                   // 캐릭터 4개 그리드
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    padding: const EdgeInsets.symmetric(horizontal: 16), // 40 → 16
                     child: AnimatedBuilder(
                       animation: _controller,
                       builder: (context, child) {
@@ -123,7 +123,7 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
                                 _buildCharacter(1, PersonalityType.aggressive),
                               ],
                             ),
-                            const SizedBox(height: 40),
+                            const SizedBox(height: 24), // 40 → 24
                             // 하단 2개
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,

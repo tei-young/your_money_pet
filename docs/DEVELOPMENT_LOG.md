@@ -165,6 +165,37 @@ AnimatedCharacter(
 
 ---
 
+### 7. 캐릭터 선택 화면 오버플로우 수정
+**파일:** `lib/screens/onboarding/character_preview_screen.dart`
+
+**문제:**
+- 캐릭터 크기 증가(180px)로 인한 레이아웃 오버플로우
+- 헌터캣, 체이서폭스에서 "right overflowed by 29 pixels" 에러
+
+**원인:**
+```
+캐릭터 크기: 180px × 2 = 360px
+좌우 패딩: 40px × 2 = 80px
+총 필요 너비: 440px (일반 모바일 화면 360~400px 초과)
+```
+
+**수정:**
+```dart
+// 패딩 및 간격 조정
+padding: const EdgeInsets.symmetric(horizontal: 16), // 40 → 16
+const SizedBox(height: 60), // 80 → 60 (상단)
+const SizedBox(height: 24), // 40 → 24 (캐릭터 사이)
+```
+
+**효과:**
+- 캐릭터 크기 180px 유지
+- 오버플로우 에러 해결
+- 48px 좌우 여백 절약
+
+**커밋:** `eb14c64` - "Fix overflow issue in character selection screen"
+
+---
+
 ## 🎬 테스트 결과
 
 ### 동작 확인

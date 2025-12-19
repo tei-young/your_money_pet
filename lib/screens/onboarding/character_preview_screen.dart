@@ -196,7 +196,7 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
               ? CharacterAnimationState.selected
               : CharacterAnimationState.idle,
           onTap: () => _onCharacterTap(type),
-          size: 100,
+          size: 180, // 100 → 180 (1.8배)
         ),
       ),
     );

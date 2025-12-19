@@ -1,5 +1,152 @@
 # MoneyPet 개발 로그
 
+## 📅 2025-12-19 세션: 프레임 애니메이션 버그 수정 및 PNG 지원
+
+### 🎯 목표
+실제 프레임 파일 테스트를 통한 버그 수정 및 안정화
+
+---
+
+## ✅ 완료된 작업
+
+### 1. PNG 포맷 지원
+**파일:** `lib/models/character_frame_animation.dart:28`
+
+**문제:**
+- 코드는 `.webp` 확장자로 하드코딩
+- 실제 프레임 파일은 `.png` 형식
+- 프레임 로드 실패로 placeholder만 표시됨
+
+**수정:**
+```dart
+// Before
+return 'assets/animations/characters/$characterId/$stateFolder/frame_$frameNumber.webp';
+
+// After
+return 'assets/animations/characters/$characterId/$stateFolder/frame_$frameNumber.png';
+```
+
+**커밋:** `6e30cfa` - "Support PNG format for animation frames"
+
+---
+
+### 2. 상태 전환 시 에러 방지
+**파일:** `lib/widgets/animated_character.dart:117`
+
+**문제:**
+- idle → selected 상태 전환 시 `_hasFrames` 플래그가 리셋되지 않음
+- selected 프레임 없으면 에러 발생
+
+**수정:**
+```dart
+setState(() {
+  _isLoading = true;
+  _hasFrames = true; // 새로운 상태에서 다시 체크
+});
+```
+
+**커밋:** `25238a0` - "Fix: Prevent errors during character state transitions"
+
+---
+
+### 3. Placeholder fallback 개선
+**파일:** `lib/widgets/animated_character.dart:178`
+
+**문제:**
+- 프레임 없을 때도 계속 로드 시도
+- 불필요한 에러 로그 발생
+
+**수정:**
+```dart
+if (mounted && _hasFrames) {
+  setState(() {
+    _hasFrames = false;
+  });
+  _controller?.stop(); // 애니메이션 정지
+}
+```
+
+**커밋:** `12e7fa4` - "Improve placeholder fallback for characters without frames"
+
+---
+
+### 4. AnimationController 크래시 수정 (치명적 버그)
+**파일:** `lib/widgets/animated_character.dart:40-111`
+
+**문제:**
+```
+SingleTickerProviderStateMixin can only be used as a TickerProvider once.
+```
+- `SingleTickerProviderStateMixin` 사용 시 상태 전환마다 새 Controller 생성 시도
+- idle → selected 전환 시 앱 크래시
+
+**수정:**
+```dart
+// 1. SingleTickerProviderStateMixin → TickerProviderStateMixin (40번 라인)
+class _AnimatedCharacterState extends State<AnimatedCharacter>
+    with TickerProviderStateMixin {
+
+// 2. Controller 재사용 로직 추가 (70-103번 라인)
+if (_controller == null) {
+  _controller = AnimationController(...); // 최초 1회만 생성
+} else {
+  // Controller 재사용
+  _controller!.stop();
+  _controller!.duration = _animation!.totalDuration;
+  _controller!.reset();
+}
+
+// 3. 애니메이션 시작
+if (_animation!.loop) {
+  _controller!.repeat(); // idle: 루프
+} else {
+  _controller!.forward(); // selected: one-shot
+}
+```
+
+**커밋:** `66cd6dc` - "Fix animation state transitions with proper controller reuse"
+
+---
+
+## 🎬 테스트 결과
+
+### 동작 확인
+1. ✅ **Hunter cat idle** (125 프레임)
+   - PNG 프레임 정상 로드
+   - 24fps 루프 애니메이션 재생
+
+2. ✅ **Hunter cat selected** (20 프레임)
+   - 클릭 시 one-shot 애니메이션 재생
+   - 완료 후 말풍선 표시
+
+3. ✅ **다른 캐릭터들**
+   - 프레임 없어도 placeholder 안전하게 표시
+   - 에러 없이 클릭/선택 가능
+
+### 수정된 파일
+- `lib/models/character_frame_animation.dart` (PNG 지원)
+- `lib/widgets/animated_character.dart` (Controller 재사용, 에러 방지)
+
+---
+
+## 📝 기술적 결정
+
+### PNG vs WebP
+**선택:** PNG 우선 지원
+**이유:**
+- ffmpeg PNG 추출이 더 간단
+- 투명 배경 보장
+- 추후 WebP 변환 가능 (스크립트 제공)
+
+### Controller 재사용 패턴
+**선택:** 하나의 Controller를 상태 간 재사용
+**이유:**
+- SingleTickerProvider 제약 회피
+- 메모리 효율적
+- 상태 전환 시 안정적
+
+---
+
 ## 📅 2025-12-16 세션: JSON 기반 애니메이션 설정 시스템 구축
 
 ### 🎯 목표

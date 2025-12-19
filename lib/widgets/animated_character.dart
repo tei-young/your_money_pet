@@ -38,8 +38,8 @@ class AnimatedCharacter extends StatefulWidget {
 }
 
 class _AnimatedCharacterState extends State<AnimatedCharacter>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+    with TickerProviderStateMixin {
+  AnimationController? _controller;
   CharacterFrameAnimation? _animation;
   int _currentFrame = 0;
   bool _hasFrames = true; // 프레임 파일 존재 여부
@@ -66,38 +66,47 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
       _isLoading = false;
     });
 
-    _controller = AnimationController(
-      duration: _animation!.totalDuration,
-      vsync: this,
-    );
+    // Controller가 없으면 생성, 있으면 재사용
+    if (_controller == null) {
+      _controller = AnimationController(
+        duration: _animation!.totalDuration,
+        vsync: this,
+      );
 
-    _controller.addListener(() {
-      final progress = _controller.value;
-      final frameIndex = (progress * _animation!.frameCount).floor();
+      _controller!.addListener(() {
+        if (_animation == null) return;
+        final progress = _controller!.value;
+        final frameIndex = (progress * _animation!.frameCount).floor();
 
-      if (frameIndex != _currentFrame) {
-        setState(() {
-          _currentFrame = frameIndex.clamp(0, _animation!.frameCount - 1);
-        });
-      }
-    });
-
-    _controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        if (_animation!.loop) {
-          _controller.repeat();
-        } else {
-          // One-shot 애니메이션 완료
-          widget.onAnimationComplete?.call();
+        if (frameIndex != _currentFrame) {
+          setState(() {
+            _currentFrame = frameIndex.clamp(0, _animation!.frameCount - 1);
+          });
         }
-      }
-    });
+      });
+
+      _controller!.addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          if (_animation!.loop) {
+            _controller!.repeat();
+          } else {
+            // One-shot 애니메이션 완료
+            widget.onAnimationComplete?.call();
+          }
+        }
+      });
+    } else {
+      // Controller 재사용: duration 업데이트
+      _controller!.stop();
+      _controller!.duration = _animation!.totalDuration;
+      _controller!.reset();
+    }
 
     // 애니메이션 시작
     if (_animation!.loop) {
-      _controller.repeat();
+      _controller!.repeat();
     } else {
-      _controller.forward();
+      _controller!.forward();
     }
   }
 
@@ -108,23 +117,18 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
     // 상태가 변경되면 애니메이션 재설정
     if (oldWidget.state != widget.state ||
         oldWidget.characterType != widget.characterType) {
-      if (!_isLoading) {
-        _controller.dispose();
-      }
       _currentFrame = 0;
       setState(() {
         _isLoading = true;
         _hasFrames = true; // 새로운 상태에서 다시 체크
       });
-      _setupAnimation();
+      _setupAnimation(); // Controller 재사용
     }
   }
 
   @override
   void dispose() {
-    if (!_isLoading) {
-      _controller.dispose();
-    }
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -176,9 +180,7 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
                 _hasFrames = false;
               });
               // 애니메이션 정지 (불필요한 프레임 로드 시도 방지)
-              if (!_isLoading) {
-                _controller.stop();
-              }
+              _controller?.stop();
             }
           });
           return _buildPlaceholder();

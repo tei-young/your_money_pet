@@ -103,11 +103,11 @@
 - **이유:** Midjourney로 빠른 프로토타이핑 가능, 디자인 유연성 향상
 - **상세 문서:** `docs/FRAME_ANIMATION_GUIDE.md`, `docs/ANIMATION_UPDATE_2025-12-13.md`
 
-**애니메이션 사양 (2025-12-16 업데이트):**
-- **포맷:** WebP (600x600px, 투명 배경)
+**애니메이션 사양 (2025-12-19 업데이트):**
+- **포맷:** PNG (600x600px, 투명 배경) / WebP 추후 변환 가능
 - **프레임 레이트:** 24fps (영화급 부드러움, Rive 수준)
-- **제작 툴:** Midjourney Video → ffmpeg 프레임 추출
-- **총 용량:** ~12MB (4 캐릭터 × 5 상태 × 평균 24프레임, WebP 압축)
+- **제작 툴:** Midjourney Video → ffmpeg PNG 추출
+- **총 용량:** ~12MB (PNG) / ~6MB (WebP 변환 시)
 
 **완료된 개발 작업:**
 - [x] 2025-12-13: 프레임 기반 애니메이션 시스템 구현
@@ -125,17 +125,27 @@
   - [x] `CharacterFrameAnimation.forStateAsync()` 추가
   - [x] `AnimatedCharacter` async 로딩 지원
   - [x] 코드 수정 없이 프레임 수 변경 가능
+- [x] 2025-12-19: PNG 지원 및 버그 수정
+  - [x] PNG 포맷 지원 (`.webp` → `.png`)
+  - [x] 상태 전환 에러 방지 로직
+  - [x] Placeholder fallback 개선
+  - [x] **AnimationController 크래시 수정** (치명적 버그)
+  - [x] SingleTickerProviderStateMixin → TickerProviderStateMixin
+  - [x] Controller 재사용 패턴 도입
+  - [x] hunter_cat idle/selected 테스트 완료
 
-**디자인팀 작업 (대기 중):**
-- [ ] Midjourney로 캐릭터별 5가지 상태 애니메이션 생성
-  - idle: 숨쉬기 루프 (24프레임, 1초)
-  - selected: 선택 반응 (20프레임, 0.8초)
-  - happy: 기쁨 표현 (30프레임, 1.2초)
-  - thinking: 생각하는 모습 (24프레임, 1초)
-  - confused: 혼란스러운 표현 (20프레임, 0.8초)
-- [ ] ffmpeg로 WebP 프레임 추출 (명령어는 `docs/FRAME_ANIMATION_GUIDE.md` 참고)
+**디자인팀 작업:**
+- [x] **헌터캣 (일부 완료)**
+  - [x] idle: 125프레임 (5초, 숨쉬기 루프) ✅
+  - [x] selected: 20프레임 (0.8초, 선택 반응) ✅
+  - [ ] happy: 30프레임 (1.2초)
+  - [ ] thinking: 24프레임 (1초)
+  - [ ] confused: 20프레임 (0.8초)
+- [ ] **머니베어, 세이브쉽, 체이서폭스**
+  - [ ] 각 5가지 상태 애니메이션 생성
+- [ ] ffmpeg로 PNG 프레임 추출 (명령어는 `docs/FRAME_ANIMATION_GUIDE.md` 참고)
   ```bash
-  ffmpeg -i input.gif -vf "fps=24,scale=600:600:flags=lanczos" -quality 90 frame_%02d.webp
+  ffmpeg -i input.mp4 -vf "fps=24,scale=600:600:flags=lanczos" frame_%02d.png
   ```
 - [ ] 프레임 파일을 `assets/animations/characters/[캐릭터ID]/[상태]/` 폴더에 배치
 

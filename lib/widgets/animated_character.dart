@@ -143,10 +143,8 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 캐릭터 애니메이션
-          if (_isLoading)
-            _buildPlaceholder() // 로딩 중
-          else if (_hasFrames)
+          // 캐릭터 애니메이션 (로딩 중에도 계속 표시)
+          if (_hasFrames && _animation != null)
             _buildFrameAnimation() // 프레임 애니메이션
           else
             _buildPlaceholder(), // 프레임 없음

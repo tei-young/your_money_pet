@@ -67,7 +67,13 @@
   - SingleTickerProviderStateMixin → TickerProviderStateMixin
   - Controller 재사용 패턴 도입
   - idle ↔ selected 전환 안정화
-- [x] 실제 프레임 파일 테스트 완료 (hunter_cat idle 125 프레임)
+- [x] **Placeholder 깜빡임 제거**
+  - 상태 전환 시 애니메이션 프레임 유지
+  - 부드러운 전환 효과
+- [x] **Selected 상태 강조 효과**
+  - 2중 글로우 효과 (캐릭터 색상 + 보라색)
+  - 프레임 수정 없이 코드로 구현
+- [x] 실제 프레임 파일 테스트 완료 (hunter_cat idle/selected)
 
 ### **2. 폴더 구조**
 ```

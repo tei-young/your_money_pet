@@ -134,47 +134,6 @@ else
 
 ---
 
-### 6. Selected 상태 강조 효과 추가
-**파일:** `lib/widgets/animated_character.dart:188-210`
-
-**목적:**
-- selected 상태일 때 캐릭터 강조 (글로우 효과)
-- 프레임 수정 없이 코드로 구현
-
-**구현:**
-```dart
-// selected 상태면 글로우 효과 추가
-return Container(
-  decoration: isSelected
-    ? BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: characterType.color.withOpacity(0.5),
-            blurRadius: 20,
-            spreadRadius: 5,
-          ),
-          BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
-            blurRadius: 12,
-            spreadRadius: 2,
-          ),
-        ],
-      )
-    : null,
-  child: frameImage,
-);
-```
-
-**효과:**
-- 2중 그림자로 빛나는 효과 연출
-- 캐릭터 색상 + 보라색 하이라이트
-- 프레임 작업 없이 즉시 적용 가능
-
-**커밋:** `34eea1a` - "Add glow effect for selected character state"
-
----
-
 ## 🎬 테스트 결과
 
 ### 동작 확인

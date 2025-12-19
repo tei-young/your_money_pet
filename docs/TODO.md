@@ -133,7 +133,6 @@
   - [x] SingleTickerProviderStateMixin → TickerProviderStateMixin
   - [x] Controller 재사용 패턴 도입
   - [x] **Placeholder 깜빡임 제거** (상태 전환 시)
-  - [x] **Selected 강조 효과** (2중 글로우)
   - [x] hunter_cat idle/selected 테스트 완료
 
 **디자인팀 작업:**

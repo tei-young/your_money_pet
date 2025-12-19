@@ -134,6 +134,37 @@ else
 
 ---
 
+### 6. 온보딩 화면 캐릭터 크기 증가
+**파일:**
+- `lib/screens/onboarding/character_preview_screen.dart:199`
+- `lib/screens/onboarding/personality_result_screen.dart:259`
+
+**목적:**
+- 온보딩 화면에서 캐릭터를 더 크게 표시 (1.8배)
+- 애니메이션 시각적 임팩트 향상
+
+**변경 사항:**
+```dart
+// 캐릭터 선택 화면
+AnimatedCharacter(
+  size: 180, // 100 → 180 (1.8배)
+)
+
+// 성향 결과 화면
+AnimatedCharacter(
+  size: 270, // 150 → 270 (1.8배)
+)
+```
+
+**효과:**
+- 캐릭터 선택 화면: 80% 크기 증가
+- 성향 결과 화면: 80% 크기 증가
+- 애니메이션 디테일 가시성 향상
+
+**커밋:** `c874ef2` - "Increase character size in onboarding screens (1.8x)"
+
+---
+
 ## 🎬 테스트 결과
 
 ### 동작 확인

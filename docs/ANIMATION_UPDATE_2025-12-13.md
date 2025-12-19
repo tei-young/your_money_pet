@@ -1,17 +1,17 @@
 # 캐릭터 애니메이션 전략 변경
 
 > **최초 작성**: 2025-12-13
-> **마지막 업데이트**: 2025-12-16 (고해상도 최적화)
+> **마지막 업데이트**: 2025-12-19 (PNG 지원 및 버그 수정)
 
 ## 🎯 핵심 결정
 
-### **Rive → 프레임 기반 (GIF/Video → WebP 추출)**
+### **Rive → 프레임 기반 (GIF/Video → PNG/WebP 추출)**
 
 | 항목 | 이전 (Rive) | 현재 (프레임 기반) |
 |------|------------|-------------------|
 | **제작 도구** | Rive Editor | Midjourney Video |
-| **파일 포맷** | .riv (벡터) | WebP (래스터, 압축) |
-| **파일 크기** | 200KB-1MB | 12MB (WebP 압축) |
+| **파일 포맷** | .riv (벡터) | PNG/WebP (래스터, 압축) |
+| **파일 크기** | 200KB-1MB | 12MB (PNG) / 6MB (WebP) |
 | **제작 난이도** | 높음 (리깅 필요) | 낮음 (AI 자동 생성) |
 | **제작 비용** | $500-2000 | $12/월 (Midjourney) |
 | **제작 시간** | 1-2주 | 1-2일 |
@@ -28,15 +28,19 @@
 
 ---
 
-## 📊 최종 스펙 (2025-12-16 업데이트)
+## 📊 최종 스펙 (2025-12-19 업데이트)
 
 ```
 제작 도구:  Midjourney Video
 프레임 수:   24fps (영화급 부드러움)
 해상도:      600x600px (Retina 3x 대응)
-포맷:        WebP (PNG 대비 용량 50% 절감)
-총 용량:     약 12MB (4 캐릭터 × 5 상태)
+포맷:        PNG (현재) / WebP (추후 변환 가능)
+총 용량:     약 12MB (PNG) / 6MB (WebP 변환 시)
 ```
+
+**포맷 선택:**
+- ✅ **PNG**: 현재 지원 중 (추출 간편, 투명 배경 보장)
+- 🔄 **WebP**: 추후 변환 가능 (용량 50% 절감)
 
 ---
 
@@ -54,6 +58,16 @@
 - [x] `CharacterFrameAnimation.forStateAsync()` 추가 (JSON 기반)
 - [x] `AnimatedCharacter` async 로딩 지원
 - [x] 코드 수정 없이 프레임 수 변경 가능
+
+### **개발팀 (2025-12-19 - PNG 지원 및 버그 수정)**
+- [x] PNG 포맷 지원 (`.webp` → `.png`)
+- [x] 상태 전환 시 에러 방지 로직 추가
+- [x] Placeholder fallback 개선 (불필요한 로드 방지)
+- [x] **AnimationController 크래시 수정** (치명적 버그)
+  - SingleTickerProviderStateMixin → TickerProviderStateMixin
+  - Controller 재사용 패턴 도입
+  - idle ↔ selected 전환 안정화
+- [x] 실제 프레임 파일 테스트 완료 (hunter_cat idle 125 프레임)
 
 ### **2. 폴더 구조**
 ```
@@ -82,19 +96,18 @@ assets/animations/characters/
 
 ## 🎬 다음 단계 (디자인팀)
 
-### **Phase 1: 헌터캣 Idle 테스트**
+### **Phase 1: 헌터캣 Idle 테스트** ✅ 완료
 
 1. Midjourney로 헌터캣 베이스 이미지 생성
-2. Midjourney Video로 Idle 영상 생성 (숨쉬기, 1초)
-3. ffmpeg로 24프레임 WebP 추출:
+2. Midjourney Video로 Idle 영상 생성 (숨쉬기, 5초)
+3. ffmpeg로 125프레임 PNG 추출:
    ```bash
-   ffmpeg -i hunter_cat_idle.gif \
+   ffmpeg -i hunter_cat_idle.mp4 \
      -vf "fps=24,scale=600:600:flags=lanczos" \
-     -quality 90 \
-     assets/animations/characters/hunter_cat/idle/frame_%02d.webp
+     assets/animations/characters/hunter_cat/idle/frame_%02d.png
    ```
 4. `flutter pub get` 실행
-5. 앱에서 확인
+5. 앱에서 확인 ✅
 
 ### **Phase 2: 전체 제작**
 
@@ -132,44 +145,59 @@ vim assets/animations/characters/hunter_cat/animation_config.json
 
 ---
 
-### **2. 프레임 파일 생성 (권장 방식)**
+### **2. 프레임 파일 생성**
 
+**방법 1: PNG 추출 (권장, 현재 지원)**
 ```bash
-# Midjourney에서 다운로드한 GIF/MP4를 WebP 프레임으로 추출
-ffmpeg -i input.gif \
+# Midjourney에서 다운로드한 GIF/MP4를 PNG 프레임으로 추출
+ffmpeg -i input.mp4 \
   -vf "fps=24,scale=600:600:flags=lanczos" \
-  -quality 90 \
-  -start_number 1 \
-  frame_%02d.webp
+  frame_%02d.png
+```
+
+**방법 2: WebP 변환 (용량 절감, 추후)**
+```bash
+# PNG → WebP 변환 (50% 용량 절감)
+for file in frame_*.png; do
+  ffmpeg -i "$file" -quality 90 "${file%.png}.webp"
+done
+
+# 코드도 .png → .webp로 변경 필요
+# lib/models/character_frame_animation.dart:28
 ```
 
 **옵션 설명:**
 - `fps=24`: 24fps (부드러움)
 - `scale=600:600`: 고해상도
 - `flags=lanczos`: 고품질 리샘플링
-- `quality=90`: WebP 품질 (90 = 거의 무손실)
+- `quality=90`: WebP 품질 (90 = 거의 무손실, WebP 전용)
 
-### **2. 폴더에 배치**
+### **3. 폴더에 배치**
 
 ```
 assets/animations/characters/hunter_cat/idle/
-├── frame_01.webp
-├── frame_02.webp
-└── frame_24.webp
+├── frame_01.png
+├── frame_02.png
+└── frame_125.png  (헌터캣은 125프레임)
 ```
 
-**중요:** 파일명은 반드시 `frame_01.webp` 형식!
+**중요:** 파일명은 반드시 `frame_01.png` 형식! (01부터, 2자리 패딩)
 
-### **3. flutter pub get 실행**
+### **4. flutter pub get 실행**
 
 ```bash
 cd your_money_pet
 flutter pub get
 ```
 
-### **4. 앱에서 자동 적용**
+### **5. 앱에서 자동 적용**
 
 프레임 파일만 배치하면 AnimatedCharacter 위젯이 자동으로 사용합니다!
+
+**테스트 결과 (2025-12-19):**
+- ✅ hunter_cat idle: 125프레임 정상 재생
+- ✅ hunter_cat selected: 20프레임 one-shot 재생
+- ✅ 다른 캐릭터: placeholder 안전하게 표시
 
 ---
 

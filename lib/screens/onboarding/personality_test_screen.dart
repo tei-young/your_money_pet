@@ -213,17 +213,17 @@ class _PersonalityTestScreenState extends State<PersonalityTestScreen> {
                 ),
                 child: Column(
                   children: [
-                    const SizedBox(height: 120),
+                    const SizedBox(height: 40), // 120 → 40
 
                     // 캐릭터 + 말풍선
                     _buildCharacterWithBubble(),
 
-                    const SizedBox(height: 60),
+                    const SizedBox(height: 32), // 60 → 32
 
                     // 질문
                     _buildQuestion(question.question),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24), // 32 → 24
 
                     // 선택지
                     ...question.options.map(

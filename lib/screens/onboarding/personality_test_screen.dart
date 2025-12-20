@@ -295,7 +295,7 @@ class _PersonalityTestScreenState extends State<PersonalityTestScreen> {
           characterType: selectedCharacter,
           state: CharacterAnimationState.idle,
           customDialogue: config.quizGreeting,
-          size: 80,
+          size: 160, // 80 → 160 (2배)
         ),
       ],
     );

@@ -196,6 +196,28 @@ const SizedBox(height: 24), // 40 → 24 (캐릭터 사이)
 
 ---
 
+### 8. 성향 테스트 화면 캐릭터 크기 증가
+**파일:** `lib/screens/onboarding/personality_test_screen.dart:298`
+
+**목적:**
+- 성향 테스트 중 표시되는 캐릭터를 더 크게 표시
+- 다른 온보딩 화면과 일관성 유지
+
+**변경:**
+```dart
+AnimatedCharacter(
+  size: 160, // 80 → 160 (2배)
+)
+```
+
+**효과:**
+- 성향 테스트 중 캐릭터 가시성 향상
+- 온보딩 전체 캐릭터 크기 통일감
+
+**커밋:** `8119b82` - "Increase character size in personality test screen"
+
+---
+
 ## 🎬 테스트 결과
 
 ### 동작 확인

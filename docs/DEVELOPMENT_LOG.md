@@ -218,6 +218,29 @@ AnimatedCharacter(
 
 ---
 
+### 9. 성향 테스트 화면 레이아웃 위치 조정
+**파일:** `lib/screens/onboarding/personality_test_screen.dart`
+
+**목적:**
+- 캐릭터와 질문을 화면 상단으로 이동
+- 전체 레이아웃 가시성 향상
+
+**변경:**
+```dart
+const SizedBox(height: 40), // 120 → 40 (상단 여백)
+const SizedBox(height: 32), // 60 → 32 (캐릭터-질문 간격)
+const SizedBox(height: 24), // 32 → 24 (질문-선택지 간격)
+```
+
+**효과:**
+- 총 116px 위로 이동
+- 캐릭터와 질문이 더 잘 보임
+- 선택지까지 한 화면에 노출
+
+**커밋:** `322b5cf` - "Reduce top spacing in personality test screen"
+
+---
+
 ## 🎬 테스트 결과
 
 ### 동작 확인

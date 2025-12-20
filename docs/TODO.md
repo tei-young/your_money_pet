@@ -133,7 +133,8 @@
   - [x] SingleTickerProviderStateMixin → TickerProviderStateMixin
   - [x] Controller 재사용 패턴 도입
   - [x] **Placeholder 깜빡임 제거** (상태 전환 시)
-  - [x] **온보딩 캐릭터 크기 증가** (1.8배)
+  - [x] **온보딩 캐릭터 크기 증가**
+    - 캐릭터 선택: 100→180, 성향 결과: 150→270, 성향 테스트: 80→160
   - [x] **오버플로우 수정** (패딩/간격 최적화)
   - [x] hunter_cat idle/selected 테스트 완료
 

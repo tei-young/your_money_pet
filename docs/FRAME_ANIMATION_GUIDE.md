@@ -1,7 +1,7 @@
 # 🎬 머니펫 프레임 기반 애니메이션 가이드
 
 > **최종 결정**: GIF/Video → PNG 프레임 추출 방식
-> **업데이트**: 2025-12-13
+> **업데이트**: 2025-12-19 (PNG 지원 및 버그 수정)
 
 ---
 
@@ -18,17 +18,17 @@
 
 ## 1. 핵심 결정사항
 
-### ✅ 최종 스펙 (2025-12-16 업데이트)
+### ✅ 최종 스펙 (2025-12-19 업데이트)
 
 | 항목 | 스펙 | 이유 |
 |------|------|------|
 | **제작 도구** | Midjourney (Video) | 구독 플랜에서 영상 생성 가능 |
 | **프레임 수** | 24fps | 영화급 부드러움, Rive 수준 |
 | **해상도** | 600x600px | 고해상도 디바이스 대응 (Retina 3x) |
-| **포맷** | WebP | 용량 50% 절감, PNG 대비 효율적 |
+| **포맷** | PNG (현재) / WebP (추후) | PNG 추출 간편, WebP 변환 시 50% 용량 절감 |
 | **총 캐릭터** | 4개 | 머니베어, 세이브쉽, 헌터캣, 체이서폭스 |
 | **총 상태** | 5개 | Idle, Selected, Happy, Thinking, Confused |
-| **총 용량** | 약 12MB | 4 캐릭터 × 5 상태 × 평균 24프레임 (WebP 압축) |
+| **총 용량** | 약 12MB (PNG) / 6MB (WebP) | 4 캐릭터 × 5 상태 × 평균 24프레임 |
 
 ### ✅ 필수 조건 충족
 
@@ -130,41 +130,37 @@ brew install ffmpeg
 https://ffmpeg.org/download.html
 ```
 
-**추출 명령어 (권장: 24fps, 600x600, WebP):**
+**추출 명령어 (권장: 24fps, 600x600, PNG):**
 ```bash
-# GIF → WebP 프레임 추출 (한 번에 처리)
+# GIF → PNG 프레임 추출
 ffmpeg -i hunter_cat_idle.gif \
   -vf "fps=24,scale=600:600:flags=lanczos" \
-  -quality 90 \
-  -start_number 1 \
-  assets/animations/characters/hunter_cat/idle/frame_%02d.webp
+  assets/animations/characters/hunter_cat/idle/frame_%02d.png
 
-# MP4 → WebP 프레임 추출
+# MP4 → PNG 프레임 추출
 ffmpeg -i hunter_cat_idle.mp4 \
   -vf "fps=24,scale=600:600:flags=lanczos" \
-  -quality 90 \
-  -start_number 1 \
-  assets/animations/characters/hunter_cat/idle/frame_%02d.webp
+  assets/animations/characters/hunter_cat/idle/frame_%02d.png
 
 # 결과:
-# frame_01.webp, frame_02.webp, ..., frame_24.webp
+# frame_01.png, frame_02.png, ..., frame_24.png
 ```
 
 **옵션 설명:**
 - `fps=24`: 24fps로 추출 (영화급 부드러움)
 - `scale=600:600`: 고해상도 (Retina 3x 대응)
 - `flags=lanczos`: 고품질 리샘플링
-- `quality=90`: WebP 품질 (90 = 거의 무손실)
 
-**2단계 방식 (PNG → WebP):**
+**WebP 변환 (추후 용량 절감 시):**
 ```bash
-# 1단계: GIF → PNG 추출
-ffmpeg -i idle.gif -vf "fps=24,scale=600:600:flags=lanczos" frame_%02d.png
-
-# 2단계: PNG → WebP 변환 (일괄)
+# 1단계: PNG → WebP 변환 (일괄)
 for file in frame_*.png; do
   ffmpeg -i "$file" -quality 90 "${file%.png}.webp"
 done
+
+# 2단계: 코드 수정 필요
+# lib/models/character_frame_animation.dart:28
+# .png → .webp로 변경
 
 # 3단계: PNG 삭제 (선택사항)
 rm frame_*.png
@@ -180,12 +176,12 @@ rm frame_*.png
 assets/animations/characters/
 └── hunter_cat/
     └── idle/
-        ├── frame_01.webp
-        ├── frame_02.webp
+        ├── frame_01.png
+        ├── frame_02.png
         └── ... (프레임 수만큼)
 ```
 
-**중요:** 파일명은 반드시 `frame_01.webp`, `frame_02.webp` 형식!
+**중요:** 파일명은 반드시 `frame_01.png`, `frame_02.png` 형식!
 
 ---
 
@@ -234,9 +230,9 @@ assets/animations/characters/
 ├── hunter_cat/
 │   ├── animation_config.json  ← 프레임 수 설정
 │   ├── idle/                  (24 frames, 1초 루프)
-│   │   ├── frame_01.webp
-│   │   ├── frame_02.webp
-│   │   └── frame_24.webp
+│   │   ├── frame_01.png
+│   │   ├── frame_02.png
+│   │   └── frame_24.png
 │   ├── selected/              (20 frames, 0.8초 one-shot)
 │   │   └── ...
 │   ├── happy/                 (30 frames, 1.2초 one-shot)
@@ -653,5 +649,5 @@ ffmpeg -i input.png -vf "colorkey=white:0.3:0.2" -pix_fmt rgba output.png
 ---
 
 **작성일**: 2025-12-13
-**마지막 업데이트**: 2025-12-13
+**마지막 업데이트**: 2025-12-19 (PNG 지원, 버그 수정, 온보딩 화면 개선)
 **담당**: Development Team

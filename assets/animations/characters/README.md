@@ -1,6 +1,6 @@
 # 캐릭터 애니메이션 프레임
 
-> **업데이트**: 2025-12-16 (24fps, 600x600, WebP)
+> **업데이트**: 2025-12-19 (24fps, 600x600, PNG)
 
 이 폴더는 프레임 기반 캐릭터 애니메이션 파일을 저장하는 곳입니다.
 
@@ -25,17 +25,17 @@ characters/
 각 상태 폴더 안에 프레임 파일을 배치하세요:
 
 ```
-frame_01.webp
-frame_02.webp
-frame_03.webp
+frame_01.png
+frame_02.png
+frame_03.png
 ...
-frame_24.webp
+frame_24.png
 ```
 
 **중요:**
-- 반드시 `frame_01.webp` 형식 (2자리 숫자)
+- 반드시 `frame_01.png` 형식 (2자리 숫자)
 - 소문자 사용
-- WebP 포맷 (고품질, 용량 효율적)
+- PNG 포맷 (현재 지원, 투명 배경 보장)
 
 ## 🎬 사용 방법
 
@@ -51,26 +51,30 @@ children's book style --ar 1:1 --v 6"
 ### 2. ffmpeg로 프레임 추출 (권장)
 
 ```bash
-# GIF → WebP 프레임 추출 (24fps, 600x600px, 고품질)
+# GIF → PNG 프레임 추출 (24fps, 600x600px, 고품질)
 ffmpeg -i hunter_cat_idle.gif \
   -vf "fps=24,scale=600:600:flags=lanczos" \
-  -quality 90 \
-  -start_number 1 \
-  hunter_cat/idle/frame_%02d.webp
+  hunter_cat/idle/frame_%02d.png
 
-# MP4 → WebP 프레임 추출
+# MP4 → PNG 프레임 추출
 ffmpeg -i hunter_cat_idle.mp4 \
   -vf "fps=24,scale=600:600:flags=lanczos" \
-  -quality 90 \
-  -start_number 1 \
-  hunter_cat/idle/frame_%02d.webp
+  hunter_cat/idle/frame_%02d.png
 ```
 
 **옵션 설명:**
 - `fps=24`: 24fps (부드러움)
 - `scale=600:600`: 고해상도 (Retina 대응)
 - `flags=lanczos`: 고품질 리샘플링
-- `quality=90`: WebP 품질 (90 = 거의 무손실)
+
+**WebP 변환 (추후 용량 절감):**
+```bash
+# PNG → WebP 변환 (50% 용량 절감)
+for file in frame_*.png; do
+  ffmpeg -i "$file" -quality 90 "${file%.png}.webp"
+done
+# 코드 수정도 필요 (lib/models/character_frame_animation.dart:28)
+```
 
 ### 3. animation_config.json 수정 (선택)
 
@@ -94,8 +98,8 @@ ffmpeg -i hunter_cat_idle.mp4 \
 
 ```
 assets/animations/characters/hunter_cat/idle/
-├── frame_01.webp
-├── frame_02.webp
+├── frame_01.png
+├── frame_02.png
 └── ...
 ```
 

@@ -1,7 +1,7 @@
 # 캐릭터 애니메이션 전략 변경
 
 > **최초 작성**: 2025-12-13
-> **마지막 업데이트**: 2025-12-19 (PNG 지원 및 버그 수정)
+> **마지막 업데이트**: 2025-12-23 (애니메이션 상태 체계 재설계: 5개 → 10개 상태)
 
 ## 🎯 핵심 결정
 
@@ -28,14 +28,15 @@
 
 ---
 
-## 📊 최종 스펙 (2025-12-19 업데이트)
+## 📊 최종 스펙 (2025-12-23 업데이트)
 
 ```
 제작 도구:  Midjourney Video
 프레임 수:   24fps (영화급 부드러움)
 해상도:      600x600px (Retina 3x 대응)
 포맷:        PNG (현재) / WebP (추후 변환 가능)
-총 용량:     약 12MB (PNG) / 6MB (WebP 변환 시)
+상태 수:     10개 (Greeting, Selected, Idle, Thinking, Happy, Confused, Home 4개)
+총 용량:     약 40MB (PNG) / 20MB (WebP 변환 시)
 ```
 
 **포맷 선택:**
@@ -83,19 +84,56 @@
   - 전체 콘텐츠 가시성 향상
 - [x] 실제 프레임 파일 테스트 완료 (hunter_cat idle/selected)
 
-### **2. 폴더 구조**
+### **개발팀 (2025-12-23 - 애니메이션 상태 체계 재설계)**
+- [x] **애니메이션 상태 시스템 재설계 (5개 → 10개)**
+  - 기존 "idle" → "greeting"으로 재정의 (손 흔들며 인사)
+  - 새로운 "idle" 개념 추가 (조용한 대기, 5초 복합 애니메이션)
+  - 홈 화면 전용 상태 4개 추가
+- [x] **CharacterAnimationState enum 확장** (8개 → 14개 상태)
+  - 카테고리 1: 캐릭터 선택 화면 (greeting, selected)
+  - 카테고리 2: 범용 상태 (idle, thinking, happy, confused)
+  - 카테고리 3: 홈 화면 전용 (homeStudying, homeExcited, homeSleepy, homeCelebration)
+- [x] **애니메이션 프리셋 업데이트** (CharacterFrameAnimation.forState)
+  - 10개 상태별 프레임 수 및 지속 시간 설정
+  - loop 설정 (greeting/idle/home: true, selected/happy/confused: false)
+- [x] **폴더 구조 재편**
+  - 기존 `idle/` 폴더 → `greeting/` 폴더로 이름 변경 (git mv)
+  - 새로운 폴더 생성: `idle/`, `home_studying/`, `home_excited/`, `home_sleepy/`, `home_celebration/`
+  - 4개 캐릭터 × 5개 폴더 = 20개 폴더 생성
+- [x] **animation_config.json 업데이트**
+  - 4개 캐릭터 설정 파일 전체 재작성
+  - 10개 상태별 frameCount, frameDuration, loop, description 설정
+- [x] **pubspec.yaml 업데이트**
+  - 40개 애니메이션 폴더 경로 등록 (4캐릭터 × 10상태)
+- [x] **화면별 상태 적용**
+  - 캐릭터 선택 화면: idle → greeting
+  - 성향 테스트 화면: idle → thinking
+  - 프리로더: idle → greeting
+- [x] **문서 업데이트**
+  - DEVELOPMENT_LOG.md: 2025-12-23 섹션 추가
+  - TODO.md: 10-state 시스템 반영
+  - FRAME_ANIMATION_GUIDE.md: 전체 재작성
+  - characters/README.md: 폴더 구조 및 사용법 업데이트
+  - README.md: 애니메이션 섹션 업데이트
+
+### **2. 폴더 구조 (2025-12-23 업데이트)**
 ```
 assets/animations/characters/
 ├── hunter_cat/
-│   ├── animation_config.json  ← 신규: 프레임 수 설정
-│   ├── idle/
-│   ├── selected/
-│   └── ...
-├── money_bear/
-│   ├── animation_config.json
-│   └── ...
-├── save_sheep/
-└── chaser_fox/
+│   ├── animation_config.json     ← JSON 설정 (10개 상태)
+│   ├── greeting/                 (손 흔들며 인사, 125 frames)
+│   ├── selected/                 (선택 반응, 20 frames)
+│   ├── idle/                     (조용한 대기, 120 frames)
+│   ├── thinking/                 (생각, 24 frames)
+│   ├── happy/                    (기쁨, 30 frames)
+│   ├── confused/                 (혼란, 20 frames)
+│   ├── home_studying/            (책 읽기, 60 frames)
+│   ├── home_excited/             (활기참, 48 frames)
+│   ├── home_sleepy/              (졸림, 72 frames)
+│   └── home_celebration/         (목표 달성, 36 frames)
+├── money_bear/                   (동일한 10개 폴더)
+├── save_sheep/                   (동일한 10개 폴더)
+└── chaser_fox/                   (동일한 10개 폴더)
 ```
 
 ### **3. 문서화**
@@ -110,24 +148,30 @@ assets/animations/characters/
 
 ## 🎬 다음 단계 (디자인팀)
 
-### **Phase 1: 헌터캣 Idle 테스트** ✅ 완료
+### **Phase 1: 헌터캣 Greeting/Selected 테스트** ✅ 완료
 
 1. Midjourney로 헌터캣 베이스 이미지 생성
-2. Midjourney Video로 Idle 영상 생성 (숨쉬기, 5초)
+2. Midjourney Video로 Greeting 영상 생성 (손 흔들며 인사, 5.2초)
 3. ffmpeg로 125프레임 PNG 추출:
    ```bash
-   ffmpeg -i hunter_cat_idle.mp4 \
+   ffmpeg -i hunter_cat_greeting.mp4 \
      -vf "fps=24,scale=600:600:flags=lanczos" \
-     assets/animations/characters/hunter_cat/idle/frame_%02d.png
+     assets/animations/characters/hunter_cat/greeting/frame_%02d.png
    ```
-4. `flutter pub get` 실행
-5. 앱에서 확인 ✅
+4. Selected 영상 생성 및 추출 (20프레임)
+5. `flutter pub get` 실행
+6. 앱에서 확인 ✅
 
-### **Phase 2: 전체 제작**
+### **Phase 2: 전체 제작 (2025-12-23 업데이트)**
 
-- 나머지 4개 상태 제작 (헌터캣)
-- 나머지 3개 캐릭터 제작
-- 총 20개 애니메이션 완성
+**현재 상태:**
+- ✅ 완료: 2개 (헌터캣 greeting, selected)
+- 🔴 필요: 37개 남음
+
+**제작 계획:**
+- 나머지 8개 상태 제작 (헌터캣: idle, thinking, happy, confused, home 4개)
+- 나머지 3개 캐릭터 × 10개 상태 = 30개
+- **총 39개 애니메이션 완성** (현재 2/39 완료)
 
 ---
 
@@ -140,13 +184,27 @@ assets/animations/characters/
 # 1. animation_config.json 파일 열기
 vim assets/animations/characters/hunter_cat/animation_config.json
 
-# 2. frameCount 수정
+# 2. frameCount 수정 (10개 상태 예시)
 {
-  "idle": {
-    "frameCount": 125,  # 5초 영상 = 125프레임 (24fps)
+  "greeting": {
+    "frameCount": 125,  # 5.2초 영상 = 125프레임 (24fps)
     "frameDuration": 42,
-    "loop": true
+    "loop": true,
+    "description": "손 흔들며 인사"
+  },
+  "idle": {
+    "frameCount": 120,  # 5초 영상 = 120프레임 (복합 애니메이션)
+    "frameDuration": 42,
+    "loop": true,
+    "description": "조용한 대기"
+  },
+  "homeStudying": {
+    "frameCount": 60,   # 2.5초 영상 = 60프레임
+    "frameDuration": 42,
+    "loop": true,
+    "description": "책 읽기"
   }
+  // ... 나머지 7개 상태
 }
 
 # 3. 앱 재실행 → 자동 적용 ✅
@@ -189,10 +247,15 @@ done
 ### **3. 폴더에 배치**
 
 ```
+assets/animations/characters/hunter_cat/greeting/
+├── frame_01.png
+├── frame_02.png
+└── frame_125.png  (헌터캣 greeting은 125프레임)
+
 assets/animations/characters/hunter_cat/idle/
 ├── frame_01.png
 ├── frame_02.png
-└── frame_125.png  (헌터캣은 125프레임)
+└── frame_120.png  (헌터캣 idle은 120프레임)
 ```
 
 **중요:** 파일명은 반드시 `frame_01.png` 형식! (01부터, 2자리 패딩)
@@ -208,9 +271,10 @@ flutter pub get
 
 프레임 파일만 배치하면 AnimatedCharacter 위젯이 자동으로 사용합니다!
 
-**테스트 결과 (2025-12-19):**
-- ✅ hunter_cat idle: 125프레임 정상 재생
+**테스트 결과 (2025-12-23 업데이트):**
+- ✅ hunter_cat greeting: 125프레임 정상 재생 (loop)
 - ✅ hunter_cat selected: 20프레임 one-shot 재생
+- 🔴 나머지 8개 상태: placeholder 표시 (제작 대기)
 - ✅ 다른 캐릭터: placeholder 안전하게 표시
 
 ---

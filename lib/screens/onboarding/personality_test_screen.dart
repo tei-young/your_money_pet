@@ -293,7 +293,7 @@ class _PersonalityTestScreenState extends State<PersonalityTestScreen> {
         // 선택된 캐릭터 표시
         AnimatedCharacter(
           characterType: selectedCharacter,
-          state: CharacterAnimationState.idle,
+          state: CharacterAnimationState.thinking,
           customDialogue: config.quizGreeting,
           size: 160, // 80 → 160 (2배)
         ),

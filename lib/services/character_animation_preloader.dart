@@ -6,9 +6,9 @@ import '../models/character_frame_animation.dart';
 ///
 /// 사용자 경험 최적화를 위해 프레임 이미지를 미리 메모리에 로드합니다.
 class CharacterAnimationPreloader {
-  /// 모든 캐릭터의 Idle 상태 로드 (Welcome Screen용)
+  /// 모든 캐릭터의 Greeting 상태 로드 (캐릭터 선택 화면용)
   ///
-  /// 4개 캐릭터 × 12프레임 = 48개 이미지 (약 2MB)
+  /// 4개 캐릭터 × 125프레임 = 500개 이미지 (약 20MB)
   /// 예상 시간: 2-3초 (WiFi 기준)
   static Future<void> loadAllIdleStates(BuildContext context) async {
     final characters = [
@@ -22,7 +22,7 @@ class CharacterAnimationPreloader {
       characters.map((characterId) => _loadCharacterState(
             context,
             characterId,
-            CharacterAnimationState.idle,
+            CharacterAnimationState.greeting,
           )),
     );
   }

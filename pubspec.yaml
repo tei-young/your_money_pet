@@ -63,32 +63,52 @@ flutter:
 
     # 캐릭터 애니메이션 프레임 (프레임 파일 추가 시 자동 인식)
     # 헌터캣
-    - assets/animations/characters/hunter_cat/idle/
+    - assets/animations/characters/hunter_cat/greeting/
     - assets/animations/characters/hunter_cat/selected/
-    - assets/animations/characters/hunter_cat/happy/
+    - assets/animations/characters/hunter_cat/idle/
     - assets/animations/characters/hunter_cat/thinking/
+    - assets/animations/characters/hunter_cat/happy/
     - assets/animations/characters/hunter_cat/confused/
+    - assets/animations/characters/hunter_cat/home_studying/
+    - assets/animations/characters/hunter_cat/home_excited/
+    - assets/animations/characters/hunter_cat/home_sleepy/
+    - assets/animations/characters/hunter_cat/home_celebration/
 
     # 머니베어
-    - assets/animations/characters/money_bear/idle/
+    - assets/animations/characters/money_bear/greeting/
     - assets/animations/characters/money_bear/selected/
-    - assets/animations/characters/money_bear/happy/
+    - assets/animations/characters/money_bear/idle/
     - assets/animations/characters/money_bear/thinking/
+    - assets/animations/characters/money_bear/happy/
     - assets/animations/characters/money_bear/confused/
+    - assets/animations/characters/money_bear/home_studying/
+    - assets/animations/characters/money_bear/home_excited/
+    - assets/animations/characters/money_bear/home_sleepy/
+    - assets/animations/characters/money_bear/home_celebration/
 
     # 세이브쉽
-    - assets/animations/characters/save_sheep/idle/
+    - assets/animations/characters/save_sheep/greeting/
     - assets/animations/characters/save_sheep/selected/
-    - assets/animations/characters/save_sheep/happy/
+    - assets/animations/characters/save_sheep/idle/
     - assets/animations/characters/save_sheep/thinking/
+    - assets/animations/characters/save_sheep/happy/
     - assets/animations/characters/save_sheep/confused/
+    - assets/animations/characters/save_sheep/home_studying/
+    - assets/animations/characters/save_sheep/home_excited/
+    - assets/animations/characters/save_sheep/home_sleepy/
+    - assets/animations/characters/save_sheep/home_celebration/
 
     # 체이서폭스
-    - assets/animations/characters/chaser_fox/idle/
+    - assets/animations/characters/chaser_fox/greeting/
     - assets/animations/characters/chaser_fox/selected/
-    - assets/animations/characters/chaser_fox/happy/
+    - assets/animations/characters/chaser_fox/idle/
     - assets/animations/characters/chaser_fox/thinking/
+    - assets/animations/characters/chaser_fox/happy/
     - assets/animations/characters/chaser_fox/confused/
+    - assets/animations/characters/chaser_fox/home_studying/
+    - assets/animations/characters/chaser_fox/home_excited/
+    - assets/animations/characters/chaser_fox/home_sleepy/
+    - assets/animations/characters/chaser_fox/home_celebration/
 
   # 폰트 (나중에 추가)
   # fonts:

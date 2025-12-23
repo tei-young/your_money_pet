@@ -1,5 +1,304 @@
 # MoneyPet 개발 로그
 
+## 📅 2025-12-23 세션: 애니메이션 상태 체계 재설계
+
+### 🎯 목표
+애니메이션 상태 시스템 전면 개편 (5개 → 10개 상태)
+
+---
+
+## ✅ 완료된 작업
+
+### 1. 기존 문제 발견
+**문제점:**
+- 기존 "idle"이 실제로는 "손 흔드는 greeting" 애니메이션
+- 진짜 idle (조용한 대기) 상태가 없음
+- 홈 화면용 다양한 상태 부족
+
+### 2. CharacterAnimationState enum 확장
+**파일:** `lib/models/character_animation_config.dart`
+
+**변경:** 8개 → 14개 상태 (실제 사용 10개)
+
+```dart
+enum CharacterAnimationState {
+  // 카테고리 1: 캐릭터 선택 화면 전용 (2개)
+  greeting,  // 손 흔들며 인사 (구 idle, 125 frames)
+  selected,  // 선택됨 반응
+
+  // 카테고리 2: 범용 상태 (4개)
+  idle,      // 진짜 조용한 대기 (120 frames, 5초 복합)
+  thinking,  // 퀴즈 문제 표시
+  happy,     // 정답/긍정 피드백
+  confused,  // 오답/부정 피드백
+
+  // 카테고리 3: 홈 화면 전용 (4개)
+  homeStudying,     // 책 읽기 (60 frames)
+  homeExcited,      // 활기찬 모습 (48 frames)
+  homeSleepy,       // 졸린 모습 (72 frames)
+  homeCelebration,  // 목표 달성 (36 frames)
+
+  // 퀴즈 반응 (기존 호환성 유지)
+  reactionPositive,
+  reactionNegative,
+  reactionNeutral,
+}
+```
+
+**커밋:** `94c0a91` - "Redesign animation state system: 5 → 10 states"
+
+---
+
+### 3. 폴더 구조 변경
+**작업:**
+- ✅ `idle/` → `greeting/` 이름 변경 (4개 캐릭터 전체)
+- ✅ 새로운 폴더 생성:
+  - `idle/` (새로운 개념)
+  - `home_studying/`
+  - `home_excited/`
+  - `home_sleepy/`
+  - `home_celebration/`
+
+**결과:**
+```
+assets/animations/characters/
+├── hunter_cat/
+│   ├── greeting/              (125 frames, 구 idle)
+│   ├── selected/              (20 frames)
+│   ├── idle/                  (120 frames, 신규)
+│   ├── thinking/              (24 frames)
+│   ├── happy/                 (30 frames)
+│   ├── confused/              (20 frames)
+│   ├── home_studying/         (60 frames, 신규)
+│   ├── home_excited/          (48 frames, 신규)
+│   ├── home_sleepy/           (72 frames, 신규)
+│   └── home_celebration/      (36 frames, 신규)
+```
+
+---
+
+### 4. Idle 애니메이션 개념 재정의
+**기존:** 단순 숨쉬기 애니메이션
+**신규:** 5초 복합 애니메이션 - 캐릭터 성향 표현
+
+**헌터캣 예시 (5초 구성):**
+- 0-2초: 조용한 숨쉬기 (날카로운 눈빛)
+- 2-3초: 윙크 (사냥꾼 본능)
+- 3-4초: 귀 쫑긋 (집중력)
+- 4-5초: 편안한 복귀
+
+**캐릭터별 차별화:**
+- 🐱 헌터캣: 날카로움, 기민함 → 윙크, 귀 쫑긋
+- 🐻 머니베어: 든든함, 신뢰 → 팔짱, 고개 끄덕임
+- 🐑 세이브쉽: 부드러움, 조화 → 고개 기울임, 미소
+- 🦊 체이서폭스: 영리함, 호기심 → 꼬리 흔들기, 장난기
+
+**핵심:** 같은 "idle"이지만 각 캐릭터의 성향이 명확히 표현됨
+
+---
+
+### 5. character_frame_animation.dart 업데이트
+**파일:** `lib/models/character_frame_animation.dart:67-171`
+
+**추가된 상태 프리셋:**
+```dart
+// 카테고리 1: 캐릭터 선택 화면
+case CharacterAnimationState.greeting:
+  return CharacterFrameAnimation(
+    frameCount: 125,  // 5.2초
+    loop: true,
+  );
+
+// 카테고리 2: 범용 상태
+case CharacterAnimationState.idle:
+  return CharacterFrameAnimation(
+    frameCount: 120,  // 5초 복합 애니메이션
+    loop: true,
+  );
+
+// 카테고리 3: 홈 화면 전용
+case CharacterAnimationState.homeStudying:
+  return CharacterFrameAnimation(
+    frameCount: 60,  // 2.5초
+    loop: true,
+  );
+// ... (나머지 3개 상태)
+```
+
+---
+
+### 6. 코드 사용처 업데이트
+**수정된 파일:**
+- `lib/screens/onboarding/character_preview_screen.dart:197`
+  - `CharacterAnimationState.idle` → `CharacterAnimationState.greeting`
+
+- `lib/screens/onboarding/personality_test_screen.dart:296`
+  - `CharacterAnimationState.idle` → `CharacterAnimationState.thinking`
+  - (더 적절한 상태로 변경)
+
+- `lib/services/character_animation_preloader.dart:13-27`
+  - `loadAllIdleStates()` → `CharacterAnimationState.greeting` 로드
+  - 주석 업데이트: "Greeting 상태 로드 (캐릭터 선택 화면용)"
+
+---
+
+### 7. animation_config.json 업데이트
+**파일:** 4개 캐릭터 모두 업데이트
+
+**변경 사항:**
+```json
+{
+  "greeting": {  // idle → greeting으로 이름 변경
+    "frameCount": 125,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "손 흔들며 인사 (5.2초)"
+  },
+  "idle": {  // 새로운 idle 추가
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "조용한 대기 - 복합 애니메이션 (5초)"
+  },
+  "homeStudying": {  // 신규
+    "frameCount": 60,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "책 읽기 (2.5초)"
+  },
+  // ... 나머지 홈 화면 상태 3개
+}
+```
+
+---
+
+### 8. pubspec.yaml 업데이트
+**파일:** `pubspec.yaml:66-111`
+
+**추가된 폴더 경로:**
+```yaml
+# 각 캐릭터마다 10개 폴더 추가
+- assets/animations/characters/hunter_cat/greeting/
+- assets/animations/characters/hunter_cat/idle/
+- assets/animations/characters/hunter_cat/home_studying/
+- assets/animations/characters/hunter_cat/home_excited/
+- assets/animations/characters/hunter_cat/home_sleepy/
+- assets/animations/characters/hunter_cat/home_celebration/
+# ... (나머지 3개 캐릭터도 동일)
+```
+
+---
+
+### 9. 문서 업데이트
+
+#### FRAME_ANIMATION_GUIDE.md
+**추가/수정 섹션:**
+- ✅ 최종 스펙: 5개 → 10개 상태, 용량 12MB → 40MB
+- ✅ "애니메이션 상태 체계 (2025-12-23 재설계)" 섹션 추가
+  - 카테고리 1, 2, 3 상세 설명
+  - Idle 애니메이션 개념 (5초 복합 구성)
+  - 캐릭터별 차별화 전략
+- ✅ Motion 지시 업데이트: 10개 상태 전체
+- ✅ 폴더 구조 업데이트
+- ✅ animation_config.json 예시 업데이트
+
+#### assets/animations/characters/README.md
+**추가/수정 섹션:**
+- ✅ 폴더 구조: 10개 상태 표시
+- ✅ "상태 체계 (2025-12-23 재설계)" 섹션 추가
+- ✅ ffmpeg 명령어: greeting, idle 예시로 변경
+- ✅ animation_config.json 예시 업데이트
+
+---
+
+## 📊 변경 요약
+
+| 항목 | 이전 | 현재 |
+|------|------|------|
+| **상태 수** | 5개 | 10개 |
+| **enum 크기** | 8개 | 14개 (퀴즈 반응 포함) |
+| **총 애니메이션** | 20개 (4×5) | 40개 (4×10) |
+| **총 프레임 수** | ~500개 | ~2,000개 |
+| **총 용량 (PNG)** | ~12MB | ~40MB |
+
+---
+
+## 🎬 애니메이션 제작 현황
+
+| 상태 | 헌터캣 | 머니베어 | 세이브쉽 | 체이서폭스 |
+|------|--------|---------|---------|-----------|
+| greeting | ✅ | ❌ | ❌ | ❌ |
+| selected | ✅ | ❌ | ❌ | ❌ |
+| **idle (신규)** | ❌ | ❌ | ❌ | ❌ |
+| thinking | ❌ | ❌ | ❌ | ❌ |
+| happy | ❌ | ❌ | ❌ | ❌ |
+| confused | ❌ | ❌ | ❌ | ❌ |
+| home_studying | ❌ | ❌ | ❌ | ❌ |
+| home_excited | ❌ | ❌ | ❌ | ❌ |
+| home_sleepy | ❌ | ❌ | ❌ | ❌ |
+| home_celebration | ❌ | ❌ | ❌ | ❌ |
+
+**총 제작 필요:** 39개 (헌터캣 greeting 1개만 완료)
+
+---
+
+## 🔧 기술적 결정
+
+### Idle 개념 전환
+**선택:** 단순 숨쉬기 → 5초 복합 애니메이션
+**이유:**
+- ✅ 캐릭터 성향 표현 강화
+- ✅ 사용자 경험 향상 (지루함 방지)
+- ✅ 브랜드 아이덴티티 강화
+
+### 홈 화면 상태 4개 추가
+**선택:** home_studying, home_excited, home_sleepy, home_celebration
+**이유:**
+- ✅ 홈 화면 다양성 확보
+- ✅ 사용자 행동에 따른 피드백 가능
+- ✅ 게이미피케이션 요소 강화
+
+---
+
+## 📝 수정된 파일 목록
+
+### Models (2개)
+- `lib/models/character_animation_config.dart` (enum 확장)
+- `lib/models/character_frame_animation.dart` (상태 프리셋 추가)
+
+### Screens (2개)
+- `lib/screens/onboarding/character_preview_screen.dart` (idle → greeting)
+- `lib/screens/onboarding/personality_test_screen.dart` (idle → thinking)
+
+### Services (1개)
+- `lib/services/character_animation_preloader.dart` (주석 업데이트)
+
+### Assets (5개)
+- `assets/animations/characters/hunter_cat/animation_config.json`
+- `assets/animations/characters/money_bear/animation_config.json`
+- `assets/animations/characters/save_sheep/animation_config.json`
+- `assets/animations/characters/chaser_fox/animation_config.json`
+- `pubspec.yaml` (폴더 경로 추가)
+
+### Documentation (2개)
+- `docs/FRAME_ANIMATION_GUIDE.md` (전면 개편)
+- `assets/animations/characters/README.md` (전면 개편)
+
+### Folders (20개)
+- 4개 캐릭터 × 5개 신규 폴더 = 20개 폴더 생성/이름 변경
+
+---
+
+## 🔗 관련 커밋
+- `94c0a91`: Redesign animation state system: 5 → 10 states
+
+---
+
+**작성일:** 2025-12-23
+**다음 작업:** 디자인팀의 신규 애니메이션 제작 (39개)
+
+---
+
 ## 📅 2025-12-19 세션: 프레임 애니메이션 버그 수정 및 PNG 지원
 
 ### 🎯 목표

@@ -2,7 +2,7 @@
 
 > **실시간 업데이트 문서** - 개발 진행 상황과 남은 작업 추적
 
-마지막 업데이트: 2025-11-29 (PersonalityType 런타임 에러 수정)
+마지막 업데이트: 2025-12-23 (애니메이션 상태 체계 재설계: 5개 → 10개 상태)
 
 ---
 
@@ -103,11 +103,12 @@
 - **이유:** Midjourney로 빠른 프로토타이핑 가능, 디자인 유연성 향상
 - **상세 문서:** `docs/FRAME_ANIMATION_GUIDE.md`, `docs/ANIMATION_UPDATE_2025-12-13.md`
 
-**애니메이션 사양 (2025-12-19 업데이트):**
+**애니메이션 사양 (2025-12-23 업데이트):**
 - **포맷:** PNG (600x600px, 투명 배경) / WebP 추후 변환 가능
 - **프레임 레이트:** 24fps (영화급 부드러움, Rive 수준)
 - **제작 툴:** Midjourney Video → ffmpeg PNG 추출
-- **총 용량:** ~12MB (PNG) / ~6MB (WebP 변환 시)
+- **총 상태:** 10개 (Greeting, Selected, Idle, Thinking, Happy, Confused, Home 4개)
+- **총 용량:** ~40MB (PNG) / ~20MB (WebP 변환 시)
 
 **완료된 개발 작업:**
 - [x] 2025-12-13: 프레임 기반 애니메이션 시스템 구현
@@ -138,34 +139,54 @@
   - [x] **오버플로우 수정** (패딩/간격 최적화)
   - [x] **성향 테스트 레이아웃 조정** (116px 상단 이동)
   - [x] hunter_cat idle/selected 테스트 완료
+- [x] 2025-12-23: 애니메이션 상태 체계 재설계
+  - [x] `CharacterAnimationState` enum 확장 (8개 → 14개, 실제 사용 10개)
+  - [x] **idle → greeting 이름 변경** (기존 손 흔드는 애니메이션)
+  - [x] **새로운 idle 개념 도입** (5초 복합 애니메이션, 캐릭터 성향 표현)
+  - [x] **홈 화면 상태 4개 추가** (home_studying, home_excited, home_sleepy, home_celebration)
+  - [x] 폴더 구조 변경 (idle/ → greeting/, 신규 폴더 5개 생성)
+  - [x] animation_config.json 업데이트 (4개 캐릭터)
+  - [x] pubspec.yaml 업데이트 (신규 폴더 경로 등록)
+  - [x] 코드 사용처 업데이트 (idle → greeting/thinking)
+  - [x] 문서 전면 개편 (FRAME_ANIMATION_GUIDE.md, README.md)
 
-**디자인팀 작업:**
+**디자인팀 작업 (2025-12-23 업데이트):**
 - [x] **헌터캣 (일부 완료)**
-  - [x] idle: 125프레임 (5초, 숨쉬기 루프) ✅
+  - [x] greeting: 125프레임 (5.2초, 손 흔들기) ✅
   - [x] selected: 20프레임 (0.8초, 선택 반응) ✅
-  - [ ] happy: 30프레임 (1.2초)
-  - [ ] thinking: 24프레임 (1초)
-  - [ ] confused: 20프레임 (0.8초)
+  - [ ] **idle (신규):** 120프레임 (5초, 복합 애니메이션 - 캐릭터 성향 표현) ⭐
+  - [ ] thinking: 24프레임 (1초, 고민)
+  - [ ] happy: 30프레임 (1.2초, 기쁨)
+  - [ ] confused: 20프레임 (0.8초, 혼란)
+  - [ ] **home_studying:** 60프레임 (2.5초, 책 읽기) 🆕
+  - [ ] **home_excited:** 48프레임 (2초, 활기참) 🆕
+  - [ ] **home_sleepy:** 72프레임 (3초, 졸림) 🆕
+  - [ ] **home_celebration:** 36프레임 (1.5초, 목표 달성) 🆕
 - [ ] **머니베어, 세이브쉽, 체이서폭스**
-  - [ ] 각 5가지 상태 애니메이션 생성
+  - [ ] 각 10가지 상태 애니메이션 생성 (greeting, selected, idle, thinking, happy, confused, home 4개)
 - [ ] ffmpeg로 PNG 프레임 추출 (명령어는 `docs/FRAME_ANIMATION_GUIDE.md` 참고)
   ```bash
   ffmpeg -i input.mp4 -vf "fps=24,scale=600:600:flags=lanczos" frame_%02d.png
   ```
 - [ ] 프레임 파일을 `assets/animations/characters/[캐릭터ID]/[상태]/` 폴더에 배치
 
-**파일 배치 예시:**
+**파일 배치 예시 (2025-12-23 업데이트):**
 ```
 assets/animations/characters/
 ├── hunter_cat/
-│   ├── idle/
-│   │   ├── frame_01.webp
-│   │   ├── frame_02.webp
-│   │   └── ... (frame_24.webp까지)
-│   ├── selected/      (20 frames)
-│   ├── happy/         (30 frames)
-│   ├── thinking/      (24 frames)
-│   └── confused/      (20 frames)
+│   ├── greeting/              (125 frames, 구 idle)
+│   │   ├── frame_01.png
+│   │   ├── frame_02.png
+│   │   └── ... (frame_125.png)
+│   ├── selected/              (20 frames)
+│   ├── idle/                  (120 frames, 신규 개념)
+│   ├── thinking/              (24 frames)
+│   ├── happy/                 (30 frames)
+│   ├── confused/              (20 frames)
+│   ├── home_studying/         (60 frames, 신규)
+│   ├── home_excited/          (48 frames, 신규)
+│   ├── home_sleepy/           (72 frames, 신규)
+│   └── home_celebration/      (36 frames, 신규)
 ├── money_bear/
 ├── save_sheep/
 └── chaser_fox/

@@ -1,7 +1,7 @@
 # 🎬 머니펫 프레임 기반 애니메이션 가이드
 
 > **최종 결정**: GIF/Video → PNG 프레임 추출 방식
-> **업데이트**: 2025-12-19 (PNG 지원 및 버그 수정)
+> **업데이트**: 2025-12-23 (애니메이션 상태 체계 재설계)
 
 ---
 
@@ -18,7 +18,7 @@
 
 ## 1. 핵심 결정사항
 
-### ✅ 최종 스펙 (2025-12-19 업데이트)
+### ✅ 최종 스펙 (2025-12-23 업데이트)
 
 | 항목 | 스펙 | 이유 |
 |------|------|------|
@@ -27,8 +27,8 @@
 | **해상도** | 600x600px | 고해상도 디바이스 대응 (Retina 3x) |
 | **포맷** | PNG (현재) / WebP (추후) | PNG 추출 간편, WebP 변환 시 50% 용량 절감 |
 | **총 캐릭터** | 4개 | 머니베어, 세이브쉽, 헌터캣, 체이서폭스 |
-| **총 상태** | 5개 | Idle, Selected, Happy, Thinking, Confused |
-| **총 용량** | 약 12MB (PNG) / 6MB (WebP) | 4 캐릭터 × 5 상태 × 평균 24프레임 |
+| **총 상태** | 10개 | Greeting, Selected, Idle, Thinking, Happy, Confused, Home(4개) |
+| **총 용량** | 약 40MB (PNG) / 20MB (WebP) | 4 캐릭터 × 10 상태 × 평균 50프레임 |
 
 ### ✅ 필수 조건 충족
 
@@ -40,7 +40,61 @@
 
 ---
 
-## 2. 애니메이션 제작 워크플로우
+## 2. 애니메이션 상태 체계 (2025-12-23 재설계)
+
+### 🎯 개념 재정의
+
+**기존 문제:**
+- 기존 "idle"이 실제로는 "손 흔드는 greeting" 애니메이션
+- 진짜 idle (조용한 대기) 상태가 없음
+- 홈 화면용 다양한 상태 부족
+
+**새로운 체계:**
+
+### 카테고리 1: 캐릭터 선택 화면 전용 (2개)
+
+| 상태 | 설명 | 프레임 수 | 용도 |
+|------|------|-----------|------|
+| **greeting** | 손 흔들며 인사 (구 idle) | 125 (5.2초) | 캐릭터 선택 화면 |
+| **selected** | 선택됨 반응 | 20 (0.8초) | 캐릭터 선택 시 |
+
+### 카테고리 2: 범용 상태 (4개)
+
+| 상태 | 설명 | 프레임 수 | 용도 |
+|------|------|-----------|------|
+| **idle** | 조용한 대기 - 복합 애니메이션 | 120 (5초) | 모든 화면 기본 상태 |
+| **thinking** | 퀴즈 문제 표시 | 24 (1초) | 성향 테스트, 퀴즈 |
+| **happy** | 정답/긍정 피드백 | 30 (1.2초) | 정답, 목표 달성 |
+| **confused** | 오답/부정 피드백 | 20 (0.8초) | 오답, 혼란 |
+
+### 카테고리 3: 홈 화면 전용 (4개)
+
+| 상태 | 설명 | 프레임 수 | 용도 |
+|------|------|-----------|------|
+| **home_studying** | 책 읽기 | 60 (2.5초) | 홈 화면 - 학습 중 |
+| **home_excited** | 활기찬 모습 | 48 (2초) | 홈 화면 - 활발함 |
+| **home_sleepy** | 졸린 모습 | 72 (3초) | 홈 화면 - 휴식 |
+| **home_celebration** | 목표 달성 | 36 (1.5초) | 홈 화면 - 성취 |
+
+### 💡 Idle 애니메이션 개념 (5초 복합 구성)
+
+**구성 요소 (예: 헌터캣)**
+- 0-2초: 조용한 숨쉬기 (날카로운 눈빛)
+- 2-3초: 윙크 (사냥꾼 본능)
+- 3-4초: 귀 쫑긋 (집중력)
+- 4-5초: 편안한 복귀
+
+**캐릭터별 차별화**
+- 🐱 **헌터캣**: 날카로움, 기민함 (윙크, 귀 쫑긋)
+- 🐻 **머니베어**: 든든함, 신뢰 (팔짱, 고개 끄덕임)
+- 🐑 **세이브쉽**: 부드러움, 조화 (고개 기울임, 평화로운 미소)
+- 🦊 **체이서폭스**: 영리함, 호기심 (꼬리 흔들기, 장난기)
+
+**핵심**: 같은 "idle"이지만 각 캐릭터의 성향이 명확히 표현됨
+
+---
+
+## 3. 애니메이션 제작 워크플로우
 
 ### **Step 1: Midjourney로 베이스 이미지 생성**
 
@@ -70,31 +124,39 @@ chaser_fox_base.png
 
 **상태별 Motion 지시:**
 
-#### **Idle (숨쉬기)**
-```
-Motion: gentle breathing motion, subtle up and down movement,
-calm and peaceful, looping animation
+### 카테고리 1: 캐릭터 선택 화면
 
-길이: 1초 (24 frames @ 24fps)
-루프: Yes
-```
-
-#### **Selected (손 흔들기)**
+#### **Greeting (손 흔들며 인사)**
 ```
 Motion: excited waving motion, jumping slightly,
 happy greeting gesture, energetic movement
+
+길이: 5.2초 (125 frames @ 24fps)
+루프: Yes
+```
+
+#### **Selected (선택됨)**
+```
+Motion: excited reaction, sparkle effect,
+jump with joy, celebration gesture
 
 길이: 0.8초 (20 frames @ 24fps)
 루프: No (one-shot)
 ```
 
-#### **Happy (점프)**
-```
-Motion: jump up and down with joy,
-celebratory bounce, stars or sparkles effect
+### 카테고리 2: 범용 상태
 
-길이: 1.2초 (30 frames @ 24fps)
-루프: No
+#### **Idle (조용한 대기 - 복합 애니메이션)**
+```
+Motion (헌터캣 예시):
+0-2초: gentle breathing, sharp eyes
+2-3초: wink (hunter instinct)
+3-4초: ears perk up (focus)
+4-5초: return to calm
+
+길이: 5초 (120 frames @ 24fps)
+루프: Yes
+특징: 각 캐릭터마다 성향이 드러나는 고유한 동작
 ```
 
 #### **Thinking (고민)**
@@ -106,6 +168,15 @@ thoughtful expression, slow contemplative motion
 루프: Yes
 ```
 
+#### **Happy (기쁨)**
+```
+Motion: jump up and down with joy,
+celebratory bounce, stars or sparkles effect
+
+길이: 1.2초 (30 frames @ 24fps)
+루프: No
+```
+
 #### **Confused (혼란)**
 ```
 Motion: slight wobble, question mark appearing,
@@ -113,6 +184,44 @@ confused head shake, uncertain movement
 
 길이: 0.8초 (20 frames @ 24fps)
 루프: No
+```
+
+### 카테고리 3: 홈 화면 전용
+
+#### **Home Studying (책 읽기)**
+```
+Motion: reading book, turning pages,
+focused expression, subtle head nod
+
+길이: 2.5초 (60 frames @ 24fps)
+루프: Yes
+```
+
+#### **Home Excited (활기찬 모습)**
+```
+Motion: energetic movement, bouncing,
+excited expression, playful gestures
+
+길이: 2초 (48 frames @ 24fps)
+루프: Yes
+```
+
+#### **Home Sleepy (졸린 모습)**
+```
+Motion: yawning, rubbing eyes,
+sleepy expression, slow swaying
+
+길이: 3초 (72 frames @ 24fps)
+루프: Yes
+```
+
+#### **Home Celebration (목표 달성)**
+```
+Motion: celebration jump, confetti effect,
+triumphant pose, victory gesture
+
+길이: 1.5초 (36 frames @ 24fps)
+루프: No (one-shot)
 ```
 
 ---
@@ -132,18 +241,19 @@ https://ffmpeg.org/download.html
 
 **추출 명령어 (권장: 24fps, 600x600, PNG):**
 ```bash
-# GIF → PNG 프레임 추출
-ffmpeg -i hunter_cat_idle.gif \
+# GIF → PNG 프레임 추출 (Greeting 예시)
+ffmpeg -i hunter_cat_greeting.gif \
   -vf "fps=24,scale=600:600:flags=lanczos" \
-  assets/animations/characters/hunter_cat/idle/frame_%02d.png
+  assets/animations/characters/hunter_cat/greeting/frame_%02d.png
 
-# MP4 → PNG 프레임 추출
+# MP4 → PNG 프레임 추출 (Idle 예시)
 ffmpeg -i hunter_cat_idle.mp4 \
   -vf "fps=24,scale=600:600:flags=lanczos" \
   assets/animations/characters/hunter_cat/idle/frame_%02d.png
 
 # 결과:
-# frame_01.png, frame_02.png, ..., frame_24.png
+# greeting: frame_01.png ~ frame_125.png (5.2초)
+# idle: frame_01.png ~ frame_120.png (5초)
 ```
 
 **옵션 설명:**
@@ -175,10 +285,19 @@ rm frame_*.png
 ```
 assets/animations/characters/
 └── hunter_cat/
-    └── idle/
-        ├── frame_01.png
-        ├── frame_02.png
-        └── ... (프레임 수만큼)
+    ├── greeting/          (125 frames)
+    │   ├── frame_01.png
+    │   ├── frame_02.png
+    │   └── frame_125.png
+    ├── selected/          (20 frames)
+    ├── idle/              (120 frames, 복합 애니메이션)
+    ├── thinking/          (24 frames)
+    ├── happy/             (30 frames)
+    ├── confused/          (20 frames)
+    ├── home_studying/     (60 frames)
+    ├── home_excited/      (48 frames)
+    ├── home_sleepy/       (72 frames)
+    └── home_celebration/  (36 frames)
 ```
 
 **중요:** 파일명은 반드시 `frame_01.png`, `frame_02.png` 형식!
@@ -192,17 +311,29 @@ assets/animations/characters/
 **animation_config.json 예시:**
 ```json
 {
-  "idle": {
+  "greeting": {
     "frameCount": 125,
     "frameDuration": 42,
     "loop": true,
-    "description": "숨쉬기 루프 (5.2초)"
+    "description": "손 흔들며 인사 (5.2초)"
   },
   "selected": {
     "frameCount": 20,
     "frameDuration": 42,
     "loop": false,
     "description": "선택 반응 (0.8초)"
+  },
+  "idle": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "조용한 대기 - 복합 애니메이션 (5초)"
+  },
+  "homeStudying": {
+    "frameCount": 60,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "책 읽기 (2.5초)"
   }
 }
 ```
@@ -228,30 +359,35 @@ assets/animations/characters/
 ```
 assets/animations/characters/
 ├── hunter_cat/
-│   ├── animation_config.json  ← 프레임 수 설정
-│   ├── idle/                  (24 frames, 1초 루프)
+│   ├── animation_config.json     ← 프레임 수 설정
+│   │
+│   ├── greeting/                 (125 frames, 5.2초 루프)
 │   │   ├── frame_01.png
 │   │   ├── frame_02.png
-│   │   └── frame_24.png
-│   ├── selected/              (20 frames, 0.8초 one-shot)
-│   │   └── ...
-│   ├── happy/                 (30 frames, 1.2초 one-shot)
-│   │   └── ...
-│   ├── thinking/              (24 frames, 1초 루프)
-│   │   └── ...
-│   └── confused/              (20 frames, 0.8초 one-shot)
-│       └── ...
+│   │   └── frame_125.png
+│   ├── selected/                 (20 frames, 0.8초 one-shot)
+│   │
+│   ├── idle/                     (120 frames, 5초 루프, 복합)
+│   ├── thinking/                 (24 frames, 1초 루프)
+│   ├── happy/                    (30 frames, 1.2초 one-shot)
+│   ├── confused/                 (20 frames, 0.8초 one-shot)
+│   │
+│   ├── home_studying/            (60 frames, 2.5초 루프)
+│   ├── home_excited/             (48 frames, 2초 루프)
+│   ├── home_sleepy/              (72 frames, 3초 루프)
+│   └── home_celebration/         (36 frames, 1.5초 one-shot)
 │
 ├── money_bear/
-│   ├── idle/
+│   ├── greeting/
 │   ├── selected/
-│   └── ...
+│   ├── idle/
+│   └── ... (동일한 10개 상태)
 │
 ├── save_sheep/
-│   └── ...
+│   └── ... (동일한 10개 상태)
 │
 └── chaser_fox/
-    └── ...
+    └── ... (동일한 10개 상태)
 ```
 
 ### **파일 네이밍 규칙**
@@ -649,5 +785,5 @@ ffmpeg -i input.png -vf "colorkey=white:0.3:0.2" -pix_fmt rgba output.png
 ---
 
 **작성일**: 2025-12-13
-**마지막 업데이트**: 2025-12-19 (PNG 지원, 버그 수정, 온보딩 화면 개선)
+**마지막 업데이트**: 2025-12-23 (애니메이션 상태 체계 재설계: 5개 → 10개 상태)
 **담당**: Development Team

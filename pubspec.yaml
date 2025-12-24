@@ -61,50 +61,62 @@ flutter:
     - assets/animations/characters/save_sheep/animation_config.json
     - assets/animations/characters/chaser_fox/animation_config.json
 
-    # 캐릭터 애니메이션 프레임 (프레임 파일 추가 시 자동 인식)
-    # 헌터캣
-    - assets/animations/characters/hunter_cat/greeting/
-    - assets/animations/characters/hunter_cat/selected/
-    - assets/animations/characters/hunter_cat/idle/
-    - assets/animations/characters/hunter_cat/thinking/
-    - assets/animations/characters/hunter_cat/happy/
-    - assets/animations/characters/hunter_cat/confused/
+    # 캐릭터 애니메이션 프레임 (13-State System, 2025-12-24 업데이트)
+    # 헌터캣 (13 states)
+    - assets/animations/characters/hunter_cat/character_greeting_loop/
+    - assets/animations/characters/hunter_cat/character_selected/
+    - assets/animations/characters/hunter_cat/personality_idle/
+    - assets/animations/characters/hunter_cat/personality_selected/
+    - assets/animations/characters/hunter_cat/quiz_idle/
+    - assets/animations/characters/hunter_cat/quiz_correct_flow/
+    - assets/animations/characters/hunter_cat/quiz_wrong_flow/
+    - assets/animations/characters/hunter_cat/result_celebration/
+    - assets/animations/characters/hunter_cat/home_idle/
     - assets/animations/characters/hunter_cat/home_studying/
     - assets/animations/characters/hunter_cat/home_excited/
     - assets/animations/characters/hunter_cat/home_sleepy/
     - assets/animations/characters/hunter_cat/home_celebration/
 
-    # 머니베어
-    - assets/animations/characters/money_bear/greeting/
-    - assets/animations/characters/money_bear/selected/
-    - assets/animations/characters/money_bear/idle/
-    - assets/animations/characters/money_bear/thinking/
-    - assets/animations/characters/money_bear/happy/
-    - assets/animations/characters/money_bear/confused/
+    # 머니베어 (13 states)
+    - assets/animations/characters/money_bear/character_greeting_loop/
+    - assets/animations/characters/money_bear/character_selected/
+    - assets/animations/characters/money_bear/personality_idle/
+    - assets/animations/characters/money_bear/personality_selected/
+    - assets/animations/characters/money_bear/quiz_idle/
+    - assets/animations/characters/money_bear/quiz_correct_flow/
+    - assets/animations/characters/money_bear/quiz_wrong_flow/
+    - assets/animations/characters/money_bear/result_celebration/
+    - assets/animations/characters/money_bear/home_idle/
     - assets/animations/characters/money_bear/home_studying/
     - assets/animations/characters/money_bear/home_excited/
     - assets/animations/characters/money_bear/home_sleepy/
     - assets/animations/characters/money_bear/home_celebration/
 
-    # 세이브쉽
-    - assets/animations/characters/save_sheep/greeting/
-    - assets/animations/characters/save_sheep/selected/
-    - assets/animations/characters/save_sheep/idle/
-    - assets/animations/characters/save_sheep/thinking/
-    - assets/animations/characters/save_sheep/happy/
-    - assets/animations/characters/save_sheep/confused/
+    # 세이브쉽 (13 states)
+    - assets/animations/characters/save_sheep/character_greeting_loop/
+    - assets/animations/characters/save_sheep/character_selected/
+    - assets/animations/characters/save_sheep/personality_idle/
+    - assets/animations/characters/save_sheep/personality_selected/
+    - assets/animations/characters/save_sheep/quiz_idle/
+    - assets/animations/characters/save_sheep/quiz_correct_flow/
+    - assets/animations/characters/save_sheep/quiz_wrong_flow/
+    - assets/animations/characters/save_sheep/result_celebration/
+    - assets/animations/characters/save_sheep/home_idle/
     - assets/animations/characters/save_sheep/home_studying/
     - assets/animations/characters/save_sheep/home_excited/
     - assets/animations/characters/save_sheep/home_sleepy/
     - assets/animations/characters/save_sheep/home_celebration/
 
-    # 체이서폭스
-    - assets/animations/characters/chaser_fox/greeting/
-    - assets/animations/characters/chaser_fox/selected/
-    - assets/animations/characters/chaser_fox/idle/
-    - assets/animations/characters/chaser_fox/thinking/
-    - assets/animations/characters/chaser_fox/happy/
-    - assets/animations/characters/chaser_fox/confused/
+    # 체이서폭스 (13 states)
+    - assets/animations/characters/chaser_fox/character_greeting_loop/
+    - assets/animations/characters/chaser_fox/character_selected/
+    - assets/animations/characters/chaser_fox/personality_idle/
+    - assets/animations/characters/chaser_fox/personality_selected/
+    - assets/animations/characters/chaser_fox/quiz_idle/
+    - assets/animations/characters/chaser_fox/quiz_correct_flow/
+    - assets/animations/characters/chaser_fox/quiz_wrong_flow/
+    - assets/animations/characters/chaser_fox/result_celebration/
+    - assets/animations/characters/chaser_fox/home_idle/
     - assets/animations/characters/chaser_fox/home_studying/
     - assets/animations/characters/chaser_fox/home_excited/
     - assets/animations/characters/chaser_fox/home_sleepy/

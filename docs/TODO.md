@@ -159,9 +159,12 @@
     - [x] 결과: 13개 상태 (통합 애니메이션 방식)
     - [x] 파일: `lib/models/character_animation_config.dart:1-25`
     - [x] Commit: 1695ecc
-  - [ ] **Enum → 폴더명 변환 로직 구현**
-    - [ ] camelCase enum → snake_case 폴더명 변환 함수 추가
-    - [ ] 파일 위치: `lib/models/character_frame_animation.dart`
+  - [x] **Enum → 폴더명 변환 로직 구현** ✅ 2025-12-24
+    - [x] `_stateToFolderName()` 헬퍼 함수 추가 (13개 상태 모두 매핑)
+    - [x] `getFramePath()` 메서드 업데이트 (snake_case 폴더명 사용)
+    - [x] `forState()` fallback 메서드 13개 상태로 재작성
+    - [x] 파일: `lib/models/character_frame_animation.dart:22-224`
+    - [x] Commit: 5e2f0b3
   - [ ] **자동 전환 로직 구현**
     - [ ] `onAnimationComplete` 콜백 추가
     - [ ] `autoTransitionTo` 필드 JSON 지원

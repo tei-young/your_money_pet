@@ -44,9 +44,29 @@
 
 ---
 
+### 2. Enum → 폴더명 변환 로직 구현 ✅
+**커밋:** 5e2f0b3
+**파일:** `lib/models/character_frame_animation.dart:22-224`
+**날짜:** 2025-12-24
+
+**변경 사항:**
+- ✅ `_stateToFolderName()` 헬퍼 함수 추가
+  - camelCase enum → snake_case 폴더명 변환
+  - 예: `CharacterAnimationState.characterGreetingLoop` → `'character_greeting_loop'`
+  - 13개 모든 상태 매핑 완료
+- ✅ `getFramePath()` 메서드 업데이트
+  - `state.name` → `_stateToFolderName(state)` 사용
+  - 올바른 snake_case 폴더 경로 생성 보장
+- ✅ `forState()` fallback 메서드 완전 재작성
+  - 구식 상태 제거 (greeting, selected, idle, thinking, happy, confused 등)
+  - 13개 신규 상태로 교체 (기본 프레임 수 포함)
+  - 유연한 타이밍 정책 반영 ("약 X초")
+
+---
+
 ## 🚨 개발팀 작업 필요 (2025-12-24)
 
-### ⚠️ 주의: Task #1 완료, 나머지 작업 진행 예정
+### ⚠️ 주의: Task #1-2 완료, 나머지 작업 진행 예정
 
 ### ~~1. CharacterAnimationState enum 재설계 (필수)~~ ✅ 완료
 **파일:** `lib/models/character_animation_config.dart`
@@ -88,10 +108,9 @@ enum CharacterAnimationState {
 
 ---
 
-### 2. Enum → 폴더명 변환 로직 구현 (필수)
-**파일:** `lib/models/character_frame_animation.dart`
+### ~~2. Enum → 폴더명 변환 로직 구현 (필수)~~ ✅ 완료
 
-**추가 필요:**
+**구현 완료:**
 ```dart
 String _stateToFolderName(CharacterAnimationState state) {
   // camelCase → snake_case 변환

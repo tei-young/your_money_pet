@@ -1,7 +1,7 @@
 # 캐릭터 애니메이션 전략 변경
 
 > **최초 작성**: 2025-12-13
-> **마지막 업데이트**: 2025-12-23 (애니메이션 상태 체계 재설계: 5개 → 10개 상태)
+> **마지막 업데이트**: 2025-12-24 (통합 애니메이션 방식 재설계: 10개 → 13개 상태)
 
 ## 🎯 핵심 결정
 
@@ -28,16 +28,22 @@
 
 ---
 
-## 📊 최종 스펙 (2025-12-23 업데이트)
+## 📊 최종 스펙 (2025-12-24 업데이트)
 
 ```
 제작 도구:  Midjourney Video
 프레임 수:   24fps (영화급 부드러움)
 해상도:      600x600px (Retina 3x 대응)
 포맷:        PNG (현재) / WebP (추후 변환 가능)
-상태 수:     10개 (Greeting, Selected, Idle, Thinking, Happy, Confused, Home 4개)
-총 용량:     약 40MB (PNG) / 20MB (WebP 변환 시)
+상태 수:     13개 (통합 애니메이션 방식)
+총 용량:     약 192MB (PNG) / 96MB (WebP 변환 시)
+총 애니메이션: 52개 (4캐릭터 × 13상태)
 ```
+
+**주요 변경 (2025-12-24):**
+- ✅ **통합 애니메이션 방식**: quiz_correct_flow = thinking → happy → idle 복귀를 하나의 애니메이션으로 제작
+- ✅ **유연한 타이밍 정책**: "정확히 XX프레임" → "약 X초" (Midjourney/Runway 특성 고려)
+- ✅ **자동 전환**: personalitySelected → personalityIdle (자동 복귀)
 
 **포맷 선택:**
 - ✅ **PNG**: 현재 지원 중 (추출 간편, 투명 배경 보장)
@@ -116,25 +122,54 @@
   - characters/README.md: 폴더 구조 및 사용법 업데이트
   - README.md: 애니메이션 섹션 업데이트
 
-### **2. 폴더 구조 (2025-12-23 업데이트)**
+### **개발팀 (2025-12-24 - 통합 애니메이션 방식 재설계: 13-State)**
+- [x] **CharacterAnimationState enum 재설계** (14개 → 13개) - Commit: 1695ecc
+  - 삭제: thinking, happy, confused, reactionPositive/Negative/Neutral (6개)
+  - 추가: personalityIdle, personalitySelected, quizIdle, quizCorrectFlow, quizWrongFlow, resultCelebration (6개)
+  - 이름 변경: greeting → characterGreetingLoop, selected → characterSelected, idle → homeIdle (3개)
+  - 통합 애니메이션 방식 적용 (quiz_correct_flow = thinking→happy→idle 복귀)
+- [x] **Enum → 폴더명 변환 로직 구현** - Commit: 5e2f0b3
+  - _stateToFolderName() 헬퍼 함수 추가 (camelCase → snake_case)
+  - getFramePath() 메서드 업데이트 (올바른 경로 생성)
+  - forState() fallback 메서드 13개 상태로 재작성
+- [x] **자동 전환 로직 구현** - Commit: a6c6108
+  - CharacterFrameAnimation에 autoTransitionTo 필드 추가
+  - AnimationConfigLoader에서 JSON autoTransitionTo 읽기 지원
+  - AnimatedCharacter에 자동 전환 처리 로직 구현
+  - personalitySelected → personalityIdle 자동 전환
+  - quizCorrectFlow/quizWrongFlow → quizIdle 자동 전환
+- [x] **폴더 구조 재편 (13-State)** - Commit: 088b510, 75264c1
+  - 이름 변경: greeting/ → character_greeting_loop/, selected/ → character_selected/
+  - 삭제: idle/, thinking/, happy/, confused/ (12개 .gitkeep)
+  - 신규 생성: personality_idle/, personality_selected/, quiz_idle/, quiz_correct_flow/, quiz_wrong_flow/, result_celebration/, home_idle/ (각 캐릭터별 7개)
+  - 최종 결과: 4개 캐릭터 × 13개 상태 = 52개 폴더
+
+### **2. 폴더 구조 (2025-12-24 업데이트 - 13-State)**
 ```
 assets/animations/characters/
 ├── hunter_cat/
-│   ├── animation_config.json     ← JSON 설정 (10개 상태)
-│   ├── greeting/                 (손 흔들며 인사, 125 frames)
-│   ├── selected/                 (선택 반응, 20 frames)
-│   ├── idle/                     (조용한 대기, 120 frames)
-│   ├── thinking/                 (생각, 24 frames)
-│   ├── happy/                    (기쁨, 30 frames)
-│   ├── confused/                 (혼란, 20 frames)
-│   ├── home_studying/            (책 읽기, 60 frames)
-│   ├── home_excited/             (활기참, 48 frames)
-│   ├── home_sleepy/              (졸림, 72 frames)
-│   └── home_celebration/         (목표 달성, 36 frames)
-├── money_bear/                   (동일한 10개 폴더)
-├── save_sheep/                   (동일한 10개 폴더)
-└── chaser_fox/                   (동일한 10개 폴더)
+│   ├── animation_config.json           ← JSON 설정 (13개 상태)
+│   ├── character_greeting_loop/        (손 흔들며 인사, 약 5초, loop)
+│   ├── character_selected/             (선택 반응, 약 1-2초, one-shot)
+│   ├── personality_idle/               (성향 퀴즈 대기, 약 3초, loop)
+│   ├── personality_selected/           (성향 선택 반응, 약 2초, auto→personalityIdle)
+│   ├── quiz_idle/                      (학습 퀴즈 대기, 약 3초, loop)
+│   ├── quiz_correct_flow/              (통합: thinking→happy→idle, 약 5초, auto→quizIdle)
+│   ├── quiz_wrong_flow/                (통합: thinking→confused→idle, 약 5초, auto→quizIdle)
+│   ├── result_celebration/             (결과 축하, 약 3초, one-shot)
+│   ├── home_idle/                      (홈 기본 대기, 약 5초, loop)
+│   ├── home_studying/                  (책 읽기, 약 3초, loop)
+│   ├── home_excited/                   (활기참, 약 2초, loop)
+│   ├── home_sleepy/                    (졸림, 약 3초, loop)
+│   └── home_celebration/               (목표 달성, 약 2초, auto→homeIdle)
+├── money_bear/                         (동일한 13개 폴더)
+├── save_sheep/                         (동일한 13개 폴더)
+└── chaser_fox/                         (동일한 13개 폴더)
 ```
+
+**폴더명 규칙 (2025-12-24):**
+- snake_case 사용 (예: `character_greeting_loop/`, `quiz_correct_flow/`)
+- camelCase enum → snake_case 폴더명 자동 변환
 
 ### **3. 문서화**
 - [x] `docs/FRAME_ANIMATION_GUIDE.md` (전체 가이드)
@@ -162,53 +197,70 @@ assets/animations/characters/
 5. `flutter pub get` 실행
 6. 앱에서 확인 ✅
 
-### **Phase 2: 전체 제작 (2025-12-23 업데이트)**
+### **Phase 2: 전체 제작 (2025-12-24 업데이트 - 13-State)**
 
 **현재 상태:**
-- ✅ 완료: 2개 (헌터캣 greeting, selected)
-- 🔴 필요: 37개 남음
+- ✅ 완료: 2개 (헌터캣 character_greeting_loop, character_selected)
+- 🔴 필요: 50개 남음
 
-**제작 계획:**
-- 나머지 8개 상태 제작 (헌터캣: idle, thinking, happy, confused, home 4개)
-- 나머지 3개 캐릭터 × 10개 상태 = 30개
-- **총 39개 애니메이션 완성** (현재 2/39 완료)
+**제작 계획 (통합 애니메이션 방식):**
+- 나머지 11개 상태 제작 (헌터캣: personality_idle, personality_selected, quiz_idle, quiz_correct_flow, quiz_wrong_flow, result_celebration, home_idle, home_studying, home_excited, home_sleepy, home_celebration)
+- 나머지 3개 캐릭터 × 13개 상태 = 39개
+- **총 52개 애니메이션 완성** (현재 2/52 완료)
+
+**우선순위:**
+1. **Phase 1 (온보딩)**: character_greeting_loop, character_selected, personality_idle, personality_selected (4개 × 4캐릭터 = 16개)
+2. **Phase 2 (학습 퀴즈)**: quiz_idle, quiz_correct_flow, quiz_wrong_flow, result_celebration (4개 × 4캐릭터 = 16개)
+3. **Phase 3 (홈 화면)**: home_idle, home_studying, home_excited, home_sleepy, home_celebration (5개 × 4캐릭터 = 20개)
 
 ---
 
 ## 📝 사용 방법 (디자인팀용)
 
-### **1. JSON 설정 수정 (프레임 수 변경 - 신규!)**
+### **1. JSON 설정 수정 (프레임 수 변경 - 2025-12-24 업데이트)**
 
 **영상 길이가 다른 경우:**
 ```bash
 # 1. animation_config.json 파일 열기
 vim assets/animations/characters/hunter_cat/animation_config.json
 
-# 2. frameCount 수정 (10개 상태 예시)
+# 2. frameCount 수정 (13개 상태 예시)
 {
-  "greeting": {
-    "frameCount": 125,  # 5.2초 영상 = 125프레임 (24fps)
+  "characterGreetingLoop": {
+    "frameCount": 120,  # 약 5초 영상 (실제 프레임 수는 제작 후 확정)
     "frameDuration": 42,
     "loop": true,
     "description": "손 흔들며 인사"
   },
-  "idle": {
-    "frameCount": 120,  # 5초 영상 = 120프레임 (복합 애니메이션)
+  "personalitySelected": {
+    "frameCount": 48,   # 약 2초 영상
     "frameDuration": 42,
-    "loop": true,
-    "description": "조용한 대기"
+    "loop": false,
+    "autoTransitionTo": "personalityIdle",  # ← 자동 전환!
+    "description": "성향 선택 반응"
+  },
+  "quizCorrectFlow": {
+    "frameCount": 120,  # 약 5초 영상 (통합 애니메이션)
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "quizIdle",  # ← 자동 전환!
+    "description": "정답 플로우: thinking→happy→idle"
   },
   "homeStudying": {
-    "frameCount": 60,   # 2.5초 영상 = 60프레임
+    "frameCount": 72,   # 약 3초 영상
     "frameDuration": 42,
     "loop": true,
     "description": "책 읽기"
   }
-  // ... 나머지 7개 상태
+  // ... 나머지 9개 상태
 }
 
 # 3. 앱 재실행 → 자동 적용 ✅
 ```
+
+**신규 기능 (2025-12-24):**
+- ✅ **autoTransitionTo**: 애니메이션 완료 후 자동으로 다음 상태로 전환
+- ✅ **유연한 타이밍**: "약 X초"로 명시, 정확한 프레임 수는 제작 후 조정
 
 **장점:**
 - ✅ 코드 수정 불필요
@@ -247,18 +299,26 @@ done
 ### **3. 폴더에 배치**
 
 ```
-assets/animations/characters/hunter_cat/greeting/
+assets/animations/characters/hunter_cat/character_greeting_loop/
 ├── frame_01.png
 ├── frame_02.png
-└── frame_125.png  (헌터캣 greeting은 125프레임)
+└── frame_120.png  (약 5초 = ~120프레임)
 
-assets/animations/characters/hunter_cat/idle/
+assets/animations/characters/hunter_cat/quiz_correct_flow/
 ├── frame_01.png
 ├── frame_02.png
-└── frame_120.png  (헌터캣 idle은 120프레임)
+└── frame_120.png  (통합 애니메이션: thinking→happy→idle)
+
+assets/animations/characters/hunter_cat/home_idle/
+├── frame_01.png
+├── frame_02.png
+└── frame_120.png  (약 5초 복합 애니메이션)
 ```
 
-**중요:** 파일명은 반드시 `frame_01.png` 형식! (01부터, 2자리 패딩)
+**중요 (2025-12-24 업데이트):**
+- 파일명: 반드시 `frame_01.png` 형식 (01부터, 2자리 패딩)
+- 폴더명: snake_case (예: `character_greeting_loop/`, `quiz_correct_flow/`)
+- 프레임 수: 제작 후 실제 프레임 수에 맞춰 JSON 수정
 
 ### **4. flutter pub get 실행**
 
@@ -271,31 +331,37 @@ flutter pub get
 
 프레임 파일만 배치하면 AnimatedCharacter 위젯이 자동으로 사용합니다!
 
-**테스트 결과 (2025-12-23 업데이트):**
-- ✅ hunter_cat greeting: 125프레임 정상 재생 (loop)
-- ✅ hunter_cat selected: 20프레임 one-shot 재생
-- 🔴 나머지 8개 상태: placeholder 표시 (제작 대기)
+**테스트 결과 (2025-12-24 업데이트):**
+- ✅ hunter_cat character_greeting_loop: 125프레임 정상 재생 (loop)
+- ✅ hunter_cat character_selected: 20프레임 one-shot 재생
+- 🔴 나머지 11개 상태: placeholder 표시 (제작 대기)
 - ✅ 다른 캐릭터: placeholder 안전하게 표시
+- ✅ 자동 전환 로직: 정상 작동 (personalitySelected → personalityIdle)
 
 ---
 
 ## 🔧 개발자 노트
 
-### **자동 적용 메커니즘**
+### **자동 적용 메커니즘 (2025-12-24 업데이트)**
 
 ```dart
 AnimatedCharacter(
   characterType: PersonalityType.aggressive, // 헌터캣
-  state: CharacterAnimationState.idle,
+  state: CharacterAnimationState.homeIdle,
   size: 200,
 )
 ```
 
 위 코드는 자동으로:
-1. `assets/animations/characters/hunter_cat/idle/` 폴더에서 프레임 로드
+1. `assets/animations/characters/hunter_cat/home_idle/` 폴더에서 프레임 로드 (snake_case 자동 변환)
 2. 24fps로 재생 (CharacterFrameAnimation 프리셋 기준)
-3. 루프 재생 (Idle은 loop: true)
+3. 루프 재생 (homeIdle은 loop: true)
 4. 프레임 없으면 Placeholder 표시
+
+**신규 기능 (2025-12-24):**
+- ✅ **자동 전환**: personalitySelected 완료 후 자동으로 personalityIdle로 전환
+- ✅ **통합 애니메이션**: quizCorrectFlow = thinking→happy→idle 복귀가 하나의 애니메이션으로
+- ✅ **camelCase → snake_case**: enum 이름이 자동으로 폴더명으로 변환
 
 ---
 

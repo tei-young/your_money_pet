@@ -179,10 +179,12 @@
     - [x] 최종 결과: 4개 캐릭터 × 13개 상태 = 52개 폴더 완성
     - [x] 파일: `assets/animations/characters/*/`
     - [x] Commit: 088b510
-  - [ ] **animation_config.json 재작성**
-    - [ ] 13개 상태로 업데이트
-    - [ ] `autoTransitionTo` 필드 추가
-    - [ ] 유연한 타이밍 정책 반영 (정확한 프레임 수는 제작 후 확정)
+  - [x] **animation_config.json 재작성** ✅ 2025-12-24
+    - [x] 13개 상태로 업데이트
+    - [x] `autoTransitionTo` 필드 추가 (personalitySelected, quizCorrectFlow, quizWrongFlow, homeCelebration)
+    - [x] 유연한 타이밍 정책 반영 ("약 X초" 형식, 정확한 프레임 수는 제작 후 확정)
+    - [x] 파일: `assets/animations/characters/*/animation_config.json` (4개)
+    - [x] Commit: e5ab1c6
   - [ ] **화면별 State 사용 업데이트**
     - [ ] 캐릭터 선택: `greeting` → `characterGreetingLoop`
     - [ ] 성향 퀴즈: `thinking` → `personalityIdle` / `personalitySelected`

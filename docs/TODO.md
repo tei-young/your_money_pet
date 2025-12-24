@@ -172,12 +172,13 @@
     - [x] `_handleAutoTransition()`, `_stringToState()` 메서드 추가
     - [x] 파일: `lib/models/character_frame_animation.dart:7-27`, `lib/services/animation_config_loader.dart:65-72`, `lib/widgets/animated_character.dart:40-236`
     - [x] Commit: a6c6108
-  - [ ] **폴더 구조 재편 (git mv)**
-    - [ ] `greeting/` → `character_greeting_loop/`
-    - [ ] `selected/` → `character_selected/`
-    - [ ] `idle/` → `home_idle/`
-    - [ ] 삭제: `thinking/`, `happy/`, `confused/`
-    - [ ] 신규 생성: `personality_idle/`, `personality_selected/`, `quiz_idle/`, `quiz_correct_flow/`, `quiz_wrong_flow/`, `result_celebration/`
+  - [x] **폴더 구조 재편 (git mv)** ✅ 2025-12-24
+    - [x] 이름 변경: `greeting/` → `character_greeting_loop/`, `selected/` → `character_selected/`
+    - [x] 삭제: `idle/`, `thinking/`, `happy/`, `confused/` (빈 폴더 또는 통합 애니메이션에 포함)
+    - [x] 신규 생성 (7개): `personality_idle/`, `personality_selected/`, `quiz_idle/`, `quiz_correct_flow/`, `quiz_wrong_flow/`, `result_celebration/`, `home_idle/`
+    - [x] 최종 결과: 4개 캐릭터 × 13개 상태 = 52개 폴더 완성
+    - [x] 파일: `assets/animations/characters/*/`
+    - [x] Commit: 088b510
   - [ ] **animation_config.json 재작성**
     - [ ] 13개 상태로 업데이트
     - [ ] `autoTransitionTo` 필드 추가

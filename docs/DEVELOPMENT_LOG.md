@@ -99,9 +99,48 @@
 
 ---
 
+### 4. 폴더 구조 재편 ✅
+**커밋:** 088b510
+**파일:** `assets/animations/characters/*/`
+**날짜:** 2025-12-24
+
+**변경 사항:**
+- ✅ **폴더 이름 변경 (각 캐릭터별 3개)**
+  - `greeting/` → `character_greeting_loop/`
+  - `selected/` → `character_selected/`
+  - `idle/` → 삭제 후 `home_idle/` 신규 생성 (빈 폴더)
+
+- ✅ **폴더 삭제 (각 캐릭터별 3개)**
+  - `thinking/` (통합 애니메이션에 포함)
+  - `happy/` (quiz_correct_flow에 포함)
+  - `confused/` (quiz_wrong_flow에 포함)
+
+- ✅ **폴더 신규 생성 (각 캐릭터별 7개)**
+  - `personality_idle/` (성향 퀴즈 대기)
+  - `personality_selected/` (성향 선택 반응)
+  - `quiz_idle/` (학습 퀴즈 대기)
+  - `quiz_correct_flow/` (정답 통합 애니메이션)
+  - `quiz_wrong_flow/` (오답 통합 애니메이션)
+  - `result_celebration/` (결과 축하)
+  - `home_idle/` (홈 기본 대기)
+
+- ✅ **기존 폴더 유지 (각 캐릭터별 5개)**
+  - `home_studying/`, `home_excited/`, `home_sleepy/`, `home_celebration/`
+  - `character_greeting_loop/`, `character_selected/` (이름 변경됨)
+
+**최종 결과:**
+- 각 캐릭터당 13개 상태 폴더
+- 총 52개 폴더 (4캐릭터 × 13상태)
+- hunter_cat: 13 folders ✓
+- money_bear: 13 folders ✓
+- save_sheep: 13 folders ✓
+- chaser_fox: 13 folders ✓
+
+---
+
 ## 🚨 개발팀 작업 필요 (2025-12-24)
 
-### ⚠️ 주의: Task #1-3 완료, 나머지 작업 진행 예정
+### ⚠️ 주의: Task #1-4 완료, 나머지 작업 진행 예정
 
 ### ~~1. CharacterAnimationState enum 재설계 (필수)~~ ✅ 완료
 **파일:** `lib/models/character_animation_config.dart`
@@ -210,9 +249,9 @@ void _onAnimationComplete() {
 
 ---
 
-### 4. 폴더 구조 재편 (필수)
+### ~~4. 폴더 구조 재편 (필수)~~ ✅ 완료
 
-**git mv 명령어:**
+**실행된 명령어:**
 ```bash
 # 각 캐릭터마다 실행 (hunter_cat, money_bear, save_sheep, chaser_fox)
 cd assets/animations/characters/hunter_cat

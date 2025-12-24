@@ -1,25 +1,27 @@
-/// 캐릭터 애니메이션 상태
+/// 캐릭터 애니메이션 상태 (2025-12-24 재설계: 13개 통합 애니메이션 방식)
 enum CharacterAnimationState {
-  // 카테고리 1: 캐릭터 선택 화면 전용
-  greeting,  // 손 흔들며 인사 (구 idle, 125 frames)
-  selected,  // 선택됨 반응
+  // 카테고리 1: 캐릭터 선택 화면 (2개)
+  characterGreetingLoop,  // 손 흔들며 인사 (약 5초, loop)
+  characterSelected,      // 선택 반응 (약 1-2초, one-shot)
 
-  // 카테고리 2: 범용 상태 (모든 화면)
-  idle,      // 진짜 조용한 대기 (5초, 복합 애니메이션)
-  thinking,  // 퀴즈 문제 표시
-  happy,     // 정답/긍정 피드백
-  confused,  // 오답/부정 피드백
+  // 카테고리 2-A: 성향 퀴즈 (2개)
+  personalityIdle,      // 성향 문제 대기 (약 3초, loop)
+  personalitySelected,  // 성향 선택 반응 (약 2초, auto→idle)
 
-  // 카테고리 3: 홈 화면 전용
-  homeStudying,     // 책 읽기
-  homeExcited,      // 활기찬 모습
-  homeSleepy,       // 졸린 모습
-  homeCelebration,  // 목표 달성
+  // 카테고리 2-B: 학습 퀴즈 (3개) - 통합 애니메이션
+  quizIdle,          // 학습 문제 대기 (약 3초, loop)
+  quizCorrectFlow,   // 통합: thinking→happy→idle (약 4-6초, auto→quizIdle)
+  quizWrongFlow,     // 통합: thinking→confused→idle (약 4-6초, auto→quizIdle)
 
-  // 퀴즈 반응 (기존 호환성 유지)
-  reactionPositive,
-  reactionNegative,
-  reactionNeutral,
+  // 카테고리 3: 결과 화면 (1개)
+  resultCelebration,  // 성향 결과 축하 (약 3초, one-shot)
+
+  // 카테고리 4: 홈 화면 (5개)
+  homeIdle,          // 기본 대기 - 복합 애니메이션 (약 5초, loop)
+  homeStudying,      // 책 읽기 (약 3초, loop)
+  homeExcited,       // 활기참 (약 2초, loop)
+  homeSleepy,        // 졸림 (약 3초, loop)
+  homeCelebration,   // 목표 달성 (약 2초, auto→homeIdle)
 }
 
 enum ReactionType {

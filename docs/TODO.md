@@ -2,7 +2,7 @@
 
 > **실시간 업데이트 문서** - 개발 진행 상황과 남은 작업 추적
 
-마지막 업데이트: 2025-12-23 (애니메이션 상태 체계 재설계: 5개 → 10개 상태)
+마지막 업데이트: 2025-12-24 (애니메이션 재설계: 10개 → 13개 상태, 통합 애니메이션 방식)
 
 ---
 
@@ -93,22 +93,24 @@
 ---
 
 ### 2. 프레임 기반 캐릭터 애니메이션 구현
-**상태:** ✅ 코드 완료 (2025-12-13) / 🟡 애니메이션 제작 대기
-**우선순위:** P1
+**상태:** 🔴 코드 재설계 필요 (2025-12-24) / 🟡 애니메이션 제작 대기
+**우선순위:** P0 (긴급) ⭐⭐⭐
 **담당:**
-  - 디자인팀: Midjourney로 애니메이션 제작
-  - 개발팀: 통합 코드 완료 ✅
+  - 개발팀: 13-state 시스템 코드 재설계 필요
+  - 디자인팀: Midjourney/Runway로 통합 애니메이션 제작
 
-**전략 변경:** Rive → 프레임 기반 PNG 시퀀스 (GIF 추출)
-- **이유:** Midjourney로 빠른 프로토타이핑 가능, 디자인 유연성 향상
+**전략 변경:** Rive → 프레임 기반 PNG 시퀀스 (2025-12-13) → **통합 애니메이션 방식 (2025-12-24)**
+- **배경:** 개별 상태 조합 시 프레임 불일치로 전환이 끊기는 UX 문제 발견
+- **해결:** 화면별 통합 애니메이션 제작 (예: quiz_correct_flow = thinking → happy → idle 복귀를 하나의 애니메이션으로)
 - **상세 문서:** `docs/FRAME_ANIMATION_GUIDE.md`, `docs/ANIMATION_UPDATE_2025-12-13.md`
 
-**애니메이션 사양 (2025-12-23 업데이트):**
-- **포맷:** PNG (600x600px, 투명 배경) / WebP 추후 변환 가능
-- **프레임 레이트:** 24fps (영화급 부드러움, Rive 수준)
-- **제작 툴:** Midjourney Video → ffmpeg PNG 추출
-- **총 상태:** 10개 (Greeting, Selected, Idle, Thinking, Happy, Confused, Home 4개)
-- **총 용량:** ~40MB (PNG) / ~20MB (WebP 변환 시)
+**애니메이션 사양 (2025-12-24 재설계):**
+- **포맷:** PNG (600x600px, 투명 배경) → WebP 변환 (40% 용량 절감)
+- **프레임 레이트:** 24fps (영화급 부드러움)
+- **제작 툴:** Midjourney Video / Runway → ffmpeg PNG 추출 → WebP 변환
+- **총 상태:** 13개 (기존 10개 → 13개)
+- **총 용량:** ~192MB (PNG) / ~96MB (WebP 변환 시)
+- **핵심 변경:** 개별 상태 조합 방식 → 화면별 통합 애니메이션 방식
 
 **완료된 개발 작업:**
 - [x] 2025-12-13: 프레임 기반 애니메이션 시스템 구현
@@ -139,7 +141,7 @@
   - [x] **오버플로우 수정** (패딩/간격 최적화)
   - [x] **성향 테스트 레이아웃 조정** (116px 상단 이동)
   - [x] hunter_cat idle/selected 테스트 완료
-- [x] 2025-12-23: 애니메이션 상태 체계 재설계
+- [x] 2025-12-23: 애니메이션 상태 체계 재설계 (10-state)
   - [x] `CharacterAnimationState` enum 확장 (8개 → 14개, 실제 사용 10개)
   - [x] **idle → greeting 이름 변경** (기존 손 흔드는 애니메이션)
   - [x] **새로운 idle 개념 도입** (5초 복합 애니메이션, 캐릭터 성향 표현)
@@ -149,48 +151,144 @@
   - [x] pubspec.yaml 업데이트 (신규 폴더 경로 등록)
   - [x] 코드 사용처 업데이트 (idle → greeting/thinking)
   - [x] 문서 전면 개편 (FRAME_ANIMATION_GUIDE.md, README.md)
+- [ ] 2025-12-24: **통합 애니메이션 방식 재설계 (13-state)** 🔴 작업 필요
+  - [ ] **CharacterAnimationState enum 재설계** (14개 → 13개)
+    - [ ] 기존 상태 삭제: `thinking`, `happy`, `confused` (통합 애니메이션에 포함됨)
+    - [ ] 새로운 상태 추가: `personalityIdle`, `personalitySelected`, `quizIdle`, `quizCorrectFlow`, `quizWrongFlow`, `resultCelebration`
+    - [ ] 이름 변경: `greeting` → `characterGreetingLoop`, `selected` → `characterSelected`, `idle` → `homeIdle`
+    - [ ] 파일 위치: `lib/models/character_animation_config.dart`
+  - [ ] **Enum → 폴더명 변환 로직 구현**
+    - [ ] camelCase enum → snake_case 폴더명 변환 함수 추가
+    - [ ] 파일 위치: `lib/models/character_frame_animation.dart`
+  - [ ] **자동 전환 로직 구현**
+    - [ ] `onAnimationComplete` 콜백 추가
+    - [ ] `autoTransitionTo` 필드 JSON 지원
+    - [ ] 파일 위치: `lib/widgets/animated_character.dart`
+  - [ ] **폴더 구조 재편 (git mv)**
+    - [ ] `greeting/` → `character_greeting_loop/`
+    - [ ] `selected/` → `character_selected/`
+    - [ ] `idle/` → `home_idle/`
+    - [ ] 삭제: `thinking/`, `happy/`, `confused/`
+    - [ ] 신규 생성: `personality_idle/`, `personality_selected/`, `quiz_idle/`, `quiz_correct_flow/`, `quiz_wrong_flow/`, `result_celebration/`
+  - [ ] **animation_config.json 재작성**
+    - [ ] 13개 상태로 업데이트
+    - [ ] `autoTransitionTo` 필드 추가
+    - [ ] 유연한 타이밍 정책 반영 (정확한 프레임 수는 제작 후 확정)
+  - [ ] **화면별 State 사용 업데이트**
+    - [ ] 캐릭터 선택: `greeting` → `characterGreetingLoop`
+    - [ ] 성향 퀴즈: `thinking` → `personalityIdle` / `personalitySelected`
+    - [ ] 학습 퀴즈: `thinking/happy/confused` → `quizIdle/quizCorrectFlow/quizWrongFlow`
+    - [ ] 파일: `character_preview_screen.dart`, `personality_test_screen.dart`, 학습 퀴즈 화면
+  - [ ] **pubspec.yaml 업데이트**
+    - [ ] 52개 폴더 경로 등록 (4캐릭터 × 13상태)
+  - [ ] **문서 전면 수정**
+    - [ ] DEVELOPMENT_LOG.md: 2025-12-24 섹션 추가
+    - [ ] FRAME_ANIMATION_GUIDE.md: 13-state, 통합 애니메이션, 유연한 타이밍
+    - [ ] ANIMATION_UPDATE_2025-12-13.md: 최종 스펙 업데이트
+    - [ ] README.md: 13-state 시스템
+    - [ ] characters/README.md: 폴더 구조 업데이트
 
-**디자인팀 작업 (2025-12-23 업데이트):**
-- [x] **헌터캣 (일부 완료)**
-  - [x] greeting: 125프레임 (5.2초, 손 흔들기) ✅
-  - [x] selected: 20프레임 (0.8초, 선택 반응) ✅
-  - [ ] **idle (신규):** 120프레임 (5초, 복합 애니메이션 - 캐릭터 성향 표현) ⭐
-  - [ ] thinking: 24프레임 (1초, 고민)
-  - [ ] happy: 30프레임 (1.2초, 기쁨)
-  - [ ] confused: 20프레임 (0.8초, 혼란)
-  - [ ] **home_studying:** 60프레임 (2.5초, 책 읽기) 🆕
-  - [ ] **home_excited:** 48프레임 (2초, 활기참) 🆕
-  - [ ] **home_sleepy:** 72프레임 (3초, 졸림) 🆕
-  - [ ] **home_celebration:** 36프레임 (1.5초, 목표 달성) 🆕
-- [ ] **머니베어, 세이브쉽, 체이서폭스**
-  - [ ] 각 10가지 상태 애니메이션 생성 (greeting, selected, idle, thinking, happy, confused, home 4개)
-- [ ] ffmpeg로 PNG 프레임 추출 (명령어는 `docs/FRAME_ANIMATION_GUIDE.md` 참고)
-  ```bash
-  ffmpeg -i input.mp4 -vf "fps=24,scale=600:600:flags=lanczos" frame_%02d.png
-  ```
-- [ ] 프레임 파일을 `assets/animations/characters/[캐릭터ID]/[상태]/` 폴더에 배치
+**디자인팀 작업 (2025-12-24 재설계 - 13-state 통합 애니메이션):**
 
-**파일 배치 예시 (2025-12-23 업데이트):**
+**⚠️ 중요 변경사항:**
+- **타이밍 정책:** "정확히 XX프레임" → "약 X초" (유연한 정책)
+- **프레임 수:** 제작 후 실제 프레임 수를 JSON에 기록
+- **통합 애니메이션:** thinking/happy/confused는 별도 제작 안 함 (quiz_correct_flow/quiz_wrong_flow에 포함)
+
+**Phase 1: 온보딩 (4개 × 4캐릭터 = 16개) 🎯 최우선**
+- [ ] **character_greeting_loop** (약 5초, loop)
+  - [x] hunter_cat: 125프레임 ✅ (기존 greeting 재활용)
+  - [ ] money_bear, save_sheep, chaser_fox
+- [ ] **character_selected** (약 1-2초, one-shot)
+  - [ ] hunter_cat: 재제작 필요 ⚠️ (기존 200프레임은 너무 김)
+  - [ ] money_bear, save_sheep, chaser_fox
+- [ ] **personality_idle** (약 3초, loop)
+  - [ ] 조용한 숨쉬기 + 호기심 표정
+  - [ ] 모든 캐릭터
+- [ ] **personality_selected** (약 2초, one-shot → auto to personality_idle)
+  - [ ] 0-1초: 고개 끄덕임
+  - [ ] 1-2초: idle 복귀
+  - [ ] 모든 캐릭터
+
+**Phase 2: 학습 퀴즈 (4개 × 4캐릭터 = 16개)**
+- [ ] **quiz_idle** (약 3초, loop)
+  - [ ] 조용한 숨쉬기 + 집중 표정
+  - [ ] 모든 캐릭터
+- [ ] **quiz_correct_flow** (약 4-6초, one-shot → auto to quiz_idle) ⭐ 통합 애니메이션
+  - [ ] 0-1초: thinking (고민 표정)
+  - [ ] 1-3초: happy (정답! 기쁨)
+  - [ ] 3-4초: idle 복귀
+  - [ ] 모든 캐릭터
+- [ ] **quiz_wrong_flow** (약 4-6초, one-shot → auto to quiz_idle) ⭐ 통합 애니메이션
+  - [ ] 0-1초: thinking (고민 표정)
+  - [ ] 1-3초: confused (오답.. 당황)
+  - [ ] 3-4초: idle 복귀
+  - [ ] 모든 캐릭터
+- [ ] **result_celebration** (약 3초, one-shot)
+  - [ ] 0-2초: happy 유지
+  - [ ] 2-3초: idle 전환
+  - [ ] 모든 캐릭터
+
+**Phase 3: 홈 화면 (5개 × 4캐릭터 = 20개)**
+- [ ] **home_idle** (약 5초, loop)
+  - [ ] 숨쉬기 + 윙크 + 캐릭터 성향 제스처
+  - [ ] 모든 캐릭터
+- [ ] **home_studying** (약 3초, loop)
+  - [ ] 책 읽기 + 페이지 넘김
+  - [ ] 모든 캐릭터
+- [ ] **home_excited** (약 2초, loop)
+  - [ ] 통통 튀기 + 신나는 표정
+  - [ ] 모든 캐릭터
+- [ ] **home_sleepy** (약 3초, loop)
+  - [ ] 하품 + 눈 비비기
+  - [ ] 모든 캐릭터
+- [ ] **home_celebration** (약 2초, one-shot → auto to home_idle)
+  - [ ] 점프 + 컨페티 + 승리 포즈
+  - [ ] 모든 캐릭터
+
+**제작 워크플로우:**
+1. Midjourney/Runway로 영상 제작 (목표 시간대로, 정확한 프레임 수는 무시)
+2. ffmpeg로 PNG 추출: `ffmpeg -i input.mp4 -vf "fps=24,scale=600:600:flags=lanczos" frame_%02d.png`
+3. rembg로 배경 제거 (투명 배경)
+4. cwebp로 WebP 변환: `cwebp -q 85 input.png -o output.webp`
+5. 실제 프레임 수 카운트 후 JSON에 기록
+6. 폴더명 확인: snake_case (예: `character_greeting_loop/`, `quiz_correct_flow/`)
+
+**총 제작 물량: 52개 애니메이션 (4캐릭터 × 13상태)**
+- Phase 1: 16개 (온보딩 테스트 가능)
+- Phase 2: 16개 (메인 기능 테스트 가능)
+- Phase 3: 20개 (완성)
+
+**파일 배치 예시 (2025-12-24 재설계 - 13-state):**
 ```
 assets/animations/characters/
 ├── hunter_cat/
-│   ├── greeting/              (125 frames, 구 idle)
-│   │   ├── frame_01.png
-│   │   ├── frame_02.png
-│   │   └── ... (frame_125.png)
-│   ├── selected/              (20 frames)
-│   ├── idle/                  (120 frames, 신규 개념)
-│   ├── thinking/              (24 frames)
-│   ├── happy/                 (30 frames)
-│   ├── confused/              (20 frames)
-│   ├── home_studying/         (60 frames, 신규)
-│   ├── home_excited/          (48 frames, 신규)
-│   ├── home_sleepy/           (72 frames, 신규)
-│   └── home_celebration/      (36 frames, 신규)
-├── money_bear/
-├── save_sheep/
-└── chaser_fox/
+│   ├── animation_config.json           (13개 상태 설정)
+│   ├── character_greeting_loop/        (약 5초, ~120 frames)
+│   │   ├── frame_01.webp
+│   │   ├── frame_02.webp
+│   │   └── ... (실제 프레임 수는 제작 후 확정)
+│   ├── character_selected/             (약 1-2초, ~24-48 frames)
+│   ├── personality_idle/               (약 3초, ~72 frames)
+│   ├── personality_selected/           (약 2초, ~48 frames)
+│   ├── quiz_idle/                      (약 3초, ~72 frames)
+│   ├── quiz_correct_flow/              (약 4-6초, ~96-144 frames) ⭐ 통합
+│   ├── quiz_wrong_flow/                (약 4-6초, ~96-144 frames) ⭐ 통합
+│   ├── result_celebration/             (약 3초, ~72 frames)
+│   ├── home_idle/                      (약 5초, ~120 frames)
+│   ├── home_studying/                  (약 3초, ~72 frames)
+│   ├── home_excited/                   (약 2초, ~48 frames)
+│   ├── home_sleepy/                    (약 3초, ~72 frames)
+│   └── home_celebration/               (약 2초, ~48 frames)
+├── money_bear/                         (동일한 13개 폴더)
+├── save_sheep/                         (동일한 13개 폴더)
+└── chaser_fox/                         (동일한 13개 폴더)
 ```
+
+**파일명 규칙:**
+- 폴더명: snake_case (예: `character_greeting_loop/`, `quiz_correct_flow/`)
+- 파일명: `frame_01.webp`, `frame_02.webp`, ... (01부터 시작, 2자리 패딩)
+- 포맷: WebP 권장 (PNG도 지원)
 
 **테스트 방법:**
 1. 프레임 파일 배치

@@ -1,5 +1,441 @@
 # MoneyPet 개발 로그
 
+## 📅 2025-12-24 세션: 통합 애니메이션 방식 재설계 (13-State)
+
+### 🎯 목표
+애니메이션 상태 시스템 재설계 (10개 → 13개 상태, 통합 애니메이션 방식 채택)
+
+### 📋 배경
+
+**문제 발견:**
+개별 상태 조합 방식의 근본적인 UX 문제 발견
+- `idle` 애니메이션 마지막 프레임 (포즈A) → `thinking` 첫 프레임 (포즈B) 전환 시 뚝 끊김
+- Midjourney/Runway는 정확한 프레임 일치를 보장할 수 없음
+- 사용자 경험에 치명적 영향
+
+**해결 방안:**
+- **Option A (채택):** 화면별 통합 애니메이션
+  - 예: `quiz_correct_flow` = thinking → happy → idle 복귀를 **하나의 애니메이션**으로 제작
+  - 장점: 완벽한 전환, 의도된 UX 플로우
+  - 단점: 용량 증가 (40MB → 192MB), 유연성 감소
+- **Option B (기각):** Neutral Pose 통일 - Midjourney로 정확한 포즈 재현 어려움
+- **Option C (기각):** 부분 통합 - 여전히 일부 전환 끊김
+
+**의사결정:** UX 우선순위로 Option A 채택
+
+---
+
+## 🚨 개발팀 작업 필요 (2025-12-24)
+
+### ⚠️ 주의: 아래 작업은 아직 진행되지 않았습니다!
+
+### 1. CharacterAnimationState enum 재설계 (필수)
+**파일:** `lib/models/character_animation_config.dart`
+
+**변경:** 14개 → 13개 상태
+
+**삭제되는 상태 (통합 애니메이션에 포함됨):**
+- `thinking` → `quiz_correct_flow`와 `quiz_wrong_flow`에 포함
+- `happy` → `quiz_correct_flow`에 포함
+- `confused` → `quiz_wrong_flow`에 포함
+
+**새로 추가되는 상태:**
+```dart
+enum CharacterAnimationState {
+  // 카테고리 1: 캐릭터 선택 화면 (2개)
+  characterGreetingLoop,  // 기존 greeting
+  characterSelected,      // 기존 selected
+
+  // 카테고리 2-A: 성향 퀴즈 전용 (2개)
+  personalityIdle,        // 성향 문제 대기
+  personalitySelected,    // 성향 선택 반응 (자동 전환)
+
+  // 카테고리 2-B: 학습 퀴즈 전용 (3개)
+  quizIdle,               // 학습 문제 대기
+  quizCorrectFlow,        // 통합: thinking → happy → idle
+  quizWrongFlow,          // 통합: thinking → confused → idle
+
+  // 카테고리 3: 결과 화면 (1개)
+  resultCelebration,      // 성향 결과 축하
+
+  // 카테고리 4: 홈 화면 (5개)
+  homeIdle,               // 기존 idle
+  homeStudying,           // 기존 homeStudying
+  homeExcited,            // 기존 homeExcited
+  homeSleepy,             // 기존 homeSleepy
+  homeCelebration,        // 기존 homeCelebration
+}
+```
+
+---
+
+### 2. Enum → 폴더명 변환 로직 구현 (필수)
+**파일:** `lib/models/character_frame_animation.dart`
+
+**추가 필요:**
+```dart
+String _stateToFolderName(CharacterAnimationState state) {
+  // camelCase → snake_case 변환
+  switch (state) {
+    case CharacterAnimationState.characterGreetingLoop:
+      return 'character_greeting_loop';
+    case CharacterAnimationState.characterSelected:
+      return 'character_selected';
+    case CharacterAnimationState.personalityIdle:
+      return 'personality_idle';
+    case CharacterAnimationState.personalitySelected:
+      return 'personality_selected';
+    case CharacterAnimationState.quizIdle:
+      return 'quiz_idle';
+    case CharacterAnimationState.quizCorrectFlow:
+      return 'quiz_correct_flow';
+    case CharacterAnimationState.quizWrongFlow:
+      return 'quiz_wrong_flow';
+    case CharacterAnimationState.resultCelebration:
+      return 'result_celebration';
+    case CharacterAnimationState.homeIdle:
+      return 'home_idle';
+    case CharacterAnimationState.homeStudying:
+      return 'home_studying';
+    case CharacterAnimationState.homeExcited:
+      return 'home_excited';
+    case CharacterAnimationState.homeSleepy:
+      return 'home_sleepy';
+    case CharacterAnimationState.homeCelebration:
+      return 'home_celebration';
+  }
+}
+```
+
+---
+
+### 3. 자동 전환 로직 구현 (필수)
+**파일:** `lib/widgets/animated_character.dart`
+
+**추가 필요:**
+```dart
+// animation_config.json에 autoTransitionTo 필드 추가
+{
+  "personalitySelected": {
+    "frameCount": 48,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "personalityIdle"  // ← 신규
+  }
+}
+
+// AnimatedCharacter 위젯에서 처리
+void _onAnimationComplete() {
+  final config = _currentConfig;
+  if (config.containsKey('autoTransitionTo')) {
+    final nextState = _stringToState(config['autoTransitionTo']);
+    setState(() {
+      _currentState = nextState;
+    });
+  }
+}
+```
+
+---
+
+### 4. 폴더 구조 재편 (필수)
+
+**git mv 명령어:**
+```bash
+# 각 캐릭터마다 실행 (hunter_cat, money_bear, save_sheep, chaser_fox)
+cd assets/animations/characters/hunter_cat
+
+# 이름 변경
+git mv greeting/ character_greeting_loop/
+git mv selected/ character_selected/
+git mv idle/ home_idle/
+
+# 삭제 (통합 애니메이션에 포함됨)
+git rm -r thinking/
+git rm -r happy/
+git rm -r confused/
+
+# 신규 폴더 생성
+mkdir personality_idle personality_selected
+mkdir quiz_idle quiz_correct_flow quiz_wrong_flow
+mkdir result_celebration
+```
+
+**최종 폴더 구조:**
+```
+assets/animations/characters/
+├── hunter_cat/
+│   ├── animation_config.json
+│   ├── character_greeting_loop/
+│   ├── character_selected/
+│   ├── personality_idle/
+│   ├── personality_selected/
+│   ├── quiz_idle/
+│   ├── quiz_correct_flow/
+│   ├── quiz_wrong_flow/
+│   ├── result_celebration/
+│   ├── home_idle/
+│   ├── home_studying/
+│   ├── home_excited/
+│   ├── home_sleepy/
+│   └── home_celebration/
+├── money_bear/ (동일)
+├── save_sheep/ (동일)
+└── chaser_fox/ (동일)
+```
+
+---
+
+### 5. animation_config.json 재작성 (필수)
+**파일:** `assets/animations/characters/*/animation_config.json`
+
+**중요:** "정확히 XX프레임" → "약 X초" (유연한 타이밍 정책)
+
+**예시:**
+```json
+{
+  "characterGreetingLoop": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "손 흔들며 인사 (약 5초)"
+  },
+  "personalitySelected": {
+    "frameCount": 48,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "personalityIdle",
+    "description": "성향 선택 반응 (약 2초)"
+  },
+  "quizCorrectFlow": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "quizIdle",
+    "description": "정답 플로우 (약 4-6초): thinking → happy → idle"
+  },
+  "quizWrongFlow": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "quizIdle",
+    "description": "오답 플로우 (약 4-6초): thinking → confused → idle"
+  }
+}
+```
+
+---
+
+### 6. 화면별 State 사용 업데이트 (필수)
+
+**파일 1:** `lib/screens/onboarding/character_preview_screen.dart`
+```dart
+// 변경 전
+state: CharacterAnimationState.greeting
+
+// 변경 후
+state: CharacterAnimationState.characterGreetingLoop
+```
+
+**파일 2:** `lib/screens/onboarding/personality_test_screen.dart`
+```dart
+// 변경 전
+state: CharacterAnimationState.thinking
+
+// 변경 후 (대기 상태)
+state: CharacterAnimationState.personalityIdle
+
+// 선택 시
+state: CharacterAnimationState.personalitySelected
+// → 2초 후 자동으로 personalityIdle로 전환
+```
+
+**파일 3:** 학습 퀴즈 화면 (미구현, 추후 구현 시)
+```dart
+// 대기
+state: CharacterAnimationState.quizIdle
+
+// 정답 선택
+state: CharacterAnimationState.quizCorrectFlow
+// → 4-6초 후 자동으로 quizIdle로 전환
+
+// 오답 선택
+state: CharacterAnimationState.quizWrongFlow
+// → 4-6초 후 자동으로 quizIdle로 전환
+```
+
+**파일 4:** `lib/services/character_animation_preloader.dart`
+```dart
+// 변경 전
+CharacterAnimationState.greeting
+
+// 변경 후
+CharacterAnimationState.characterGreetingLoop
+```
+
+---
+
+### 7. pubspec.yaml 업데이트 (필수)
+**파일:** `pubspec.yaml`
+
+**변경:** 40개 경로 → 52개 경로 (4캐릭터 × 13상태)
+
+```yaml
+flutter:
+  assets:
+    # hunter_cat (13개 상태)
+    - assets/animations/characters/hunter_cat/character_greeting_loop/
+    - assets/animations/characters/hunter_cat/character_selected/
+    - assets/animations/characters/hunter_cat/personality_idle/
+    - assets/animations/characters/hunter_cat/personality_selected/
+    - assets/animations/characters/hunter_cat/quiz_idle/
+    - assets/animations/characters/hunter_cat/quiz_correct_flow/
+    - assets/animations/characters/hunter_cat/quiz_wrong_flow/
+    - assets/animations/characters/hunter_cat/result_celebration/
+    - assets/animations/characters/hunter_cat/home_idle/
+    - assets/animations/characters/hunter_cat/home_studying/
+    - assets/animations/characters/hunter_cat/home_excited/
+    - assets/animations/characters/hunter_cat/home_sleepy/
+    - assets/animations/characters/hunter_cat/home_celebration/
+    # money_bear, save_sheep, chaser_fox도 동일하게 13개씩
+```
+
+---
+
+### 8. 문서 업데이트 (필수)
+
+**파일 목록:**
+- [x] `docs/TODO.md` - 2025-12-24 작업 항목 추가 ✅
+- [x] `docs/DEVELOPMENT_LOG.md` - 2025-12-24 섹션 추가 ✅
+- [ ] `docs/FRAME_ANIMATION_GUIDE.md` - 13-state, 통합 애니메이션, 유연한 타이밍
+- [ ] `docs/ANIMATION_UPDATE_2025-12-13.md` - 최종 스펙 업데이트
+- [ ] `README.md` - 애니메이션 섹션 업데이트
+- [ ] `assets/animations/characters/README.md` - 폴더 구조 업데이트
+
+---
+
+## 📊 13-State 시스템 상세
+
+### State 체계 (카테고리별)
+
+| 카테고리 | State | 설명 | 시간 | 프레임 | Loop | 자동전환 |
+|---------|-------|------|------|--------|------|----------|
+| **1. 캐릭터 선택** | `characterGreetingLoop` | 손 흔들며 인사 | 약 5초 | ~120 | ✅ | - |
+| | `characterSelected` | 선택 반응 | 약 1-2초 | ~24-48 | ❌ | - |
+| **2-A. 성향 퀴즈** | `personalityIdle` | 성향 문제 대기 | 약 3초 | ~72 | ✅ | - |
+| | `personalitySelected` | 성향 선택 반응 | 약 2초 | ~48 | ❌ | `personalityIdle` |
+| **2-B. 학습 퀴즈** | `quizIdle` | 학습 문제 대기 | 약 3초 | ~72 | ✅ | - |
+| | `quizCorrectFlow` | 통합: thinking→happy→idle | 약 4-6초 | ~96-144 | ❌ | `quizIdle` |
+| | `quizWrongFlow` | 통합: thinking→confused→idle | 약 4-6초 | ~96-144 | ❌ | `quizIdle` |
+| **3. 결과 화면** | `resultCelebration` | 성향 결과 축하 | 약 3초 | ~72 | ❌ | - |
+| **4. 홈 화면** | `homeIdle` | 기본 대기 | 약 5초 | ~120 | ✅ | - |
+| | `homeStudying` | 책 읽기 | 약 3초 | ~72 | ✅ | - |
+| | `homeExcited` | 활기찬 모습 | 약 2초 | ~48 | ✅ | - |
+| | `homeSleepy` | 졸린 모습 | 약 3초 | ~72 | ✅ | - |
+| | `homeCelebration` | 목표 달성 축하 | 약 2초 | ~48 | ❌ | `homeIdle` |
+
+**합계:** 13개 상태
+
+---
+
+### 유연한 타이밍 정책
+
+**Before (경직적):**
+```
+❌ quiz_correct_flow: 정확히 96프레임
+   thinking(24프레임) + happy(48프레임) + idle복귀(24프레임)
+```
+
+**After (유연):**
+```
+✅ quiz_correct_flow: 약 4-6초
+   구성: thinking → happy → idle 복귀
+   실제 프레임 수: 제작 후 확정 (96~144 예상)
+   JSON 설정: frameCount: [실제 프레임 수]
+```
+
+**이유:**
+- Midjourney/Runway는 정확한 프레임 수 통제 불가
+- "4초 목표"로 제작 → 실제 110프레임 나옴 → JSON에 110 기록 → 완벽 작동
+
+---
+
+### 화면별 State 매핑
+
+**1️⃣ 캐릭터 선택 화면**
+```
+[🐻] [🐑] [🐱] [🦊]
+  ↓    ↓    ↓    ↓
+characterGreetingLoop (5초 무한 루프)
+
+터치 →
+characterSelected (1초 원샷) →
+다음 화면
+```
+
+**2️⃣ 성향 퀴즈 화면**
+```
+┌─→ personalityIdle (3초 루프)
+│
+│   Q. 투자할 때 중요한 건?
+│   ○ 안정성 ← 선택!
+│
+│   ↓
+│   personalitySelected (2초)
+│   ↓ 자동 전환
+└───┘
+```
+
+**3️⃣ 학습/퀴즈 화면**
+```
+┌─→ quizIdle (3초 루프)
+│
+│   Q. 복리의 마법이란?
+│   ○ 정답 ← 선택!
+│
+│   ↓
+│   quizCorrectFlow (4-6초)
+│   [thinking → happy → idle]
+│   ↓ 자동 전환
+└───┘
+```
+
+**4️⃣ 홈 화면**
+```
+┌─→ homeIdle (기본)
+│
+├─→ homeStudying (학습 시)
+├─→ homeExcited (활기)
+├─→ homeSleepy (휴식)
+│
+└─→ homeCelebration (달성)
+    ↓ 자동 전환
+    homeIdle
+```
+
+---
+
+### 제작 물량
+
+**총 52개 애니메이션:**
+- Phase 1 (온보딩): 16개 (4상태 × 4캐릭터)
+- Phase 2 (학습): 16개 (4상태 × 4캐릭터)
+- Phase 3 (홈): 20개 (5상태 × 4캐릭터)
+
+**총 용량:**
+- PNG: ~192MB (캐릭터당 48MB)
+- WebP: ~96MB (50% 절감)
+
+---
+
+## 📝 문서 작성 완료
+
+- [x] TODO.md 업데이트 (작업 항목 명시)
+- [x] DEVELOPMENT_LOG.md 업데이트 (2025-12-24 섹션)
+- [ ] 다른 문서들 (다음 단계)
+
+---
+
 ## 📅 2025-12-23 세션: 애니메이션 상태 체계 재설계
 
 ### 🎯 목표

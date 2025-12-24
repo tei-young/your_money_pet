@@ -193,8 +193,8 @@ class _CharacterPreviewScreenState extends State<CharacterPreviewScreen>
         child: AnimatedCharacter(
           characterType: type,
           state: isSelected
-              ? CharacterAnimationState.selected
-              : CharacterAnimationState.greeting,
+              ? CharacterAnimationState.characterSelected
+              : CharacterAnimationState.characterGreetingLoop,
           onTap: () => _onCharacterTap(type),
           size: 180, // 100 → 180 (1.8배)
         ),

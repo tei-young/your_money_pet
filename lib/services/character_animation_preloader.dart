@@ -8,7 +8,7 @@ import '../models/character_frame_animation.dart';
 class CharacterAnimationPreloader {
   /// 모든 캐릭터의 Greeting 상태 로드 (캐릭터 선택 화면용)
   ///
-  /// 4개 캐릭터 × 125프레임 = 500개 이미지 (약 20MB)
+  /// 4개 캐릭터 × 120프레임 = 480개 이미지 (약 20MB)
   /// 예상 시간: 2-3초 (WiFi 기준)
   static Future<void> loadAllIdleStates(BuildContext context) async {
     final characters = [
@@ -22,24 +22,24 @@ class CharacterAnimationPreloader {
       characters.map((characterId) => _loadCharacterState(
             context,
             characterId,
-            CharacterAnimationState.greeting,
+            CharacterAnimationState.characterGreetingLoop,
           )),
     );
   }
 
-  /// 특정 캐릭터의 모든 상태 로드 (캐릭터 선택 후)
+  /// 특정 캐릭터의 모든 온보딩 상태 로드 (캐릭터 선택 후)
   ///
-  /// 1개 캐릭터 × 4개 상태 × 평균 10프레임 = 40개 이미지 (약 1.6MB)
+  /// 1개 캐릭터 × 4개 상태 (characterSelected, personalityIdle, personalitySelected, resultCelebration)
   /// 예상 시간: 1-2초 (백그라운드)
   static Future<void> loadCharacterAllStates(
     BuildContext context,
     String characterId,
   ) async {
     await Future.wait([
-      _loadCharacterState(context, characterId, CharacterAnimationState.selected),
-      _loadCharacterState(context, characterId, CharacterAnimationState.happy),
-      _loadCharacterState(context, characterId, CharacterAnimationState.thinking),
-      _loadCharacterState(context, characterId, CharacterAnimationState.confused),
+      _loadCharacterState(context, characterId, CharacterAnimationState.characterSelected),
+      _loadCharacterState(context, characterId, CharacterAnimationState.personalityIdle),
+      _loadCharacterState(context, characterId, CharacterAnimationState.personalitySelected),
+      _loadCharacterState(context, characterId, CharacterAnimationState.resultCelebration),
     ]);
   }
 

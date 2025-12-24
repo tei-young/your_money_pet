@@ -254,7 +254,7 @@ class PersonalityResultScreen extends StatelessWidget {
         // 캐릭터 애니메이션
         AnimatedCharacter(
           characterType: selectedCharacter,
-          state: CharacterAnimationState.selected,
+          state: CharacterAnimationState.resultCelebration,
           customDialogue: dialogue,
           size: 270, // 150 → 270 (1.8배)
         ),

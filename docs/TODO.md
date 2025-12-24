@@ -179,23 +179,29 @@
     - [x] 최종 결과: 4개 캐릭터 × 13개 상태 = 52개 폴더 완성
     - [x] 파일: `assets/animations/characters/*/`
     - [x] Commit: 088b510
-  - [ ] **animation_config.json 재작성**
-    - [ ] 13개 상태로 업데이트
-    - [ ] `autoTransitionTo` 필드 추가
-    - [ ] 유연한 타이밍 정책 반영 (정확한 프레임 수는 제작 후 확정)
-  - [ ] **화면별 State 사용 업데이트**
-    - [ ] 캐릭터 선택: `greeting` → `characterGreetingLoop`
-    - [ ] 성향 퀴즈: `thinking` → `personalityIdle` / `personalitySelected`
-    - [ ] 학습 퀴즈: `thinking/happy/confused` → `quizIdle/quizCorrectFlow/quizWrongFlow`
-    - [ ] 파일: `character_preview_screen.dart`, `personality_test_screen.dart`, 학습 퀴즈 화면
-  - [ ] **pubspec.yaml 업데이트**
-    - [ ] 52개 폴더 경로 등록 (4캐릭터 × 13상태)
-  - [ ] **문서 전면 수정**
-    - [ ] DEVELOPMENT_LOG.md: 2025-12-24 섹션 추가
-    - [ ] FRAME_ANIMATION_GUIDE.md: 13-state, 통합 애니메이션, 유연한 타이밍
-    - [ ] ANIMATION_UPDATE_2025-12-13.md: 최종 스펙 업데이트
-    - [ ] README.md: 13-state 시스템
-    - [ ] characters/README.md: 폴더 구조 업데이트
+  - [x] **animation_config.json 재작성** ✅ 2025-12-24
+    - [x] 13개 상태로 업데이트
+    - [x] `autoTransitionTo` 필드 추가 (personalitySelected, quizCorrectFlow, quizWrongFlow, homeCelebration)
+    - [x] 유연한 타이밍 정책 반영 ("약 X초" 형식, 정확한 프레임 수는 제작 후 확정)
+    - [x] 파일: `assets/animations/characters/*/animation_config.json` (4개)
+    - [x] Commit: e5ab1c6
+  - [x] **화면별 State 사용 업데이트** ✅ 2025-12-24
+    - [x] 캐릭터 선택: `greeting` → `characterGreetingLoop`, `selected` → `characterSelected`
+    - [x] 성향 퀴즈: `thinking` → `personalityIdle`
+    - [x] 성향 결과: `selected` → `resultCelebration`
+    - [x] 프리로더: `greeting/selected/happy/thinking/confused` → 13-state 온보딩 상태들
+    - [x] 파일: `character_preview_screen.dart`, `personality_test_screen.dart`, `personality_result_screen.dart`, `character_animation_preloader.dart`
+    - [x] Commit: bb8d045
+  - [x] **pubspec.yaml 업데이트** ✅ 2025-12-24
+    - [x] 52개 폴더 경로 등록 (4캐릭터 × 13상태)
+    - [x] 10-state 경로 삭제 및 13-state 경로 등록
+    - [x] Commit: 5950ff5
+  - [x] **문서 전면 수정** ✅ 2025-12-24
+    - [x] DEVELOPMENT_LOG.md: 2025-12-24 섹션 추가 (Task #1-7 완료 내역)
+    - [x] FRAME_ANIMATION_GUIDE.md: 13-state, 통합 애니메이션 (이미 업데이트됨)
+    - [x] ANIMATION_UPDATE_2025-12-13.md: 최종 스펙 업데이트 (Commit 4c3359a)
+    - [x] README.md: 13-state 시스템, Rive → 프레임 애니메이션 변경
+    - [x] assets/animations/characters/README.md: 폴더 구조 업데이트 (이미 업데이트됨)
 
 **디자인팀 작업 (2025-12-24 재설계 - 13-state 통합 애니메이션):**
 

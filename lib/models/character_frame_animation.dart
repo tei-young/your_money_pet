@@ -3,7 +3,7 @@ import '../services/animation_config_loader.dart';
 
 /// 프레임 기반 캐릭터 애니메이션 설정
 ///
-/// 각 상태별 프레임 수, 재생 속도, 루프 여부를 관리합니다.
+/// 각 상태별 프레임 수, 재생 속도, 루프 여부, 자동 전환을 관리합니다.
 class CharacterFrameAnimation {
   final String characterId;
   final CharacterAnimationState state;
@@ -11,12 +11,19 @@ class CharacterFrameAnimation {
   final Duration frameDuration;
   final bool loop;
 
+  /// 애니메이션 완료 후 자동으로 전환할 상태 (선택적)
+  ///
+  /// 예: personalitySelected → personalityIdle
+  /// JSON에서 "autoTransitionTo": "personalityIdle" 형식으로 지정
+  final String? autoTransitionTo;
+
   const CharacterFrameAnimation({
     required this.characterId,
     required this.state,
     required this.frameCount,
     required this.frameDuration,
     this.loop = true,
+    this.autoTransitionTo,
   });
 
   /// 프레임 이미지 경로 생성

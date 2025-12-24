@@ -3,7 +3,7 @@ import '../services/animation_config_loader.dart';
 
 /// 프레임 기반 캐릭터 애니메이션 설정
 ///
-/// 각 상태별 프레임 수, 재생 속도, 루프 여부를 관리합니다.
+/// 각 상태별 프레임 수, 재생 속도, 루프 여부, 자동 전환을 관리합니다.
 class CharacterFrameAnimation {
   final String characterId;
   final CharacterAnimationState state;
@@ -11,21 +11,62 @@ class CharacterFrameAnimation {
   final Duration frameDuration;
   final bool loop;
 
+  /// 애니메이션 완료 후 자동으로 전환할 상태 (선택적)
+  ///
+  /// 예: personalitySelected → personalityIdle
+  /// JSON에서 "autoTransitionTo": "personalityIdle" 형식으로 지정
+  final String? autoTransitionTo;
+
   const CharacterFrameAnimation({
     required this.characterId,
     required this.state,
     required this.frameCount,
     required this.frameDuration,
     this.loop = true,
+    this.autoTransitionTo,
   });
 
   /// 프레임 이미지 경로 생성
   ///
-  /// 예: 'assets/animations/characters/hunter_cat/idle/frame_01.png'
+  /// 예: 'assets/animations/characters/hunter_cat/character_greeting_loop/frame_01.png'
   String getFramePath(int frameIndex) {
-    final stateFolder = state.name; // 'idle', 'selected', etc.
+    final stateFolder = _stateToFolderName(state);
     final frameNumber = (frameIndex + 1).toString().padLeft(2, '0');
     return 'assets/animations/characters/$characterId/$stateFolder/frame_$frameNumber.png';
+  }
+
+  /// camelCase enum → snake_case 폴더명 변환
+  ///
+  /// 예: CharacterAnimationState.characterGreetingLoop → 'character_greeting_loop'
+  static String _stateToFolderName(CharacterAnimationState state) {
+    switch (state) {
+      case CharacterAnimationState.characterGreetingLoop:
+        return 'character_greeting_loop';
+      case CharacterAnimationState.characterSelected:
+        return 'character_selected';
+      case CharacterAnimationState.personalityIdle:
+        return 'personality_idle';
+      case CharacterAnimationState.personalitySelected:
+        return 'personality_selected';
+      case CharacterAnimationState.quizIdle:
+        return 'quiz_idle';
+      case CharacterAnimationState.quizCorrectFlow:
+        return 'quiz_correct_flow';
+      case CharacterAnimationState.quizWrongFlow:
+        return 'quiz_wrong_flow';
+      case CharacterAnimationState.resultCelebration:
+        return 'result_celebration';
+      case CharacterAnimationState.homeIdle:
+        return 'home_idle';
+      case CharacterAnimationState.homeStudying:
+        return 'home_studying';
+      case CharacterAnimationState.homeExcited:
+        return 'home_excited';
+      case CharacterAnimationState.homeSleepy:
+        return 'home_sleepy';
+      case CharacterAnimationState.homeCelebration:
+        return 'home_celebration';
+    }
   }
 
   /// 총 애니메이션 길이
@@ -56,7 +97,7 @@ class CharacterFrameAnimation {
 
   /// 상태별 프리셋 생성 (하드코딩) - Fallback 용
   ///
-  /// JSON 파일이 없을 때 사용되는 기본값.
+  /// JSON 파일이 없을 때 사용되는 기본값 (13-state 시스템)
   /// 프레임 수는 frameCountOverride로 덮어쓸 수 있습니다.
   static CharacterFrameAnimation forState(
     String characterId,
@@ -64,69 +105,98 @@ class CharacterFrameAnimation {
     int? frameCountOverride,
   }) {
     switch (state) {
-      // 카테고리 1: 캐릭터 선택 화면 전용
-      case CharacterAnimationState.greeting:
+      // 카테고리 1: 캐릭터 선택 화면 (2개)
+      case CharacterAnimationState.characterGreetingLoop:
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 125,
-          frameDuration: const Duration(milliseconds: 42), // 24fps, 5.2초
+          frameCount: frameCountOverride ?? 120, // 약 5초
+          frameDuration: const Duration(milliseconds: 42), // 24fps
           loop: true,
         );
 
-      case CharacterAnimationState.selected:
+      case CharacterAnimationState.characterSelected:
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 20,
-          frameDuration: const Duration(milliseconds: 42), // 24fps, ~0.8초
+          frameCount: frameCountOverride ?? 36, // 약 1.5초
+          frameDuration: const Duration(milliseconds: 42), // 24fps
           loop: false, // one-shot
         );
 
-      // 카테고리 2: 범용 상태
-      case CharacterAnimationState.idle:
+      // 카테고리 2-A: 성향 퀴즈 (2개)
+      case CharacterAnimationState.personalityIdle:
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 120,
-          frameDuration: const Duration(milliseconds: 42), // 24fps, 5초 복합 애니메이션
+          frameCount: frameCountOverride ?? 72, // 약 3초
+          frameDuration: const Duration(milliseconds: 42), // 24fps
           loop: true,
         );
 
-      case CharacterAnimationState.thinking:
+      case CharacterAnimationState.personalitySelected:
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 24,
-          frameDuration: const Duration(milliseconds: 42), // 24fps, 1초 루프
+          frameCount: frameCountOverride ?? 48, // 약 2초
+          frameDuration: const Duration(milliseconds: 42), // 24fps
+          loop: false, // one-shot, auto→personalityIdle
+        );
+
+      // 카테고리 2-B: 학습 퀴즈 (3개) - 통합 애니메이션
+      case CharacterAnimationState.quizIdle:
+        return CharacterFrameAnimation(
+          characterId: characterId,
+          state: state,
+          frameCount: frameCountOverride ?? 72, // 약 3초
+          frameDuration: const Duration(milliseconds: 42), // 24fps
           loop: true,
         );
 
-      case CharacterAnimationState.happy:
+      case CharacterAnimationState.quizCorrectFlow:
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 30,
-          frameDuration: const Duration(milliseconds: 42), // 24fps, ~1.2초
-          loop: false,
+          frameCount: frameCountOverride ?? 120, // 약 5초 (thinking→happy→idle)
+          frameDuration: const Duration(milliseconds: 42), // 24fps
+          loop: false, // one-shot, auto→quizIdle
         );
 
-      case CharacterAnimationState.confused:
+      case CharacterAnimationState.quizWrongFlow:
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 20,
-          frameDuration: const Duration(milliseconds: 42), // 24fps, ~0.8초
-          loop: false,
+          frameCount: frameCountOverride ?? 120, // 약 5초 (thinking→confused→idle)
+          frameDuration: const Duration(milliseconds: 42), // 24fps
+          loop: false, // one-shot, auto→quizIdle
         );
 
-      // 카테고리 3: 홈 화면 전용
+      // 카테고리 3: 결과 화면 (1개)
+      case CharacterAnimationState.resultCelebration:
+        return CharacterFrameAnimation(
+          characterId: characterId,
+          state: state,
+          frameCount: frameCountOverride ?? 72, // 약 3초
+          frameDuration: const Duration(milliseconds: 42), // 24fps
+          loop: false, // one-shot
+        );
+
+      // 카테고리 4: 홈 화면 (5개)
+      case CharacterAnimationState.homeIdle:
+        return CharacterFrameAnimation(
+          characterId: characterId,
+          state: state,
+          frameCount: frameCountOverride ?? 120, // 약 5초 복합 애니메이션
+          frameDuration: const Duration(milliseconds: 42), // 24fps
+          loop: true,
+        );
+
       case CharacterAnimationState.homeStudying:
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 60,
-          frameDuration: const Duration(milliseconds: 42), // 24fps, 2.5초
+          frameCount: frameCountOverride ?? 72, // 약 3초
+          frameDuration: const Duration(milliseconds: 42), // 24fps
           loop: true,
         );
 
@@ -134,8 +204,8 @@ class CharacterFrameAnimation {
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 48,
-          frameDuration: const Duration(milliseconds: 42), // 24fps, 2초
+          frameCount: frameCountOverride ?? 48, // 약 2초
+          frameDuration: const Duration(milliseconds: 42), // 24fps
           loop: true,
         );
 
@@ -143,8 +213,8 @@ class CharacterFrameAnimation {
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 72,
-          frameDuration: const Duration(milliseconds: 42), // 24fps, 3초
+          frameCount: frameCountOverride ?? 72, // 약 3초
+          frameDuration: const Duration(milliseconds: 42), // 24fps
           loop: true,
         );
 
@@ -152,21 +222,9 @@ class CharacterFrameAnimation {
         return CharacterFrameAnimation(
           characterId: characterId,
           state: state,
-          frameCount: frameCountOverride ?? 36,
-          frameDuration: const Duration(milliseconds: 42), // 24fps, 1.5초
-          loop: false, // one-shot
-        );
-
-      // 퀴즈 반응은 프레임 애니메이션 없음 (기존 방식 유지)
-      case CharacterAnimationState.reactionPositive:
-      case CharacterAnimationState.reactionNegative:
-      case CharacterAnimationState.reactionNeutral:
-        return CharacterFrameAnimation(
-          characterId: characterId,
-          state: state,
-          frameCount: 1,
-          frameDuration: const Duration(milliseconds: 100),
-          loop: false,
+          frameCount: frameCountOverride ?? 48, // 약 2초
+          frameDuration: const Duration(milliseconds: 42), // 24fps
+          loop: false, // one-shot, auto→homeIdle
         );
     }
   }

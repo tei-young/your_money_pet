@@ -68,6 +68,7 @@ class AnimationConfigLoader {
       frameCount: stateConfig['frameCount'] as int,
       frameDuration: Duration(milliseconds: stateConfig['frameDuration'] as int),
       loop: stateConfig['loop'] as bool,
+      autoTransitionTo: stateConfig['autoTransitionTo'] as String?,
     );
   }
 

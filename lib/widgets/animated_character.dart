@@ -45,19 +45,26 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
   bool _hasFrames = true; // 프레임 파일 존재 여부
   bool _isLoading = true; // JSON 로딩 상태
 
+  // 자동 전환을 위한 내부 상태
+  CharacterAnimationState? _currentState;
+
   @override
   void initState() {
     super.initState();
+    _currentState = widget.state; // 초기 상태 설정
     _setupAnimation();
   }
+
+  /// 현재 활성 상태 (자동 전환 고려)
+  CharacterAnimationState get _activeState => _currentState ?? widget.state;
 
   Future<void> _setupAnimation() async {
     final characterId = widget.characterType.animationConfig.characterId;
 
-    // JSON 기반 로딩 시도
+    // JSON 기반 로딩 시도 (내부 상태 사용)
     _animation = await CharacterFrameAnimation.forStateAsync(
       characterId,
-      widget.state,
+      _activeState,
     );
 
     if (!mounted) return;
@@ -92,6 +99,11 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
           } else {
             // One-shot 애니메이션 완료
             widget.onAnimationComplete?.call();
+
+            // 자동 전환 처리
+            if (_animation!.autoTransitionTo != null) {
+              _handleAutoTransition(_animation!.autoTransitionTo!);
+            }
           }
         }
       });
@@ -118,11 +130,42 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
     if (oldWidget.state != widget.state ||
         oldWidget.characterType != widget.characterType) {
       _currentFrame = 0;
+      _currentState = widget.state; // 외부 상태 변경 반영
       setState(() {
         _isLoading = true;
         _hasFrames = true; // 새로운 상태에서 다시 체크
       });
       _setupAnimation(); // Controller 재사용
+    }
+  }
+
+  /// 자동 전환 처리
+  ///
+  /// autoTransitionTo 필드에 지정된 상태 이름을 CharacterAnimationState로 변환하여 전환
+  void _handleAutoTransition(String nextStateName) {
+    final nextState = _stringToState(nextStateName);
+    if (nextState != null) {
+      setState(() {
+        _currentState = nextState;
+        _isLoading = true;
+        _hasFrames = true;
+      });
+      _setupAnimation();
+    } else {
+      print('⚠️ Unknown autoTransitionTo state: $nextStateName');
+    }
+  }
+
+  /// 문자열 → CharacterAnimationState 변환
+  ///
+  /// JSON의 "autoTransitionTo": "personalityIdle" → CharacterAnimationState.personalityIdle
+  CharacterAnimationState? _stringToState(String stateName) {
+    try {
+      return CharacterAnimationState.values.firstWhere(
+        (state) => state.name == stateName,
+      );
+    } catch (e) {
+      return null;
     }
   }
 
@@ -135,7 +178,7 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
   @override
   Widget build(BuildContext context) {
     final config = widget.characterType.animationConfig;
-    final isSelected = widget.state == CharacterAnimationState.selected;
+    final isSelected = _activeState == CharacterAnimationState.characterSelected;
     final dialogue = widget.customDialogue ?? config.introDialogue;
 
     return GestureDetector(
@@ -189,7 +232,7 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
 
   /// Placeholder (프레임 파일 없을 때)
   Widget _buildPlaceholder() {
-    final isSelected = widget.state == CharacterAnimationState.selected;
+    final isSelected = _activeState == CharacterAnimationState.characterSelected;
 
     return AnimatedContainer(
       duration: AnimationDuration.medium,

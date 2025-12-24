@@ -151,19 +151,27 @@
   - [x] pubspec.yaml 업데이트 (신규 폴더 경로 등록)
   - [x] 코드 사용처 업데이트 (idle → greeting/thinking)
   - [x] 문서 전면 개편 (FRAME_ANIMATION_GUIDE.md, README.md)
-- [ ] 2025-12-24: **통합 애니메이션 방식 재설계 (13-state)** 🔴 작업 필요
-  - [ ] **CharacterAnimationState enum 재설계** (14개 → 13개)
-    - [ ] 기존 상태 삭제: `thinking`, `happy`, `confused` (통합 애니메이션에 포함됨)
-    - [ ] 새로운 상태 추가: `personalityIdle`, `personalitySelected`, `quizIdle`, `quizCorrectFlow`, `quizWrongFlow`, `resultCelebration`
-    - [ ] 이름 변경: `greeting` → `characterGreetingLoop`, `selected` → `characterSelected`, `idle` → `homeIdle`
-    - [ ] 파일 위치: `lib/models/character_animation_config.dart`
-  - [ ] **Enum → 폴더명 변환 로직 구현**
-    - [ ] camelCase enum → snake_case 폴더명 변환 함수 추가
-    - [ ] 파일 위치: `lib/models/character_frame_animation.dart`
-  - [ ] **자동 전환 로직 구현**
-    - [ ] `onAnimationComplete` 콜백 추가
-    - [ ] `autoTransitionTo` 필드 JSON 지원
-    - [ ] 파일 위치: `lib/widgets/animated_character.dart`
+- [ ] 2025-12-24: **통합 애니메이션 방식 재설계 (13-state)** 🟡 진행 중
+  - [x] **CharacterAnimationState enum 재설계** (14개 → 13개) ✅ 2025-12-24
+    - [x] 기존 상태 삭제: `thinking`, `happy`, `confused`, `reactionPositive/Negative/Neutral` (6개)
+    - [x] 새로운 상태 추가: `personalityIdle`, `personalitySelected`, `quizIdle`, `quizCorrectFlow`, `quizWrongFlow`, `resultCelebration` (6개)
+    - [x] 이름 변경: `greeting` → `characterGreetingLoop`, `selected` → `characterSelected`, `idle` → `homeIdle` (3개)
+    - [x] 결과: 13개 상태 (통합 애니메이션 방식)
+    - [x] 파일: `lib/models/character_animation_config.dart:1-25`
+    - [x] Commit: 1695ecc
+  - [x] **Enum → 폴더명 변환 로직 구현** ✅ 2025-12-24
+    - [x] `_stateToFolderName()` 헬퍼 함수 추가 (13개 상태 모두 매핑)
+    - [x] `getFramePath()` 메서드 업데이트 (snake_case 폴더명 사용)
+    - [x] `forState()` fallback 메서드 13개 상태로 재작성
+    - [x] 파일: `lib/models/character_frame_animation.dart:22-224`
+    - [x] Commit: 5e2f0b3
+  - [x] **자동 전환 로직 구현** ✅ 2025-12-24
+    - [x] `CharacterFrameAnimation`에 `autoTransitionTo` 필드 추가
+    - [x] `AnimationConfigLoader`에서 JSON `autoTransitionTo` 읽기 지원
+    - [x] `AnimatedCharacter`에 자동 전환 처리 로직 구현
+    - [x] `_handleAutoTransition()`, `_stringToState()` 메서드 추가
+    - [x] 파일: `lib/models/character_frame_animation.dart:7-27`, `lib/services/animation_config_loader.dart:65-72`, `lib/widgets/animated_character.dart:40-236`
+    - [x] Commit: a6c6108
   - [ ] **폴더 구조 재편 (git mv)**
     - [ ] `greeting/` → `character_greeting_loop/`
     - [ ] `selected/` → `character_selected/`

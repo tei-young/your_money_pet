@@ -185,13 +185,17 @@
     - [x] 유연한 타이밍 정책 반영 ("약 X초" 형식, 정확한 프레임 수는 제작 후 확정)
     - [x] 파일: `assets/animations/characters/*/animation_config.json` (4개)
     - [x] Commit: e5ab1c6
-  - [ ] **화면별 State 사용 업데이트**
-    - [ ] 캐릭터 선택: `greeting` → `characterGreetingLoop`
-    - [ ] 성향 퀴즈: `thinking` → `personalityIdle` / `personalitySelected`
-    - [ ] 학습 퀴즈: `thinking/happy/confused` → `quizIdle/quizCorrectFlow/quizWrongFlow`
-    - [ ] 파일: `character_preview_screen.dart`, `personality_test_screen.dart`, 학습 퀴즈 화면
-  - [ ] **pubspec.yaml 업데이트**
-    - [ ] 52개 폴더 경로 등록 (4캐릭터 × 13상태)
+  - [x] **화면별 State 사용 업데이트** ✅ 2025-12-24
+    - [x] 캐릭터 선택: `greeting` → `characterGreetingLoop`, `selected` → `characterSelected`
+    - [x] 성향 퀴즈: `thinking` → `personalityIdle`
+    - [x] 성향 결과: `selected` → `resultCelebration`
+    - [x] 프리로더: `greeting/selected/happy/thinking/confused` → 13-state 온보딩 상태들
+    - [x] 파일: `character_preview_screen.dart`, `personality_test_screen.dart`, `personality_result_screen.dart`, `character_animation_preloader.dart`
+    - [x] Commit: bb8d045
+  - [x] **pubspec.yaml 업데이트** ✅ 2025-12-24
+    - [x] 52개 폴더 경로 등록 (4캐릭터 × 13상태)
+    - [x] 10-state 경로 삭제 및 13-state 경로 등록
+    - [x] Commit: 5950ff5
   - [ ] **문서 전면 수정**
     - [ ] DEVELOPMENT_LOG.md: 2025-12-24 섹션 추가
     - [ ] FRAME_ANIMATION_GUIDE.md: 13-state, 통합 애니메이션, 유연한 타이밍

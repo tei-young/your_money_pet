@@ -208,9 +208,63 @@
 
 ---
 
+### 6. 화면별 State 사용 업데이트 ✅
+**커밋:** bb8d045
+**파일:**
+  - `lib/screens/onboarding/character_preview_screen.dart:195-197`
+  - `lib/screens/onboarding/personality_test_screen.dart:296`
+  - `lib/screens/onboarding/personality_result_screen.dart:257`
+  - `lib/services/character_animation_preloader.dart:25,39-42`
+**날짜:** 2025-12-24
+
+**변경 사항:**
+- ✅ **캐릭터 선택 화면** (`character_preview_screen.dart`)
+  - `CharacterAnimationState.greeting` → `CharacterAnimationState.characterGreetingLoop`
+  - `CharacterAnimationState.selected` → `CharacterAnimationState.characterSelected`
+
+- ✅ **성향 퀴즈 화면** (`personality_test_screen.dart`)
+  - `CharacterAnimationState.thinking` → `CharacterAnimationState.personalityIdle`
+
+- ✅ **성향 결과 화면** (`personality_result_screen.dart`)
+  - `CharacterAnimationState.selected` → `CharacterAnimationState.resultCelebration`
+
+- ✅ **애니메이션 프리로더** (`character_animation_preloader.dart`)
+  - `greeting` → `characterGreetingLoop`
+  - `selected`, `happy`, `thinking`, `confused` → `characterSelected`, `personalityIdle`, `personalitySelected`, `resultCelebration`
+  - 프리로드 대상을 온보딩 4개 상태로 제한 (최적화)
+
+**최종 결과:**
+- 모든 화면에서 13-state 시스템 사용
+- 더 이상 old state 참조 없음
+- 프리로더 최적화 완료
+
+---
+
+### 7. pubspec.yaml 업데이트 ✅
+**커밋:** 5950ff5
+**파일:** `pubspec.yaml:64-123`
+**날짜:** 2025-12-24
+
+**변경 사항:**
+- ✅ **10-state 경로 삭제**
+  - `greeting/`, `selected/`, `idle/`, `thinking/`, `happy/`, `confused/`
+
+- ✅ **13-state 경로 등록** (각 캐릭터당 13개)
+  - `character_greeting_loop/`, `character_selected/`
+  - `personality_idle/`, `personality_selected/`
+  - `quiz_idle/`, `quiz_correct_flow/`, `quiz_wrong_flow/`
+  - `result_celebration/`
+  - `home_idle/`, `home_studying/`, `home_excited/`, `home_sleepy/`, `home_celebration/`
+
+**최종 결과:**
+- 4개 캐릭터 × 13개 상태 = 52개 폴더 경로 등록 완료
+- 프레임 파일 추가 시 자동 인식
+
+---
+
 ## 🚨 개발팀 작업 필요 (2025-12-24)
 
-### ⚠️ 주의: Task #1-4 완료, 나머지 작업 진행 예정
+### ⚠️ 주의: Task #1-7 완료, 나머지 작업 진행 예정
 
 ### ~~1. CharacterAnimationState enum 재설계 (필수)~~ ✅ 완료
 **파일:** `lib/models/character_animation_config.dart`

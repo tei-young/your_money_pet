@@ -151,12 +151,14 @@
   - [x] pubspec.yaml 업데이트 (신규 폴더 경로 등록)
   - [x] 코드 사용처 업데이트 (idle → greeting/thinking)
   - [x] 문서 전면 개편 (FRAME_ANIMATION_GUIDE.md, README.md)
-- [ ] 2025-12-24: **통합 애니메이션 방식 재설계 (13-state)** 🔴 작업 필요
-  - [ ] **CharacterAnimationState enum 재설계** (14개 → 13개)
-    - [ ] 기존 상태 삭제: `thinking`, `happy`, `confused` (통합 애니메이션에 포함됨)
-    - [ ] 새로운 상태 추가: `personalityIdle`, `personalitySelected`, `quizIdle`, `quizCorrectFlow`, `quizWrongFlow`, `resultCelebration`
-    - [ ] 이름 변경: `greeting` → `characterGreetingLoop`, `selected` → `characterSelected`, `idle` → `homeIdle`
-    - [ ] 파일 위치: `lib/models/character_animation_config.dart`
+- [ ] 2025-12-24: **통합 애니메이션 방식 재설계 (13-state)** 🟡 진행 중
+  - [x] **CharacterAnimationState enum 재설계** (14개 → 13개) ✅ 2025-12-24
+    - [x] 기존 상태 삭제: `thinking`, `happy`, `confused`, `reactionPositive/Negative/Neutral` (6개)
+    - [x] 새로운 상태 추가: `personalityIdle`, `personalitySelected`, `quizIdle`, `quizCorrectFlow`, `quizWrongFlow`, `resultCelebration` (6개)
+    - [x] 이름 변경: `greeting` → `characterGreetingLoop`, `selected` → `characterSelected`, `idle` → `homeIdle` (3개)
+    - [x] 결과: 13개 상태 (통합 애니메이션 방식)
+    - [x] 파일: `lib/models/character_animation_config.dart:1-25`
+    - [x] Commit: 1695ecc
   - [ ] **Enum → 폴더명 변환 로직 구현**
     - [ ] camelCase enum → snake_case 폴더명 변환 함수 추가
     - [ ] 파일 위치: `lib/models/character_frame_animation.dart`

@@ -1,62 +1,84 @@
 {
-  "greeting": {
-    "frameCount": 125,
-    "frameDuration": 42,
-    "loop": true,
-    "description": "손 흔들며 인사 (5.2초)"
-  },
-  "selected": {
-    "frameCount": 20,
-    "frameDuration": 42,
-    "loop": false,
-    "description": "선택 반응 (0.8초)"
-  },
-  "idle": {
+  "characterGreetingLoop": {
     "frameCount": 120,
     "frameDuration": 42,
     "loop": true,
-    "description": "조용한 대기 - 복합 애니메이션 (5초)"
+    "description": "손 흔들며 인사 (약 5초)"
   },
-  "thinking": {
-    "frameCount": 24,
+  "characterSelected": {
+    "frameCount": 36,
+    "frameDuration": 42,
+    "loop": false,
+    "description": "선택 반응 (약 1.5초)"
+  },
+  "personalityIdle": {
+    "frameCount": 72,
     "frameDuration": 42,
     "loop": true,
-    "description": "생각하는 모습 (1초 루프)"
+    "description": "성향 문제 대기 (약 3초)"
   },
-  "happy": {
-    "frameCount": 30,
+  "personalitySelected": {
+    "frameCount": 48,
     "frameDuration": 42,
     "loop": false,
-    "description": "기쁨 표현 (1.2초)"
+    "autoTransitionTo": "personalityIdle",
+    "description": "성향 선택 반응 (약 2초, auto→personalityIdle)"
   },
-  "confused": {
-    "frameCount": 20,
+  "quizIdle": {
+    "frameCount": 72,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "학습 문제 대기 (약 3초)"
+  },
+  "quizCorrectFlow": {
+    "frameCount": 120,
     "frameDuration": 42,
     "loop": false,
-    "description": "혼란스러운 표현 (0.8초)"
+    "autoTransitionTo": "quizIdle",
+    "description": "정답 플로우: thinking→happy→idle (약 5초, auto→quizIdle)"
+  },
+  "quizWrongFlow": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "quizIdle",
+    "description": "오답 플로우: thinking→confused→idle (약 5초, auto→quizIdle)"
+  },
+  "resultCelebration": {
+    "frameCount": 72,
+    "frameDuration": 42,
+    "loop": false,
+    "description": "성향 결과 축하 (약 3초)"
+  },
+  "homeIdle": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "홈 기본 대기 - 복합 애니메이션 (약 5초)"
   },
   "homeStudying": {
-    "frameCount": 60,
+    "frameCount": 72,
     "frameDuration": 42,
     "loop": true,
-    "description": "책 읽기 (2.5초)"
+    "description": "책 읽기 (약 3초)"
   },
   "homeExcited": {
     "frameCount": 48,
     "frameDuration": 42,
     "loop": true,
-    "description": "활기찬 모습 (2초)"
+    "description": "활기찬 모습 (약 2초)"
   },
   "homeSleepy": {
     "frameCount": 72,
     "frameDuration": 42,
     "loop": true,
-    "description": "졸린 모습 (3초)"
+    "description": "졸린 모습 (약 3초)"
   },
   "homeCelebration": {
-    "frameCount": 36,
+    "frameCount": 48,
     "frameDuration": 42,
     "loop": false,
-    "description": "목표 달성 (1.5초)"
+    "autoTransitionTo": "homeIdle",
+    "description": "목표 달성 축하 (약 2초, auto→homeIdle)"
   }
 }

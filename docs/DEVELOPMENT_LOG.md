@@ -64,9 +64,44 @@
 
 ---
 
+### 3. 자동 전환 로직 구현 ✅
+**커밋:** a6c6108
+**파일:**
+  - `lib/models/character_frame_animation.dart:7-27`
+  - `lib/services/animation_config_loader.dart:65-72`
+  - `lib/widgets/animated_character.dart:40-236`
+**날짜:** 2025-12-24
+
+**변경 사항:**
+- ✅ **CharacterFrameAnimation 모델 업데이트**
+  - `autoTransitionTo` 필드 추가 (String?, 선택적)
+  - 애니메이션 완료 후 자동 전환할 상태 지정 가능
+  - 예: `personalitySelected` → `personalityIdle`
+
+- ✅ **AnimationConfigLoader 서비스 업데이트**
+  - `createAnimation()` 메서드에서 JSON `autoTransitionTo` 읽기 지원
+  - JSON 형식: `"autoTransitionTo": "personalityIdle"`
+
+- ✅ **AnimatedCharacter 위젯 업데이트**
+  - `_currentState` 내부 상태 추가 (자동 전환 관리)
+  - `_activeState` getter 추가 (현재 활성 상태 반환)
+  - `_handleAutoTransition()` 메서드 추가 (자동 전환 처리)
+  - `_stringToState()` 헬퍼 추가 (문자열 → enum 변환)
+  - `addStatusListener`에서 애니메이션 완료 시 자동 전환 실행
+  - `didUpdateWidget`에서 외부 상태 변경 동기화
+  - `build()`와 `_buildPlaceholder()`에서 `_activeState` 사용
+
+**결과:**
+- `personalitySelected` 완료 → 자동으로 `personalityIdle`로 전환
+- `quizCorrectFlow` 완료 → 자동으로 `quizIdle`로 전환
+- `quizWrongFlow` 완료 → 자동으로 `quizIdle`로 전환
+- `homeCelebration` 완료 → 자동으로 `homeIdle`로 전환
+
+---
+
 ## 🚨 개발팀 작업 필요 (2025-12-24)
 
-### ⚠️ 주의: Task #1-2 완료, 나머지 작업 진행 예정
+### ⚠️ 주의: Task #1-3 완료, 나머지 작업 진행 예정
 
 ### ~~1. CharacterAnimationState enum 재설계 (필수)~~ ✅ 완료
 **파일:** `lib/models/character_animation_config.dart`
@@ -147,10 +182,9 @@ String _stateToFolderName(CharacterAnimationState state) {
 
 ---
 
-### 3. 자동 전환 로직 구현 (필수)
-**파일:** `lib/widgets/animated_character.dart`
+### ~~3. 자동 전환 로직 구현 (필수)~~ ✅ 완료
 
-**추가 필요:**
+**구현 완료:**
 ```dart
 // animation_config.json에 autoTransitionTo 필드 추가
 {

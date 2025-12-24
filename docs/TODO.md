@@ -165,10 +165,13 @@
     - [x] `forState()` fallback 메서드 13개 상태로 재작성
     - [x] 파일: `lib/models/character_frame_animation.dart:22-224`
     - [x] Commit: 5e2f0b3
-  - [ ] **자동 전환 로직 구현**
-    - [ ] `onAnimationComplete` 콜백 추가
-    - [ ] `autoTransitionTo` 필드 JSON 지원
-    - [ ] 파일 위치: `lib/widgets/animated_character.dart`
+  - [x] **자동 전환 로직 구현** ✅ 2025-12-24
+    - [x] `CharacterFrameAnimation`에 `autoTransitionTo` 필드 추가
+    - [x] `AnimationConfigLoader`에서 JSON `autoTransitionTo` 읽기 지원
+    - [x] `AnimatedCharacter`에 자동 전환 처리 로직 구현
+    - [x] `_handleAutoTransition()`, `_stringToState()` 메서드 추가
+    - [x] 파일: `lib/models/character_frame_animation.dart:7-27`, `lib/services/animation_config_loader.dart:65-72`, `lib/widgets/animated_character.dart:40-236`
+    - [x] Commit: a6c6108
   - [ ] **폴더 구조 재편 (git mv)**
     - [ ] `greeting/` → `character_greeting_loop/`
     - [ ] `selected/` → `character_selected/`

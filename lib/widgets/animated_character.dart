@@ -26,7 +26,7 @@ class AnimatedCharacter extends StatefulWidget {
   const AnimatedCharacter({
     super.key,
     required this.characterType,
-    this.state = CharacterAnimationState.idle,
+    this.state = CharacterAnimationState.homeIdle,
     this.customDialogue,
     this.onTap,
     this.onAnimationComplete,

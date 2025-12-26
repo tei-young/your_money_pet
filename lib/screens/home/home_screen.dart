@@ -1,9 +1,12 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../utils/constants.dart';
 import '../../providers/user_provider.dart';
 import '../../providers/learning_provider.dart';
 import '../../utils/share_helper.dart';
+import '../../widgets/animated_character.dart';
+import '../../models/character_animation_config.dart';
 import '../learning/learning_screen.dart';
 import '../learning/learning_tab_screen.dart';
 
@@ -17,10 +20,28 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late CharacterAnimationState _currentHomeState;
+
   @override
   void initState() {
     super.initState();
+    _currentHomeState = _selectRandomHomeState();
     _initializeData();
+  }
+
+  /// 홈 화면 진입 시 랜덤하게 home state 선택
+  ///
+  /// 현재: 5개 home state 중 랜덤
+  /// 추후: 유저 상태에 따라 분기 (예: 학습 완료 시 homeStudying, 연속 7일 시 homeExcited 등)
+  CharacterAnimationState _selectRandomHomeState() {
+    final homeStates = [
+      CharacterAnimationState.homeIdle,
+      CharacterAnimationState.homeStudying,
+      CharacterAnimationState.homeExcited,
+      CharacterAnimationState.homeSleepy,
+      CharacterAnimationState.homeCelebration,
+    ];
+    return homeStates[Random().nextInt(homeStates.length)];
   }
 
   Future<void> _initializeData() async {
@@ -276,30 +297,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 24),
 
-          // 캐릭터
-          Container(
-            width: 140,
-            height: 140,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(70),
-              border: Border.all(
-                color: personalityType.color.withOpacity(0.3),
-                width: 3,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: personalityType.color.withOpacity(0.2),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.pets,
-              size: 70,
-              color: personalityType.color,
-            ),
+          // 캐릭터 애니메이션
+          AnimatedCharacter(
+            characterType: personalityType,
+            state: _currentHomeState,
+            size: 140,
           ),
 
           const SizedBox(height: 16),

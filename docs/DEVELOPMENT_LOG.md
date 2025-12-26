@@ -1,5 +1,127 @@
 # MoneyPet 개발 로그
 
+## 📅 2025-12-26 세션: 홈 화면 랜덤 애니메이션 로직 추가
+
+### 🎯 목표
+홈 화면 진입 시 5개 home state 중 랜덤하게 하나를 선택하여 다양한 캐릭터 모습 표시
+
+### 📋 완료된 작업
+
+#### 1. 홈 화면 랜덤 state 선택 로직 구현 ✅
+**커밋:** 068f974
+**파일:** `lib/screens/home/home_screen.dart`
+**날짜:** 2025-12-26
+
+**변경 사항:**
+- ✅ `_selectRandomHomeState()` 메서드 추가
+  - 5개 home state 배열 선언 (`homeIdle`, `homeStudying`, `homeExcited`, `homeSleepy`, `homeCelebration`)
+  - `Random().nextInt()` 사용하여 랜덤 선택
+  - 매번 `initState()`에서 호출하여 화면 진입 시마다 다른 애니메이션 표시
+- ✅ `_currentHomeState` 필드 추가
+  - `late CharacterAnimationState _currentHomeState` 선언
+  - 랜덤 선택된 state 저장
+- ✅ 추후 확장 가능한 구조 설계
+  - 주석으로 추후 유저 상태 기반 로직 확장 방향 명시
+  - 예: 학습 완료 시 `homeStudying`, 연속 7일 시 `homeExcited` 등
+
+**코드:**
+```dart
+/// 홈 화면 진입 시 랜덤하게 home state 선택
+///
+/// 현재: 5개 home state 중 랜덤
+/// 추후: 유저 상태에 따라 분기 (예: 학습 완료 시 homeStudying, 연속 7일 시 homeExcited 등)
+CharacterAnimationState _selectRandomHomeState() {
+  final homeStates = [
+    CharacterAnimationState.homeIdle,
+    CharacterAnimationState.homeStudying,
+    CharacterAnimationState.homeExcited,
+    CharacterAnimationState.homeSleepy,
+    CharacterAnimationState.homeCelebration,
+  ];
+  return homeStates[Random().nextInt(homeStates.length)];
+}
+```
+
+---
+
+#### 2. Icon 위젯 → AnimatedCharacter 위젯 교체 ✅
+**커밋:** 068f974
+**파일:** `lib/screens/home/home_screen.dart`
+**날짜:** 2025-12-26
+
+**변경 사항:**
+- ❌ 삭제: `Icon(Icons.pets)` placeholder (단순 아이콘 표시)
+- ✅ 추가: `AnimatedCharacter` 위젯 사용
+  - `characterType`: 유저의 `personalityType` 사용
+  - `state`: 랜덤 선택된 `_currentHomeState` 전달
+  - `size`: 140 (기존과 동일)
+- ✅ 프레임 애니메이션 준비 완료
+  - 디자인팀에서 애니메이션 제작 시 즉시 적용 가능
+  - 현재는 프레임 파일 없어서 placeholder 표시
+
+**Before:**
+```dart
+child: Icon(
+  Icons.pets,
+  size: 70,
+  color: personalityType.color,
+),
+```
+
+**After:**
+```dart
+// 캐릭터 애니메이션
+AnimatedCharacter(
+  characterType: personalityType,
+  state: _currentHomeState,
+  size: 140,
+),
+```
+
+---
+
+#### 3. 성향 진단 화면 AnimatedCharacter 사용 확인 ✅
+**파일:**
+  - `lib/screens/onboarding/personality_test_screen.dart`
+  - `lib/screens/onboarding/personality_result_screen.dart`
+**날짜:** 2025-12-26
+
+**확인 결과:**
+- ✅ **성향 진단 퀴즈 화면**: `AnimatedCharacter` 정상 사용 중
+  - State: `CharacterAnimationState.personalityIdle`
+  - 코드 구조 정상, 프레임 파일만 없음
+- ✅ **성향 진단 완료 화면**: `AnimatedCharacter` 정상 사용 중
+  - State: `CharacterAnimationState.resultCelebration`
+  - 코드 구조 정상, 프레임 파일만 없음
+- ⚠️ **Placeholder 원인**: 단순히 프레임 파일 부재 (코드 문제 아님)
+  - `assets/animations/characters/*/personality_idle/frame_01.png` 없음
+  - `assets/animations/characters/*/result_celebration/frame_01.png` 없음
+
+---
+
+### 📊 요약
+
+**홈 화면 개선:**
+- 기존: 단순 아이콘 표시
+- 변경: 5개 home state 중 랜덤 애니메이션 표시
+- 효과: 다양성 확보, 프레임 애니메이션 준비 완료
+
+**확인된 문제:**
+- 모든 AnimatedCharacter 위젯이 정상적으로 사용되고 있음
+- Placeholder가 나오는 유일한 이유는 프레임 파일 부재
+- 디자인팀에서 52개 애니메이션 제작 시 즉시 적용 가능
+
+**다음 단계:**
+- [ ] 디자인팀: 52개 애니메이션 프레임 제작
+- [ ] v1.1+: 유저 상태 기반 애니메이션 선택 로직 추가
+  - 학습 완료 시: `homeStudying`
+  - 연속 7일 이상: `homeExcited`
+  - 심야 시간대: `homeSleepy`
+  - 목표 달성: `homeCelebration`
+  - 기본: `homeIdle`
+
+---
+
 ## 📅 2025-12-24 세션: 통합 애니메이션 방식 재설계 (13-State)
 
 ### 🎯 목표

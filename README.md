@@ -1042,6 +1042,55 @@ TBD
 
 ## 🔄 최신 업데이트
 
+### 2025-12-26: 홈 화면 랜덤 애니메이션 로직 추가 🎲
+
+**완료된 작업:**
+- ✅ **홈 화면 진입 시 5개 home state 중 랜덤 선택**
+  - `homeIdle`, `homeStudying`, `homeExcited`, `homeSleepy`, `homeCelebration` 중 랜덤
+  - 매번 홈 화면 진입 시 다른 캐릭터 모습 표시 (다양성 확보)
+- ✅ **Icon 위젯 → AnimatedCharacter 위젯으로 교체**
+  - 기존: 단순 `Icon(Icons.pets)` placeholder
+  - 변경: `AnimatedCharacter` 위젯 사용 (프레임 애니메이션 준비 완료)
+- ✅ **추후 유저 상태 기반 로직 확장 가능한 구조 설계**
+  - 현재: 5개 state 랜덤 선택
+  - 추후: 유저 학습 완료 여부, 연속 학습일, 시간대 등에 따라 적절한 애니메이션 표시 가능
+
+**기술적 세부사항:**
+```dart
+// 랜덤 선택 로직
+CharacterAnimationState _selectRandomHomeState() {
+  final homeStates = [
+    CharacterAnimationState.homeIdle,
+    CharacterAnimationState.homeStudying,
+    CharacterAnimationState.homeExcited,
+    CharacterAnimationState.homeSleepy,
+    CharacterAnimationState.homeCelebration,
+  ];
+  return homeStates[Random().nextInt(homeStates.length)];
+}
+
+// AnimatedCharacter 사용
+AnimatedCharacter(
+  characterType: personalityType,
+  state: _currentHomeState,  // 랜덤 선택된 state
+  size: 140,
+)
+```
+
+**확인 사항:**
+- ✅ 성향 진단 퀴즈 화면: `AnimatedCharacter` 정상 사용 중 (`personalityIdle`)
+- ✅ 성향 진단 완료 화면: `AnimatedCharacter` 정상 사용 중 (`resultCelebration`)
+- ⚠️ 두 화면 모두 프레임 파일 없어서 placeholder 표시됨 (코드는 정상)
+
+**변경 파일:**
+- `lib/screens/home/home_screen.dart` - 랜덤 로직 + AnimatedCharacter 통합
+
+**다음 단계:**
+- 디자인팀에서 52개 애니메이션 프레임 제작 시 즉시 적용 가능
+- 유저 상태 기반 애니메이션 선택 로직 추가 (v1.1+)
+
+---
+
 ### 2025-12-02 (2차): 통일된 다크 테마 + 헤더 압축 최적화 🌙
 
 **완료된 작업:**

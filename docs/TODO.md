@@ -261,6 +261,37 @@
   - [ ] 점프 + 컨페티 + 승리 포즈
   - [ ] 모든 캐릭터
 
+---
+
+### 추가 작업 (2025-12-26): 홈 화면 랜덤 애니메이션 로직 ✅ 완료
+
+**완료된 작업:**
+- [x] **홈 화면 진입 시 5개 home state 중 랜덤 선택** ✅
+  - [x] `_selectRandomHomeState()` 메서드 구현
+  - [x] 5개 상태 중 랜덤 선택: `homeIdle`, `homeStudying`, `homeExcited`, `homeSleepy`, `homeCelebration`
+  - [x] 매번 홈 화면 진입 시 다른 캐릭터 모습 표시
+  - [x] 파일: `lib/screens/home/home_screen.dart`
+  - [x] Commit: 068f974
+- [x] **Icon 위젯 → AnimatedCharacter 위젯으로 교체** ✅
+  - [x] 기존: `Icon(Icons.pets)` placeholder
+  - [x] 변경: `AnimatedCharacter(state: _currentHomeState)`
+  - [x] 프레임 애니메이션 준비 완료
+- [x] **추후 유저 상태 기반 로직 확장 구조 설계** ✅
+  - [x] 주석으로 확장 방향 명시 (학습 완료, 연속일, 시간대 등)
+  - [x] 현재: 랜덤 선택
+  - [x] 추후: 유저 상태에 따라 적절한 애니메이션 선택
+
+**확인 사항:**
+- [x] 성향 진단 퀴즈 화면: `AnimatedCharacter` 정상 사용 중 (`personalityIdle`)
+- [x] 성향 진단 완료 화면: `AnimatedCharacter` 정상 사용 중 (`resultCelebration`)
+- ⚠️ 두 화면 모두 프레임 파일 없어서 placeholder 표시 (코드는 정상)
+
+**다음 단계:**
+- [ ] 디자인팀에서 52개 애니메이션 프레임 제작 시 즉시 적용
+- [ ] v1.1+: 유저 상태 기반 애니메이션 선택 로직 추가
+
+---
+
 **제작 워크플로우:**
 1. Midjourney/Runway로 영상 제작 (목표 시간대로, 정확한 프레임 수는 무시)
 2. ffmpeg로 PNG 추출: `ffmpeg -i input.mp4 -vf "fps=24,scale=600:600:flags=lanczos" frame_%02d.png`

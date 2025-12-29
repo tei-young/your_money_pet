@@ -1,0 +1,12 @@
+{
+  "name": "moneypet-admin-scripts",
+  "version": "1.0.0",
+  "description": "MoneyPet Firebase Admin Scripts",
+  "private": true,
+  "scripts": {
+    "set-admin": "node set-admin.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}

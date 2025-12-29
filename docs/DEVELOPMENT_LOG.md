@@ -2897,5 +2897,175 @@ f0efa57 - Add character selection flow to onboarding
 
 ---
 
-**Last Updated:** 2025-01-15
+## 🏢 백오피스 개발 (2025-12-29)
+
+### 개요
+관리자가 학습 콘텐츠와 퀴즈를 관리할 수 있는 백오피스 시스템 개발 시작
+
+### Phase 1: Firebase 인프라 구축 ✅ 완료
+
+#### 1. Firebase 프로젝트 설정
+**프로젝트 정보:**
+- 프로젝트 ID: `moneypet-74066`
+- Storage Bucket: `moneypet-74066.firebasestorage.app`
+- 플랫폼: Android, iOS 설정 완료
+
+**설정 파일:**
+- `lib/firebase_options.dart` - Flutter Firebase 설정
+- `android/app/google-services.json` - Android 설정
+- `ios/Runner/GoogleService-Info.plist` - iOS 설정
+
+#### 2. Firestore Database 생성
+**설정:**
+- 위치: `asia-northeast3 (Seoul)` - 한국 사용자 최적화
+- 모드: Production mode - 보안 우선
+
+**컬렉션 구조:**
+```
+firestore/
+├── users/                     # 사용자 데이터
+│   └── {userId}/
+│       ├── learning_progress/ # 학습 진행 기록
+│       └── quiz_results/      # 퀴즈 결과
+├── learning_contents/         # 학습 콘텐츠 (관리자 관리)
+├── quiz_contents/             # 퀴즈 콘텐츠 (관리자 관리)
+├── character_configs/         # 캐릭터 설정 (관리자 관리)
+└── app_config/                # 앱 설정 (관리자 관리)
+```
+
+#### 3. Security Rules 설정
+**파일 위치:** Firebase Console > Firestore Database > Rules
+
+**핵심 규칙:**
+- 사용자 데이터: 본인만 읽기/쓰기
+- 콘텐츠/설정: 모두 읽기, 관리자만 쓰기
+- 관리자 판별: `request.auth.token.admin == true`
+
+**주요 함수:**
+```javascript
+function isAdmin() {
+  return request.auth != null && request.auth.token.admin == true;
+}
+
+function isOwner(userId) {
+  return request.auth != null && request.auth.uid == userId;
+}
+```
+
+#### 4. 관리자 계정 설정
+**스크립트:** `scripts/set-admin.js`
+
+**기능:**
+- Firebase Admin SDK를 사용해 특정 사용자에게 admin custom claim 부여
+- 관리자는 Firestore에서 콘텐츠 쓰기 권한 획득
+
+**사용법:**
+```bash
+cd scripts
+npm install
+node set-admin.js <USER_UID>
+```
+
+**보안:**
+- Service Account Key는 `.gitignore`에 추가 (절대 커밋 금지)
+- `scripts/service-account-key.json` 파일 필요
+
+#### 5. 초기 데이터 생성
+**스크립트:** `scripts/init-firestore.js`
+
+**생성된 데이터:**
+
+1. **App Config** (1개)
+```javascript
+{
+  minAppVersion: "1.0.0",
+  forceUpdateVersion: "1.0.0",
+  maintenanceMode: false,
+  features: {
+    characterSelection: true,
+    dailyReminder: true,
+    sharing: true
+  },
+  constants: {
+    totalDays: 365,
+    learningPoints: 50,
+    quizPointsPerQuestion: 20
+  }
+}
+```
+
+2. **Character Configs** (4개)
+- 머니베어 (money_bear) - 안전형 🐻
+- 세이브쉽 (save_sheep) - 균형형 🐑
+- 헌터캣 (hunter_cat) - 공격형 🐱
+- 체이서폭스 (chaser_fox) - 도전형 🦊
+
+3. **샘플 Learning Content** (1개)
+- Day 1 안전형: "예적금의 기본"
+- 3개의 학습 카드
+- 예상 소요시간: 3분
+- 포인트: 50점
+
+4. **샘플 Quiz Content** (1개)
+- Day 1 안전형 퀴즈
+- 2개의 문제 (각 50점)
+- 합격 점수: 60점
+
+**사용법:**
+```bash
+cd scripts
+node init-firestore.js
+```
+
+### 다음 단계 (Phase 3: 백오피스 웹 개발)
+
+#### 예정 작업:
+1. **웹 프로젝트 생성**
+   - Next.js + TypeScript
+   - Firebase Admin SDK 연동
+   - Tailwind CSS
+
+2. **관리자 로그인**
+   - Firebase Auth 연동
+   - 이메일/비밀번호 로그인
+   - Admin claim 확인
+
+3. **콘텐츠 관리 페이지**
+   - 학습 콘텐츠 CRUD
+   - 퀴즈 CRUD
+   - WYSIWYG 에디터
+
+4. **통계 대시보드**
+   - 사용자 통계
+   - 학습 진행률
+   - 퀴즈 정답률
+
+### 프로젝트 구조 업데이트
+
+```
+your_money_pet/
+├── lib/                        # Flutter 앱
+│   ├── firebase_options.dart   ✅ Firebase 설정
+│   └── ...
+├── scripts/                    ✅ 신규
+│   ├── package.json
+│   ├── set-admin.js            # 관리자 권한 부여
+│   ├── init-firestore.js       # Firestore 초기화
+│   ├── service-account-key.json # (gitignore)
+│   └── node_modules/           # (gitignore)
+├── docs/
+│   ├── BACKOFFICE_DESIGN.md    ✅ 업데이트
+│   └── DEVELOPMENT_LOG.md      ✅ 업데이트
+└── .gitignore                  ✅ 업데이트
+```
+
+### Git 커밋 히스토리
+```bash
+390dbae - Add Firestore initialization script (2025-12-29)
+7f2f4d3 - Add Firebase Admin scripts for setting admin custom claims (2025-12-29)
+```
+
+---
+
+**Last Updated:** 2025-12-29
 **Contributors:** Claude AI

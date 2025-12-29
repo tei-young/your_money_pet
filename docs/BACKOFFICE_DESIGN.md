@@ -36,6 +36,13 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
 **사용자 역할:** 읽기 전용
 
 #### 2.1 Learning Content (학습 콘텐츠)
+
+**⚠️ 중요: 콘텐츠 마크업 시스템 적용됨 (2024-12-09)**
+- `content` 및 `tip` 필드는 **마크업 문법** 지원
+- 현재: `**텍스트**` (볼드)
+- 향후: `[color:#HEX]텍스트[/color]`, `[size:크기]텍스트[/size]`
+- 자세한 내용: `docs/CONTENT_MARKUP_GUIDE.md` 참조
+
 ```dart
 // LearningContent Collection
 {
@@ -47,8 +54,9 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
     {
       "order": 1,
       "type": "text",  // text, image, video
-      "content": "예금과 적금의 차이는...",
-      "imageUrl": null
+      "content": "**예금**은 자유롭게 입출금이 가능하고, **적금**은 정해진 기간 동안 저축해요.",
+      "imageUrl": null,
+      "tip": "**복리**의 힘은 시간이 지날수록 커져요!"  // 선택적 필드
     }
   ],
   "estimatedMinutes": 3,
@@ -61,6 +69,11 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
   "tags": ["예금", "적금", "기본"]
 }
 ```
+
+**콘텐츠 입력 시 주의사항:**
+- `content`와 `tip` 필드에 마크업 문법 사용 가능
+- `**키워드**` 형식으로 중요 용어 강조
+- 백오피스 UI에서 실시간 프리뷰 제공 권장
 
 #### 2.2 Quiz Content (퀴즈 콘텐츠)
 ```dart
@@ -339,9 +352,312 @@ service cloud.firestore {
 }
 ```
 
+---
+
+## 콘텐츠 에디터 UI 설계 (상세)
+
+### Phase 1: 기본 텍스트 입력 (MVP)
+
+**구현 시점**: 백오피스 초기 구축 시
+**복잡도**: 낮음
+
+#### UI 레이아웃
+```
+┌─────────────────────────────────────────────┐
+│ 학습 콘텐츠 작성                              │
+├─────────────────────────────────────────────┤
+│ Day: [1 ▼]  성향: [공통 ▼]                   │
+│ 제목: [____________________________]         │
+│                                              │
+│ 카드 1                                  [삭제] │
+│ ┌─────────────────────────────────────────┐ │
+│ │ 콘텐츠:                                  │ │
+│ │ **예금**은 자유롭게 입출금이 가능하고,    │ │
+│ │ **적금**은 정해진 기간 동안 저축해요.     │ │
+│ │                                          │ │
+│ └─────────────────────────────────────────┘ │
+│                                              │
+│ ┌─────────────────────────────────────────┐ │
+│ │ Tip (선택):                              │ │
+│ │ **복리**의 힘은 시간이 지날수록 커져요!   │ │
+│ └─────────────────────────────────────────┘ │
+│                                              │
+│ 이미지 URL: [____________________________]   │
+│                                              │
+│                              [+ 카드 추가]    │
+│                                              │
+│                   [미리보기] [저장] [발행]    │
+└─────────────────────────────────────────────┘
+```
+
+#### 마크업 가이드 표시
+```
+💡 마크업 문법 도움말
+• **텍스트**: 굵게 강조
+  예시: **예금**은 자유롭게...
+```
+
+---
+
+### Phase 2: 실시간 프리뷰 (권장)
+
+**구현 시점**: 백오피스 1차 고도화
+**복잡도**: 중간
+
+#### 분할 화면 레이아웃
+```
+┌─────────────────────┬─────────────────────┐
+│ 편집 영역           │ 실시간 프리뷰        │
+├─────────────────────┼─────────────────────┤
+│ 콘텐츠:             │ ┌─────────────────┐ │
+│ **예금**은 자유롭게 │ │ 예금은 자유롭게  │ │
+│ 입출금이 가능하고,   │ │ 입출금이 가능하고,│ │
+│ **적금**은...       │ │ 적금은...        │ │
+│                     │ │                  │ │
+│                     │ │ (Pretendard W500)│ │
+│                     │ │ 키워드: W700     │ │
+│                     │ └─────────────────┘ │
+│                     │                     │
+│ Tip:                │ 💡 Tip              │
+│ **복리**의 힘은...  │ 복리의 힘은...      │
+└─────────────────────┴─────────────────────┘
+```
+
+#### 구현 방법
+```jsx
+// React 예시
+function ContentEditor() {
+  const [content, setContent] = useState('');
+
+  return (
+    <div className="editor-container">
+      <div className="edit-panel">
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+      </div>
+
+      <div className="preview-panel">
+        <MobilePreview content={content} />
+      </div>
+    </div>
+  );
+}
+
+function MobilePreview({ content }) {
+  // **키워드** -> <strong>키워드</strong>
+  const renderMarkdown = (text) => {
+    return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  };
+
+  return (
+    <div className="mobile-screen">
+      <div
+        className="learning-card"
+        dangerouslySetInnerHTML={{
+          __html: renderMarkdown(content)
+        }}
+      />
+    </div>
+  );
+}
+```
+
+#### CSS 스타일 (앱과 동일하게)
+```css
+.learning-card {
+  font-family: 'Pretendard', sans-serif;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.7;
+  color: #2D3748;
+}
+
+.learning-card strong {
+  font-weight: 700;
+}
+```
+
+---
+
+### Phase 3: WYSIWYG 에디터 (고급)
+
+**구현 시점**: 백오피스 2차 고도화
+**복잡도**: 높음
+
+#### 툴바 기반 에디터
+```
+┌─────────────────────────────────────────────┐
+│ [B] [색상▼] [크기▼] [이미지] [실행취소]      │
+├─────────────────────────────────────────────┤
+│                                              │
+│ 예금은 자유롭게 입출금이 가능하고,            │
+│ 적금은 정해진 기간 동안 저축해요.             │
+│ ^---^                                        │
+│ (선택 시 툴바 활성화)                         │
+│                                              │
+└─────────────────────────────────────────────┘
+```
+
+#### 사용 흐름
+1. 텍스트 드래그 선택
+2. 툴바에서 [B] 버튼 클릭
+3. 자동으로 `**예금**` 마크업 삽입
+4. 실시간 프리뷰 업데이트
+
+#### 추천 라이브러리
+- **Draft.js** (Facebook): 강력한 커스터마이징
+- **Slate.js**: 가벼운 React 에디터
+- **TipTap**: Vue/React 호환, 마크다운 지원
+
+#### 구현 예시 (Draft.js)
+```jsx
+import { Editor, EditorState, RichUtils } from 'draft-js';
+
+function WYSIWYGEditor() {
+  const [editorState, setEditorState] = useState(
+    EditorState.createEmpty()
+  );
+
+  const handleBold = () => {
+    setEditorState(
+      RichUtils.toggleInlineStyle(editorState, 'BOLD')
+    );
+  };
+
+  return (
+    <>
+      <button onClick={handleBold}>B</button>
+      <Editor
+        editorState={editorState}
+        onChange={setEditorState}
+      />
+    </>
+  );
+}
+```
+
+---
+
+## 타이포그래피 시스템 (현재 구현 상태)
+
+### Pretendard 폰트 사용
+**도입일**: 2024-12-09
+**위치**: `lib/utils/theme.dart`, `pubspec.yaml`
+
+#### 폰트 굵기 체계
+| Weight | 이름 | 용도 |
+|--------|------|------|
+| 400 | Regular | 기본 텍스트 (bodyLarge) |
+| 500 | Medium | 본문, 버튼 (bodyMedium) |
+| 600 | SemiBold | 부제목 |
+| 700 | Bold | 제목, 강조 키워드 |
+
+#### 학습 콘텐츠 타이포그래피
+```dart
+// 본문 (일반 텍스트)
+TextStyle(
+  fontFamily: 'Pretendard',
+  fontSize: 17,
+  fontWeight: FontWeight.w500,  // Medium
+  height: 1.7,
+)
+
+// 키워드 (볼드 마크업)
+TextStyle(
+  fontFamily: 'Pretendard',
+  fontSize: 17,
+  fontWeight: FontWeight.w700,  // Bold
+  height: 1.7,
+)
+```
+
+### 백오피스에서 폰트 미리보기 구현
+
+#### 웹 폰트 로딩
+```html
+<!-- 백오피스 HTML head -->
+<link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+```
+
+#### CSS 적용
+```css
+/* 앱과 동일한 스타일 */
+.preview-content {
+  font-family: 'Pretendard', -apple-system, sans-serif;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.7;
+}
+
+.preview-content strong {
+  font-weight: 700;
+}
+```
+
+---
+
+## 마크업 확장 로드맵
+
+### v1.0 (현재)
+- [x] `**텍스트**` - 볼드
+- [x] ContentTextRenderer 구현
+- [x] 학습 화면 적용 (content, tip)
+
+### v2.0 (백오피스 구축 시)
+- [ ] `[color:#HEX]텍스트[/color]` - 색상
+- [ ] `[size:크기]텍스트[/size]` - 크기
+- [ ] 백오피스 에디터 UI (Phase 2)
+- [ ] 실시간 프리뷰
+
+### v3.0 (향후)
+- [ ] `*텍스트*` - 이탤릭
+- [ ] `__텍스트__` - 밑줄
+- [ ] 복합 마크업 지원
+- [ ] WYSIWYG 에디터 (Phase 3)
+
+### 구현 위치
+**파일**: `lib/utils/text_renderer.dart`
+**확장 메서드**:
+- `_parseWithColors()` - 준비됨
+- `_parseWithSizes()` - 준비됨
+- `_parseWithAllMarkups()` - 준비됨
+
+---
+
+## 백오피스 체크리스트
+
+### 콘텐츠 관리자용
+- [ ] 마크업 문법 가이드 숙지 (`docs/CONTENT_MARKUP_GUIDE.md`)
+- [ ] **키워드** 형식으로 중요 용어 강조
+- [ ] 한 문장에 2-3개 키워드만 강조
+- [ ] 입력 후 앱에서 프리뷰 확인
+
+### 개발자용
+- [ ] Pretendard 폰트 웹폰트 로딩
+- [ ] CSS 스타일 앱과 동기화
+- [ ] 마크업 파싱 로직 구현 (정규식)
+- [ ] 실시간 프리뷰 컴포넌트
+- [ ] Firebase 저장 시 마크업 포함
+
+### 디자이너용
+- [ ] 모바일 화면 프리뷰 디자인
+- [ ] 툴바 아이콘 디자인 (Phase 3)
+- [ ] 색상 팔레트 정의
+- [ ] 에디터 레이아웃 디자인
+
+---
+
 ## 참고사항
 
 - 콘텐츠는 버전 관리를 통해 A/B 테스트 가능
 - 사용자 데이터는 개인정보 보호 정책 준수 필요
 - 콘텐츠 CDN 활용으로 로딩 속도 최적화
 - 오프라인 모드 대비 로컬 캐싱 전략 필요
+- **타이포그래피 시스템**: Pretendard 폰트, 마크업 지원 (2024-12-09 추가)
+- **관련 문서**:
+  - `docs/CONTENT_MARKUP_GUIDE.md` - 마크업 문법 상세 가이드
+  - `docs/DEVELOPMENT_LOG.md` - 구현 히스토리
+  - `lib/utils/text_renderer.dart` - 렌더링 로직

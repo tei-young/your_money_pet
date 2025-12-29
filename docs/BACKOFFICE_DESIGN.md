@@ -290,26 +290,36 @@ PUT    /api/v1/characters/{characterId}
 
 ## 구현 우선순위
 
-### Phase 1: 데이터 모델 개선
-- [ ] User 모델에 백오피스 필드 추가 (createdAt, updatedAt, metadata)
-- [ ] Content 모델 생성 (LearningContent, QuizContent)
-- [ ] CharacterConfig 모델 생성
-- [ ] AppConfig 모델 생성
+### Phase 1: 데이터 모델 개선 ✅ 완료 (2025-12-29)
+- [x] User 모델에 백오피스 필드 추가 (createdAt, updatedAt, metadata)
+- [x] Content 모델 생성 (LearningContent, QuizContent)
+- [x] CharacterConfig 모델 생성
+- [x] AppConfig 모델 생성
 
-### Phase 2: Firebase 연동
-- [ ] Firestore 컬렉션 설계 및 생성
+### Phase 2: Firebase 연동 🚧 진행 중
+- [x] **Firestore 컬렉션 설계 및 생성** (2025-12-29 완료)
+  - Firebase 프로젝트: `moneypet-74066`
+  - 위치: `asia-northeast3 (Seoul)`
+  - 모드: Production mode
+  - Security Rules 설정 완료
+  - 관리자 계정 생성 및 admin custom claim 설정 완료
+  - 초기 데이터 생성 완료:
+    - app_config: 1개
+    - character_configs: 4개 (머니베어, 세이브쉽, 헌터캣, 체이서폭스)
+    - learning_contents: 1개 (샘플)
+    - quiz_contents: 1개 (샘플)
 - [ ] User CRUD 구현
 - [ ] Content CRUD 구현
 - [ ] 로컬 캐싱 전략
 
-### Phase 3: 백오피스 웹 개발
+### Phase 3: 백오피스 웹 개발 📋 예정
 - [ ] 관리자 인증 (Firebase Auth)
 - [ ] 사용자 관리 페이지
 - [ ] 콘텐츠 관리 페이지 (WYSIWYG 에디터)
 - [ ] 퀴즈 관리 페이지
 - [ ] 통계 대시보드
 
-### Phase 4: 고도화
+### Phase 4: 고도화 📋 예정
 - [ ] 버전 관리 시스템
 - [ ] A/B 테스트 기능
 - [ ] 푸시 알림 관리

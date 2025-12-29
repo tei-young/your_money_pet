@@ -56,3 +56,8 @@ app.*.map.json
 **/macos/Pods/
 **/macos/.symlinks/
 **/macos/Flutter/ephemeral/
+
+# Firebase Admin SDK
+scripts/service-account-key.json
+scripts/node_modules/
+scripts/package-lock.json

@@ -83,7 +83,7 @@
 1. **꾸미기 아이템**: 의상, 악세서리, 배경
 2. **캐릭터 진화 시스템** ⭐:
    - 조건: 캐릭터 + 성향 + 포인트
-   - 예: 코인캣 + 안전형 + 1000P → "안전 코인캣" 디자인
+   - 예: 헌터캣 + 안전형 + 1000P → "안전 헌터캣" 디자인
    - 총 16가지 바리에이션 (4 캐릭터 × 4 성향)
 
 #### 5. Day 30 완료 화면
@@ -167,7 +167,7 @@
 프론트엔드:
 - Flutter 3.x (Dart)
 - 상태관리: Provider / Riverpod
-- 애니메이션: Rive (추천) / Lottie
+- 애니메이션: 프레임 기반 (PNG/WebP 시퀀스)
 - 로컬 저장소: Hive / SharedPreferences
 
 백엔드:
@@ -179,7 +179,7 @@
 
 주요 패키지:
 - go_router (네비게이션)
-- rive (애니메이션)
+- provider (상태 관리)
 - firebase_core, cloud_firestore, firebase_auth
 - share_plus (SNS 공유)
 - image (이미지 생성)
@@ -199,7 +199,7 @@ CI/CD:
 ✅ **60 FPS 보장**: 부드러운 UI/UX
 ✅ **Hot Reload**: 빠른 개발 속도
 ✅ **단일 코드베이스**: iOS/Android 동시 개발
-✅ **Rive 지원**: 인터랙티브 애니메이션 제작 도구
+✅ **프레임 애니메이션 지원**: PNG/WebP 시퀀스 재생 최적화
 
 ---
 
@@ -222,20 +222,20 @@ CI/CD:
 > **온보딩 상태**: 기본 플로우 완성. UX 개선 및 전체 테스트 필요
 
 #### 메인 기능
-- [x] 홈 화면 ✅ **학습 완료 UI 구현 완료** (2024-12-08)
-  - [x] 캐릭터 표시 (Placeholder 아이콘, Rive 대기)
+- [x] 홈 화면 ✅ **학습 완료 UI 구현 완료** (2025-12-08) **+ 랜덤 애니메이션 로직** (2025-12-26)
+  - [x] 캐릭터 표시 (AnimatedCharacter 위젯, 5개 home state 중 랜덤 선택)
   - [x] 오늘의 학습 카드 (일반/완료 상태 분기)
   - [x] 학습 완료 UI (완료 축하, 내일 예고, 복습/이전 학습 보기 버튼)
   - [x] 스트릭 카운터 (🔥7)
   - [x] 통계 영역 (학습일수, 포인트, 연속)
   - [x] SNS 공유 버튼 (기본 구조)
-- [x] 학습 화면 ✅ **복습 모드 구현 완료** (2024-12-08)
+- [x] 학습 화면 ✅ **복습 모드 구현 완료** (2025-12-08)
   - [x] 콘텐츠 카드 (스와이프) - PageView
   - [x] 페이지 인디케이터 (●●○○○)
   - [x] 다음/이전 버튼
   - [x] 복습 모드 (isReview 플래그, 헤더 배지, 캐릭터 메시지 변경)
   - [x] 복습 시 포인트/스트릭 업데이트 스킵
-- [x] 퀴즈 화면 ✅ **복습 모드 구현 완료** (2024-12-08)
+- [x] 퀴즈 화면 ✅ **복습 모드 구현 완료** (2025-12-08)
   - [x] 5문항 객관식
   - [x] 정답/오답 피드백
   - [x] 해설 표시
@@ -265,17 +265,52 @@ CI/CD:
 - [x] 스트릭 카운터 (연속 학습일) 🟡 **로직 완료, UI/테스트 개선 필요**
 - [x] 학습 완료 보상 화면 🟡 **기본 구현 완료, 디자인 개선 필요**
 
-#### 캐릭터 애니메이션 (5종 필수)
-- [ ] Idle (호흡, 2초 loop) 🔴 Rive 전문가 제작 대기
-- [ ] Welcome (환영, 손 흔들기) 🔴 Rive 전문가 제작 대기
-- [ ] Reading (학습, 책 읽기) 🔴 Rive 전문가 제작 대기
-- [ ] Happy (완료, 점프 + 별) 🔴 Rive 전문가 제작 대기
-- [ ] Sad (미접속, 시무룩) 🔴 Rive 전문가 제작 대기
+#### 캐릭터 애니메이션 (13-state 시스템, 통합 애니메이션 방식)
+- [x] **기술 스택 변경** ✅ Rive → PNG/WebP 프레임 시퀀스 (Midjourney/Runway)
+- [x] **개발 완료** ✅ (2025-12-24)
+  - [x] 애니메이션 시스템 구현 (프레임 기반)
+  - [x] JSON 설정 시스템 (코드 수정 없이 프레임 수 조정)
+  - [x] 상태 체계 재설계 (5개 → 10개 → 13개 상태)
+  - [x] 통합 애니메이션 방식 적용 (프레임 불일치 문제 해결)
+  - [x] 자동 전환 로직 구현 (autoTransitionTo)
+  - [x] 폴더 구조 재편 (52개 폴더: 4캐릭터 × 13상태)
+  - [x] PNG/WebP 지원 및 버그 수정
+  - [x] 온보딩 화면 개선 (크기 증가, 오버플로우 수정)
+  - [x] pubspec.yaml 업데이트 (52개 asset 경로)
+- [ ] **디자인팀 작업 대기** 🔴 애니메이션 제작 필요 (52개)
 
-> **애니메이션 상태**:
-> - AnimatedCharacter 위젯 준비 완료 (개발팀)
-> - Rive 파일은 외부 전문가가 제작 예정
-> - 제작 완료된 .riv 파일 전달 시 즉시 통합 가능
+**상태 체계 (2025-12-24 완료 - 통합 애니메이션 방식):**
+- **카테고리 1: 캐릭터 선택 화면 (2개)**
+  - `characterGreetingLoop`: 손 흔들며 인사 (약 5초) - 헌터캣 재활용 가능 ✅
+  - `characterSelected`: 선택 반응 (약 1-2초) - 재제작 필요 ⚠️
+- **카테고리 2-A: 성향 퀴즈 (2개)**
+  - `personalityIdle`: 성향 문제 대기 (약 3초, loop) 🆕
+  - `personalitySelected`: 선택 반응 → auto idle (약 2초) 🆕
+- **카테고리 2-B: 학습 퀴즈 (3개)**
+  - `quizIdle`: 학습 문제 대기 (약 3초, loop) 🆕
+  - `quizCorrectFlow`: **통합** thinking→happy→idle (약 4-6초) ⭐
+  - `quizWrongFlow`: **통합** thinking→confused→idle (약 4-6초) ⭐
+- **카테고리 3: 결과 화면 (1개)**
+  - `resultCelebration`: 성향 결과 축하 (약 3초) 🆕
+- **카테고리 4: 홈 화면 (5개)**
+  - `homeIdle`: 기본 대기 - 복합 애니메이션 (약 5초)
+  - `homeStudying`: 책 읽기 (약 3초)
+  - `homeExcited`: 활기찬 모습 (약 2초)
+  - `homeSleepy`: 졸린 모습 (약 3초)
+  - `homeCelebration`: 목표 달성 → auto idle (약 2초)
+
+> **핵심 변경: 통합 애니메이션 방식**
+> - 개별 상태 조합 시 프레임 불일치로 전환이 끊기는 문제 해결
+> - `quiz_correct_flow` = thinking → happy → idle 복귀를 **하나의 애니메이션**으로 제작
+> - 부드러운 전환을 위해 일부 용량 증가 감수 (40MB → 192MB PNG / 96MB WebP)
+>
+> **애니메이션 현황**:
+> - ✅ 프레임 시스템 구축 완료 (2025-12-23)
+> - ✅ 13-state 코드 재설계 완료 (2025-12-24)
+> - ✅ Task #1-7 개발 완료 (enum, 폴더, JSON, 화면, pubspec)
+> - 🔴 디자인팀: 52개 애니메이션 제작 대기 (13상태 × 4캐릭터, 헌터캣 greeting 1개 재활용 가능)
+> - 📋 제작 가이드: `docs/FRAME_ANIMATION_GUIDE.md`
+> - 📋 작업 상세: `docs/TODO.md` (2025-12-24 섹션)
 
 #### 예외 처리
 - [ ] 네트워크 에러 (전체 화면 + 토스트) 🔴 미완
@@ -418,7 +453,7 @@ CI/CD:
 - 메인 화면 (홈 + 학습 탭)
 - 학습 화면 (콘텐츠 카드 스와이프)
 - 퀴즈 화면 (재개 없음)
-- 캐릭터 애니메이션 (5종)
+- 캐릭터 애니메이션 (13-state 시스템)
 
 ### Phase 2: 신규 기능 (Week 5-6)
 - 월별 진도 표시 (기본 + 상세)
@@ -450,9 +485,9 @@ CI/CD:
 
 ### 성향별 컬러
 - **안전형 (머니베어)**: `#718096` (따뜻한 회색)
-- **밸런스형 (밸런스토끼)**: `#B794F6` (파스텔 보라)
-- **공격형 (코인캣)**: `#9F7AEA` (메인 보라)
-- **도전형 (세이빙덕)**: `#4A5568` (차분한 회색)
+- **밸런스형 (세이브쉽)**: `#B794F6` (파스텔 보라)
+- **공격형 (헌터캣)**: `#9F7AEA` (메인 보라)
+- **도전형 (체이서폭스)**: `#4A5568` (차분한 회색)
 
 ### 타이포그래피
 - **H1**: 32px, Bold
@@ -504,7 +539,7 @@ your_money_pet/
 │       └── app_router.dart         # go_router 설정
 ├── assets/                         # 리소스
 │   ├── images/                     # 이미지
-│   ├── animations/                 # Rive 애니메이션 파일
+│   ├── animations/                 # 프레임 애니메이션 파일 (PNG/WebP)
 │   └── fonts/                      # 폰트
 ├── test/                           # 테스트
 ├── android/                        # Android 설정
@@ -1007,6 +1042,55 @@ TBD
 
 ## 🔄 최신 업데이트
 
+### 2025-12-26: 홈 화면 랜덤 애니메이션 로직 추가 🎲
+
+**완료된 작업:**
+- ✅ **홈 화면 진입 시 5개 home state 중 랜덤 선택**
+  - `homeIdle`, `homeStudying`, `homeExcited`, `homeSleepy`, `homeCelebration` 중 랜덤
+  - 매번 홈 화면 진입 시 다른 캐릭터 모습 표시 (다양성 확보)
+- ✅ **Icon 위젯 → AnimatedCharacter 위젯으로 교체**
+  - 기존: 단순 `Icon(Icons.pets)` placeholder
+  - 변경: `AnimatedCharacter` 위젯 사용 (프레임 애니메이션 준비 완료)
+- ✅ **추후 유저 상태 기반 로직 확장 가능한 구조 설계**
+  - 현재: 5개 state 랜덤 선택
+  - 추후: 유저 학습 완료 여부, 연속 학습일, 시간대 등에 따라 적절한 애니메이션 표시 가능
+
+**기술적 세부사항:**
+```dart
+// 랜덤 선택 로직
+CharacterAnimationState _selectRandomHomeState() {
+  final homeStates = [
+    CharacterAnimationState.homeIdle,
+    CharacterAnimationState.homeStudying,
+    CharacterAnimationState.homeExcited,
+    CharacterAnimationState.homeSleepy,
+    CharacterAnimationState.homeCelebration,
+  ];
+  return homeStates[Random().nextInt(homeStates.length)];
+}
+
+// AnimatedCharacter 사용
+AnimatedCharacter(
+  characterType: personalityType,
+  state: _currentHomeState,  // 랜덤 선택된 state
+  size: 140,
+)
+```
+
+**확인 사항:**
+- ✅ 성향 진단 퀴즈 화면: `AnimatedCharacter` 정상 사용 중 (`personalityIdle`)
+- ✅ 성향 진단 완료 화면: `AnimatedCharacter` 정상 사용 중 (`resultCelebration`)
+- ⚠️ 두 화면 모두 프레임 파일 없어서 placeholder 표시됨 (코드는 정상)
+
+**변경 파일:**
+- `lib/screens/home/home_screen.dart` - 랜덤 로직 + AnimatedCharacter 통합
+
+**다음 단계:**
+- 디자인팀에서 52개 애니메이션 프레임 제작 시 즉시 적용 가능
+- 유저 상태 기반 애니메이션 선택 로직 추가 (v1.1+)
+
+---
+
 ### 2025-12-02 (2차): 통일된 다크 테마 + 헤더 압축 최적화 🌙
 
 **완료된 작업:**
@@ -1084,7 +1168,7 @@ Row(
     - ValueKey를 통한 정확한 위젯 식별
 
 - ✅ **퀴즈 화면 동일 개선 적용** (`lib/screens/learning/quiz_screen.dart`)
-  - 학습 화면과 동일한 3단계 개선 + 애니메이션
+  - [x] 학습 화면과 동일한 3단계 개선 + 애니메이션
   - 정답/오답에 따른 캐릭터 반응 메시지
     - 답변 전: "신중하게 생각해봐요! 🤔"
     - 정답: "정답이에요! 👏"
@@ -1121,7 +1205,7 @@ AnimatedSwitcher(
 - **부드러운 전환**: 300ms fade 효과로 전문적인 UX
 
 **다음 단계:**
-- Rive 애니메이션 통합 시 Placeholder 교체
+- 프레임 애니메이션 통합 시 Placeholder 교체
 - 실제 콘텐츠 투입 후 가독성 테스트
 - 사용자 피드백 수집 및 미세 조정
 
@@ -1137,7 +1221,7 @@ AnimatedSwitcher(
   - 프로덕션 안정성 확보 (런타임 로딩 이슈 제거)
 - ✅ **홈화면 UI 정리**
   - 성향별 캐릭터 이름 표시 제거
-  - Rive 애니메이션 준비를 위한 UI 간소화
+  - 프레임 애니메이션 준비를 위한 UI 간소화
 
 **기술적 변경사항:**
 ```dart
@@ -1241,12 +1325,11 @@ Firebase:      60% (Auth 완료, Firestore 대기)
    - **학습 콘텐츠는 반드시 DB에서 관리** (하드코딩 금지)
 4. **백오피스 웹 개발** (P1): 콘텐츠 관리 시스템 (WYSIWYG 에디터)
 5. **SNS 공유 이미지** (P1): 이미지 생성 기능 (현재 텍스트만)
-6. **Rive 애니메이션 통합** (P1): 전달받은 .riv 파일 통합 작업
 
 ### 📝 외부 전문가 작업 (콘텐츠/디자인)
 1. **학습 콘텐츠 작성** (P0): Day 1-30 학습 콘텐츠 (120개: 30일 × 4성향)
 2. **퀴즈 문항 작성** (P0): 600개 문항 (5문항 × 30일 × 4성향)
-3. **Rive 애니메이션 제작** (P0): 캐릭터 5종 × 4가지 = 20개 애니메이션
+3. **프레임 애니메이션 제작** (P0): 52개 애니메이션 (13상태 × 4캐릭터)
 
 > **⚠️ 중요 아키텍처 원칙**:
 > - 학습 콘텐츠는 **Firestore에 저장**, 앱에서는 실시간으로 불러옴
@@ -1294,10 +1377,10 @@ Firebase:      60% (Auth 완료, Firestore 대기)
 
 #### AnimatedCharacter 위젯
 캐릭터 애니메이션 (현재 Placeholder)
-- 숨쉬기 애니메이션
-- 선택 효과
+- 프레임 기반 애니메이션 시스템
+- 13-state 지원 및 자동 전환
 - 말풍선 통합
-- 🔜 Rive 애니메이션으로 교체 예정
+- 🔜 실제 프레임 파일 추가 예정
 
 #### SpeechBubble 위젯
 말풍선 UI
@@ -1313,16 +1396,42 @@ Firebase:      60% (Auth 완료, Firestore 대기)
 - [`docs/DEVELOPMENT_LOG.md`](./docs/DEVELOPMENT_LOG.md) - 상세 개발 로그 및 TODO
 - [`docs/BACKOFFICE_DESIGN.md`](./docs/BACKOFFICE_DESIGN.md) - 백오피스 데이터 구조 설계
 
-### 🔜 다음 단계
-1. **🟡 Google OAuth 설정** (P0) - Firebase Console에서 클라이언트 ID 설정
-2. **🔴 Firebase Auth 연동** (P0) - auth_service.dart 생성, 로그인/회원가입 기능
-3. **SharedPreferences 영구 저장** - 로컬 데이터 저장 구현
-4. **홈 화면 구현** - 학습 시작 진입점
-5. **학습/퀴즈 화면 구현** - 핵심 기능 완성
-6. **Rive 애니메이션 통합** - 캐릭터 애니메이션 제작 및 적용
-7. **실제 콘텐츠 작성** - Day 1-10 학습 콘텐츠 및 퀴즈 (샘플)
-8. **Firestore 연동** - 사용자 데이터 영구 저장
-9. **백오피스 개발** - 콘텐츠 관리 시스템 (v1.1 이후)
+### 🔜 현재 진행 중 & 다음 단계
+
+#### ✅ 완료된 주요 작업 (2025년)
+1. ✅ **Firebase Auth 연동** (2025-11-27) - Google OAuth + 이메일/비밀번호 로그인
+2. ✅ **온보딩 플로우 전체 구현** - 캐릭터 선택 우선 방식, 성향 진단 5문항
+3. ✅ **홈/학습/퀴즈 화면 기본 구조** - 학습 완료 UI, 복습 모드, 진도 관리
+4. ✅ **13-state 애니메이션 시스템 재설계** (2025-12-24) - 통합 애니메이션 방식
+5. ✅ **홈 화면 랜덤 애니메이션 로직** (2025-12-26) - 5개 home state 중 랜덤 선택
+
+#### 🔴 진행 중 (디자인팀 작업 대기 - 최우선)
+**프레임 애니메이션 제작 (52개: 13상태 × 4캐릭터)**
+- Phase 1: 온보딩 애니메이션 (16개) 🎯 최우선
+  - `character_greeting_loop`, `character_selected`
+  - `personality_idle`, `personality_selected`
+- Phase 2: 학습 퀴즈 (16개)
+  - `quiz_idle`, `quiz_correct_flow`, `quiz_wrong_flow`, `result_celebration`
+- Phase 3: 홈 화면 (20개)
+  - `home_idle`, `home_studying`, `home_excited`, `home_sleepy`, `home_celebration`
+
+**제작 가이드:** [`docs/FRAME_ANIMATION_GUIDE.md`](./docs/FRAME_ANIMATION_GUIDE.md)
+
+#### 📋 다음 단계 (개발팀)
+1. **실제 콘텐츠 작성** (외부 전문가 협업)
+   - Day 1-30 학습 콘텐츠 (120개: 30일 × 4성향)
+   - 퀴즈 문항 (600개: 5문항 × 30일 × 4성향)
+2. **Firestore 콘텐츠 시스템 완성**
+   - 사용자 데이터 영구 저장
+   - 콘텐츠 DB 구조 최종 확정
+3. **신규 필수 기능**
+   - Day 30 완료 화면 (다른 성향 체험 유도)
+   - 성향 변경 확인 팝업 (Day 1 재시작 고지)
+4. **예외 처리 & 통합 테스트**
+   - 네트워크 에러 처리
+   - 전체 플로우 테스트
+5. **백오피스 개발** (v1.1+)
+   - 콘텐츠 관리 시스템 (WYSIWYG 에디터)
 
 자세한 내용은 [`docs/TODO.md`](./docs/TODO.md) 및 [`docs/DEVELOPMENT_LOG.md`](./docs/DEVELOPMENT_LOG.md) 참고
 

@@ -1,0 +1,84 @@
+{
+  "characterGreetingLoop": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "손 흔들며 인사 (약 5초)"
+  },
+  "characterSelected": {
+    "frameCount": 36,
+    "frameDuration": 42,
+    "loop": false,
+    "description": "선택 반응 (약 1.5초)"
+  },
+  "personalityIdle": {
+    "frameCount": 72,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "성향 문제 대기 (약 3초)"
+  },
+  "personalitySelected": {
+    "frameCount": 48,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "personalityIdle",
+    "description": "성향 선택 반응 (약 2초, auto→personalityIdle)"
+  },
+  "quizIdle": {
+    "frameCount": 72,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "학습 문제 대기 (약 3초)"
+  },
+  "quizCorrectFlow": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "quizIdle",
+    "description": "정답 플로우: thinking→happy→idle (약 5초, auto→quizIdle)"
+  },
+  "quizWrongFlow": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "quizIdle",
+    "description": "오답 플로우: thinking→confused→idle (약 5초, auto→quizIdle)"
+  },
+  "resultCelebration": {
+    "frameCount": 72,
+    "frameDuration": 42,
+    "loop": false,
+    "description": "성향 결과 축하 (약 3초)"
+  },
+  "homeIdle": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "홈 기본 대기 - 복합 애니메이션 (약 5초)"
+  },
+  "homeStudying": {
+    "frameCount": 72,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "책 읽기 (약 3초)"
+  },
+  "homeExcited": {
+    "frameCount": 48,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "활기찬 모습 (약 2초)"
+  },
+  "homeSleepy": {
+    "frameCount": 72,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "졸린 모습 (약 3초)"
+  },
+  "homeCelebration": {
+    "frameCount": 48,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "homeIdle",
+    "description": "목표 달성 축하 (약 2초, auto→homeIdle)"
+  }
+}

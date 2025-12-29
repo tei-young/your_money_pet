@@ -1,221 +1,2016 @@
 # MoneyPet 개발 로그
 
-## 📅 2024-12-09 세션: 학습 콘텐츠 타이포그래피 개선 및 마크업 시스템 구축
+## 📅 2025-12-26 세션: 홈 화면 랜덤 애니메이션 로직 추가
 
 ### 🎯 목표
-학습 콘텐츠의 가독성과 강조 효과 개선, 백오피스 콘텐츠 관리 준비
+홈 화면 진입 시 5개 home state 중 랜덤하게 하나를 선택하여 다양한 캐릭터 모습 표시
+
+### 📋 완료된 작업
+
+#### 1. 홈 화면 랜덤 state 선택 로직 구현 ✅
+**커밋:** 068f974
+**파일:** `lib/screens/home/home_screen.dart`
+**날짜:** 2025-12-26
+
+**변경 사항:**
+- ✅ `_selectRandomHomeState()` 메서드 추가
+  - 5개 home state 배열 선언 (`homeIdle`, `homeStudying`, `homeExcited`, `homeSleepy`, `homeCelebration`)
+  - `Random().nextInt()` 사용하여 랜덤 선택
+  - 매번 `initState()`에서 호출하여 화면 진입 시마다 다른 애니메이션 표시
+- ✅ `_currentHomeState` 필드 추가
+  - `late CharacterAnimationState _currentHomeState` 선언
+  - 랜덤 선택된 state 저장
+- ✅ 추후 확장 가능한 구조 설계
+  - 주석으로 추후 유저 상태 기반 로직 확장 방향 명시
+  - 예: 학습 완료 시 `homeStudying`, 연속 7일 시 `homeExcited` 등
+
+**코드:**
+```dart
+/// 홈 화면 진입 시 랜덤하게 home state 선택
+///
+/// 현재: 5개 home state 중 랜덤
+/// 추후: 유저 상태에 따라 분기 (예: 학습 완료 시 homeStudying, 연속 7일 시 homeExcited 등)
+CharacterAnimationState _selectRandomHomeState() {
+  final homeStates = [
+    CharacterAnimationState.homeIdle,
+    CharacterAnimationState.homeStudying,
+    CharacterAnimationState.homeExcited,
+    CharacterAnimationState.homeSleepy,
+    CharacterAnimationState.homeCelebration,
+  ];
+  return homeStates[Random().nextInt(homeStates.length)];
+}
+```
+
+---
+
+#### 2. Icon 위젯 → AnimatedCharacter 위젯 교체 ✅
+**커밋:** 068f974
+**파일:** `lib/screens/home/home_screen.dart`
+**날짜:** 2025-12-26
+
+**변경 사항:**
+- ❌ 삭제: `Icon(Icons.pets)` placeholder (단순 아이콘 표시)
+- ✅ 추가: `AnimatedCharacter` 위젯 사용
+  - `characterType`: 유저의 `personalityType` 사용
+  - `state`: 랜덤 선택된 `_currentHomeState` 전달
+  - `size`: 140 (기존과 동일)
+- ✅ 프레임 애니메이션 준비 완료
+  - 디자인팀에서 애니메이션 제작 시 즉시 적용 가능
+  - 현재는 프레임 파일 없어서 placeholder 표시
+
+**Before:**
+```dart
+child: Icon(
+  Icons.pets,
+  size: 70,
+  color: personalityType.color,
+),
+```
+
+**After:**
+```dart
+// 캐릭터 애니메이션
+AnimatedCharacter(
+  characterType: personalityType,
+  state: _currentHomeState,
+  size: 140,
+),
+```
+
+---
+
+#### 3. 성향 진단 화면 AnimatedCharacter 사용 확인 ✅
+**파일:**
+  - `lib/screens/onboarding/personality_test_screen.dart`
+  - `lib/screens/onboarding/personality_result_screen.dart`
+**날짜:** 2025-12-26
+
+**확인 결과:**
+- ✅ **성향 진단 퀴즈 화면**: `AnimatedCharacter` 정상 사용 중
+  - State: `CharacterAnimationState.personalityIdle`
+  - 코드 구조 정상, 프레임 파일만 없음
+- ✅ **성향 진단 완료 화면**: `AnimatedCharacter` 정상 사용 중
+  - State: `CharacterAnimationState.resultCelebration`
+  - 코드 구조 정상, 프레임 파일만 없음
+- ⚠️ **Placeholder 원인**: 단순히 프레임 파일 부재 (코드 문제 아님)
+  - `assets/animations/characters/*/personality_idle/frame_01.png` 없음
+  - `assets/animations/characters/*/result_celebration/frame_01.png` 없음
+
+---
+
+### 📊 요약
+
+**홈 화면 개선:**
+- 기존: 단순 아이콘 표시
+- 변경: 5개 home state 중 랜덤 애니메이션 표시
+- 효과: 다양성 확보, 프레임 애니메이션 준비 완료
+
+**확인된 문제:**
+- 모든 AnimatedCharacter 위젯이 정상적으로 사용되고 있음
+- Placeholder가 나오는 유일한 이유는 프레임 파일 부재
+- 디자인팀에서 52개 애니메이션 제작 시 즉시 적용 가능
+
+**다음 단계:**
+- [ ] 디자인팀: 52개 애니메이션 프레임 제작
+- [ ] v1.1+: 유저 상태 기반 애니메이션 선택 로직 추가
+  - 학습 완료 시: `homeStudying`
+  - 연속 7일 이상: `homeExcited`
+  - 심야 시간대: `homeSleepy`
+  - 목표 달성: `homeCelebration`
+  - 기본: `homeIdle`
+
+---
+
+## 📅 2025-12-24 세션: 통합 애니메이션 방식 재설계 (13-State)
+
+### 🎯 목표
+애니메이션 상태 시스템 재설계 (10개 → 13개 상태, 통합 애니메이션 방식 채택)
+
+### 📋 배경
+
+**문제 발견:**
+개별 상태 조합 방식의 근본적인 UX 문제 발견
+- `idle` 애니메이션 마지막 프레임 (포즈A) → `thinking` 첫 프레임 (포즈B) 전환 시 뚝 끊김
+- Midjourney/Runway는 정확한 프레임 일치를 보장할 수 없음
+- 사용자 경험에 치명적 영향
+
+**해결 방안:**
+- **Option A (채택):** 화면별 통합 애니메이션
+  - 예: `quiz_correct_flow` = thinking → happy → idle 복귀를 **하나의 애니메이션**으로 제작
+  - 장점: 완벽한 전환, 의도된 UX 플로우
+  - 단점: 용량 증가 (40MB → 192MB), 유연성 감소
+- **Option B (기각):** Neutral Pose 통일 - Midjourney로 정확한 포즈 재현 어려움
+- **Option C (기각):** 부분 통합 - 여전히 일부 전환 끊김
+
+**의사결정:** UX 우선순위로 Option A 채택
+
+---
+
+## ✅ 완료된 작업 (2025-12-24)
+
+### 1. CharacterAnimationState enum 재설계 ✅
+**커밋:** 1695ecc
+**파일:** `lib/models/character_animation_config.dart:1-25`
+**날짜:** 2025-12-24
+
+**변경 사항:**
+- ❌ 삭제: `thinking`, `happy`, `confused`, `reactionPositive`, `reactionNegative`, `reactionNeutral` (6개)
+- ✅ 추가: `personalityIdle`, `personalitySelected`, `quizIdle`, `quizCorrectFlow`, `quizWrongFlow`, `resultCelebration` (6개)
+- 🔄 이름 변경:
+  - `greeting` → `characterGreetingLoop`
+  - `selected` → `characterSelected`
+  - `idle` → `homeIdle`
+
+**결과:** 14개 → 13개 상태 (통합 애니메이션 방식 적용)
+
+---
+
+### 2. Enum → 폴더명 변환 로직 구현 ✅
+**커밋:** 5e2f0b3
+**파일:** `lib/models/character_frame_animation.dart:22-224`
+**날짜:** 2025-12-24
+
+**변경 사항:**
+- ✅ `_stateToFolderName()` 헬퍼 함수 추가
+  - camelCase enum → snake_case 폴더명 변환
+  - 예: `CharacterAnimationState.characterGreetingLoop` → `'character_greeting_loop'`
+  - 13개 모든 상태 매핑 완료
+- ✅ `getFramePath()` 메서드 업데이트
+  - `state.name` → `_stateToFolderName(state)` 사용
+  - 올바른 snake_case 폴더 경로 생성 보장
+- ✅ `forState()` fallback 메서드 완전 재작성
+  - 구식 상태 제거 (greeting, selected, idle, thinking, happy, confused 등)
+  - 13개 신규 상태로 교체 (기본 프레임 수 포함)
+  - 유연한 타이밍 정책 반영 ("약 X초")
+
+---
+
+### 3. 자동 전환 로직 구현 ✅
+**커밋:** a6c6108
+**파일:**
+  - `lib/models/character_frame_animation.dart:7-27`
+  - `lib/services/animation_config_loader.dart:65-72`
+  - `lib/widgets/animated_character.dart:40-236`
+**날짜:** 2025-12-24
+
+**변경 사항:**
+- ✅ **CharacterFrameAnimation 모델 업데이트**
+  - `autoTransitionTo` 필드 추가 (String?, 선택적)
+  - 애니메이션 완료 후 자동 전환할 상태 지정 가능
+  - 예: `personalitySelected` → `personalityIdle`
+
+- ✅ **AnimationConfigLoader 서비스 업데이트**
+  - `createAnimation()` 메서드에서 JSON `autoTransitionTo` 읽기 지원
+  - JSON 형식: `"autoTransitionTo": "personalityIdle"`
+
+- ✅ **AnimatedCharacter 위젯 업데이트**
+  - `_currentState` 내부 상태 추가 (자동 전환 관리)
+  - `_activeState` getter 추가 (현재 활성 상태 반환)
+  - `_handleAutoTransition()` 메서드 추가 (자동 전환 처리)
+  - `_stringToState()` 헬퍼 추가 (문자열 → enum 변환)
+  - `addStatusListener`에서 애니메이션 완료 시 자동 전환 실행
+  - `didUpdateWidget`에서 외부 상태 변경 동기화
+  - `build()`와 `_buildPlaceholder()`에서 `_activeState` 사용
+
+**결과:**
+- `personalitySelected` 완료 → 자동으로 `personalityIdle`로 전환
+- `quizCorrectFlow` 완료 → 자동으로 `quizIdle`로 전환
+- `quizWrongFlow` 완료 → 자동으로 `quizIdle`로 전환
+- `homeCelebration` 완료 → 자동으로 `homeIdle`로 전환
+
+---
+
+### 4. 폴더 구조 재편 ✅
+**커밋:** 088b510
+**파일:** `assets/animations/characters/*/`
+**날짜:** 2025-12-24
+
+**변경 사항:**
+- ✅ **폴더 이름 변경 (각 캐릭터별 3개)**
+  - `greeting/` → `character_greeting_loop/`
+  - `selected/` → `character_selected/`
+  - `idle/` → 삭제 후 `home_idle/` 신규 생성 (빈 폴더)
+
+- ✅ **폴더 삭제 (각 캐릭터별 3개)**
+  - `thinking/` (통합 애니메이션에 포함)
+  - `happy/` (quiz_correct_flow에 포함)
+  - `confused/` (quiz_wrong_flow에 포함)
+
+- ✅ **폴더 신규 생성 (각 캐릭터별 7개)**
+  - `personality_idle/` (성향 퀴즈 대기)
+  - `personality_selected/` (성향 선택 반응)
+  - `quiz_idle/` (학습 퀴즈 대기)
+  - `quiz_correct_flow/` (정답 통합 애니메이션)
+  - `quiz_wrong_flow/` (오답 통합 애니메이션)
+  - `result_celebration/` (결과 축하)
+  - `home_idle/` (홈 기본 대기)
+
+- ✅ **기존 폴더 유지 (각 캐릭터별 5개)**
+  - `home_studying/`, `home_excited/`, `home_sleepy/`, `home_celebration/`
+  - `character_greeting_loop/`, `character_selected/` (이름 변경됨)
+
+**최종 결과:**
+- 각 캐릭터당 13개 상태 폴더
+- 총 52개 폴더 (4캐릭터 × 13상태)
+- hunter_cat: 13 folders ✓
+- money_bear: 13 folders ✓
+- save_sheep: 13 folders ✓
+- chaser_fox: 13 folders ✓
+
+---
+
+### 5. animation_config.json 재작성 ✅
+**커밋:** e5ab1c6
+**파일:** `assets/animations/characters/*/animation_config.json` (4개 파일)
+**날짜:** 2025-12-24
+
+**변경 사항:**
+- ✅ **기존 10-state 키 → 13-state 키 변경**
+  - `greeting` → `characterGreetingLoop`
+  - `selected` → `characterSelected`
+  - `idle` → `homeIdle`
+  - `homeStudying`, `homeExcited`, `homeSleepy`, `homeCelebration` 유지 (camelCase 그대로)
+
+- ❌ **삭제된 state (3개)**
+  - `thinking` (quiz_correct_flow/quiz_wrong_flow에 통합)
+  - `happy` (quiz_correct_flow에 통합)
+  - `confused` (quiz_wrong_flow에 통합)
+
+- ✅ **신규 state 추가 (6개)**
+  - `personalityIdle` (약 3초, loop)
+  - `personalitySelected` (약 2초, one-shot, auto→personalityIdle)
+  - `quizIdle` (약 3초, loop)
+  - `quizCorrectFlow` (약 5초, one-shot, auto→quizIdle) ⭐ 통합 애니메이션
+  - `quizWrongFlow` (약 5초, one-shot, auto→quizIdle) ⭐ 통합 애니메이션
+  - `resultCelebration` (약 3초, one-shot)
+
+- ✅ **autoTransitionTo 필드 추가 (4개 state)**
+  - `personalitySelected` → "personalityIdle"
+  - `quizCorrectFlow` → "quizIdle"
+  - `quizWrongFlow` → "quizIdle"
+  - `homeCelebration` → "homeIdle"
+
+**유연한 타이밍 정책 적용:**
+- 기존: "정확히 XX프레임" → 제작 부담
+- 변경: "약 X초" → 실제 프레임 수는 제작 후 JSON에 기록
+- 예: `characterGreetingLoop` = 약 5초 (실제 프레임 수는 제작팀이 결정)
+
+**JSON 구조 예시:**
+```json
+{
+  "characterGreetingLoop": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "손 흔들며 인사 (약 5초)"
+  },
+  "personalitySelected": {
+    "frameCount": 48,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "personalityIdle",
+    "description": "성향 선택 반응 (약 2초, auto→personalityIdle)"
+  },
+  "quizCorrectFlow": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "quizIdle",
+    "description": "정답 플로우: thinking→happy→idle (약 5초, auto→quizIdle)"
+  }
+}
+```
+
+**최종 결과:**
+- 4개 캐릭터 JSON 파일 모두 13-state 시스템으로 업데이트
+- 모든 one-shot 애니메이션에 autoTransitionTo 설정 완료
+- 유연한 타이밍 정책 반영 ("약 X초")
+- Commit: e5ab1c6
+
+---
+
+### 6. 화면별 State 사용 업데이트 ✅
+**커밋:** bb8d045
+**파일:**
+  - `lib/screens/onboarding/character_preview_screen.dart:195-197`
+  - `lib/screens/onboarding/personality_test_screen.dart:296`
+  - `lib/screens/onboarding/personality_result_screen.dart:257`
+  - `lib/services/character_animation_preloader.dart:25,39-42`
+**날짜:** 2025-12-24
+
+**변경 사항:**
+- ✅ **캐릭터 선택 화면** (`character_preview_screen.dart`)
+  - `CharacterAnimationState.greeting` → `CharacterAnimationState.characterGreetingLoop`
+  - `CharacterAnimationState.selected` → `CharacterAnimationState.characterSelected`
+
+- ✅ **성향 퀴즈 화면** (`personality_test_screen.dart`)
+  - `CharacterAnimationState.thinking` → `CharacterAnimationState.personalityIdle`
+
+- ✅ **성향 결과 화면** (`personality_result_screen.dart`)
+  - `CharacterAnimationState.selected` → `CharacterAnimationState.resultCelebration`
+
+- ✅ **애니메이션 프리로더** (`character_animation_preloader.dart`)
+  - `greeting` → `characterGreetingLoop`
+  - `selected`, `happy`, `thinking`, `confused` → `characterSelected`, `personalityIdle`, `personalitySelected`, `resultCelebration`
+  - 프리로드 대상을 온보딩 4개 상태로 제한 (최적화)
+
+**최종 결과:**
+- 모든 화면에서 13-state 시스템 사용
+- 더 이상 old state 참조 없음
+- 프리로더 최적화 완료
+
+---
+
+### 7. pubspec.yaml 업데이트 ✅
+**커밋:** 5950ff5
+**파일:** `pubspec.yaml:64-123`
+**날짜:** 2025-12-24
+
+**변경 사항:**
+- ✅ **10-state 경로 삭제**
+  - `greeting/`, `selected/`, `idle/`, `thinking/`, `happy/`, `confused/`
+
+- ✅ **13-state 경로 등록** (각 캐릭터당 13개)
+  - `character_greeting_loop/`, `character_selected/`
+  - `personality_idle/`, `personality_selected/`
+  - `quiz_idle/`, `quiz_correct_flow/`, `quiz_wrong_flow/`
+  - `result_celebration/`
+  - `home_idle/`, `home_studying/`, `home_excited/`, `home_sleepy/`, `home_celebration/`
+
+**최종 결과:**
+- 4개 캐릭터 × 13개 상태 = 52개 폴더 경로 등록 완료
+- 프레임 파일 추가 시 자동 인식
+
+---
+
+## 🚨 개발팀 작업 필요 (2025-12-24)
+
+### ⚠️ 주의: Task #1-7 완료, 나머지 작업 진행 예정
+
+### ~~1. CharacterAnimationState enum 재설계 (필수)~~ ✅ 완료
+**파일:** `lib/models/character_animation_config.dart`
+
+**변경:** 14개 → 13개 상태
+
+**삭제되는 상태 (통합 애니메이션에 포함됨):**
+- `thinking` → `quiz_correct_flow`와 `quiz_wrong_flow`에 포함
+- `happy` → `quiz_correct_flow`에 포함
+- `confused` → `quiz_wrong_flow`에 포함
+
+**새로 추가되는 상태:**
+```dart
+enum CharacterAnimationState {
+  // 카테고리 1: 캐릭터 선택 화면 (2개)
+  characterGreetingLoop,  // 기존 greeting
+  characterSelected,      // 기존 selected
+
+  // 카테고리 2-A: 성향 퀴즈 전용 (2개)
+  personalityIdle,        // 성향 문제 대기
+  personalitySelected,    // 성향 선택 반응 (자동 전환)
+
+  // 카테고리 2-B: 학습 퀴즈 전용 (3개)
+  quizIdle,               // 학습 문제 대기
+  quizCorrectFlow,        // 통합: thinking → happy → idle
+  quizWrongFlow,          // 통합: thinking → confused → idle
+
+  // 카테고리 3: 결과 화면 (1개)
+  resultCelebration,      // 성향 결과 축하
+
+  // 카테고리 4: 홈 화면 (5개)
+  homeIdle,               // 기존 idle
+  homeStudying,           // 기존 homeStudying
+  homeExcited,            // 기존 homeExcited
+  homeSleepy,             // 기존 homeSleepy
+  homeCelebration,        // 기존 homeCelebration
+}
+```
+
+---
+
+### ~~2. Enum → 폴더명 변환 로직 구현 (필수)~~ ✅ 완료
+
+**구현 완료:**
+```dart
+String _stateToFolderName(CharacterAnimationState state) {
+  // camelCase → snake_case 변환
+  switch (state) {
+    case CharacterAnimationState.characterGreetingLoop:
+      return 'character_greeting_loop';
+    case CharacterAnimationState.characterSelected:
+      return 'character_selected';
+    case CharacterAnimationState.personalityIdle:
+      return 'personality_idle';
+    case CharacterAnimationState.personalitySelected:
+      return 'personality_selected';
+    case CharacterAnimationState.quizIdle:
+      return 'quiz_idle';
+    case CharacterAnimationState.quizCorrectFlow:
+      return 'quiz_correct_flow';
+    case CharacterAnimationState.quizWrongFlow:
+      return 'quiz_wrong_flow';
+    case CharacterAnimationState.resultCelebration:
+      return 'result_celebration';
+    case CharacterAnimationState.homeIdle:
+      return 'home_idle';
+    case CharacterAnimationState.homeStudying:
+      return 'home_studying';
+    case CharacterAnimationState.homeExcited:
+      return 'home_excited';
+    case CharacterAnimationState.homeSleepy:
+      return 'home_sleepy';
+    case CharacterAnimationState.homeCelebration:
+      return 'home_celebration';
+  }
+}
+```
+
+---
+
+### ~~3. 자동 전환 로직 구현 (필수)~~ ✅ 완료
+
+**구현 완료:**
+```dart
+// animation_config.json에 autoTransitionTo 필드 추가
+{
+  "personalitySelected": {
+    "frameCount": 48,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "personalityIdle"  // ← 신규
+  }
+}
+
+// AnimatedCharacter 위젯에서 처리
+void _onAnimationComplete() {
+  final config = _currentConfig;
+  if (config.containsKey('autoTransitionTo')) {
+    final nextState = _stringToState(config['autoTransitionTo']);
+    setState(() {
+      _currentState = nextState;
+    });
+  }
+}
+```
+
+---
+
+### ~~4. 폴더 구조 재편 (필수)~~ ✅ 완료
+
+**실행된 명령어:**
+```bash
+# 각 캐릭터마다 실행 (hunter_cat, money_bear, save_sheep, chaser_fox)
+cd assets/animations/characters/hunter_cat
+
+# 이름 변경
+git mv greeting/ character_greeting_loop/
+git mv selected/ character_selected/
+git mv idle/ home_idle/
+
+# 삭제 (통합 애니메이션에 포함됨)
+git rm -r thinking/
+git rm -r happy/
+git rm -r confused/
+
+# 신규 폴더 생성
+mkdir personality_idle personality_selected
+mkdir quiz_idle quiz_correct_flow quiz_wrong_flow
+mkdir result_celebration
+```
+
+**최종 폴더 구조:**
+```
+assets/animations/characters/
+├── hunter_cat/
+│   ├── animation_config.json
+│   ├── character_greeting_loop/
+│   ├── character_selected/
+│   ├── personality_idle/
+│   ├── personality_selected/
+│   ├── quiz_idle/
+│   ├── quiz_correct_flow/
+│   ├── quiz_wrong_flow/
+│   ├── result_celebration/
+│   ├── home_idle/
+│   ├── home_studying/
+│   ├── home_excited/
+│   ├── home_sleepy/
+│   └── home_celebration/
+├── money_bear/ (동일)
+├── save_sheep/ (동일)
+└── chaser_fox/ (동일)
+```
+
+---
+
+### 5. animation_config.json 재작성 (필수)
+**파일:** `assets/animations/characters/*/animation_config.json`
+
+**중요:** "정확히 XX프레임" → "약 X초" (유연한 타이밍 정책)
+
+**예시:**
+```json
+{
+  "characterGreetingLoop": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "손 흔들며 인사 (약 5초)"
+  },
+  "personalitySelected": {
+    "frameCount": 48,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "personalityIdle",
+    "description": "성향 선택 반응 (약 2초)"
+  },
+  "quizCorrectFlow": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "quizIdle",
+    "description": "정답 플로우 (약 4-6초): thinking → happy → idle"
+  },
+  "quizWrongFlow": {
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": false,
+    "autoTransitionTo": "quizIdle",
+    "description": "오답 플로우 (약 4-6초): thinking → confused → idle"
+  }
+}
+```
+
+---
+
+### 6. 화면별 State 사용 업데이트 (필수)
+
+**파일 1:** `lib/screens/onboarding/character_preview_screen.dart`
+```dart
+// 변경 전
+state: CharacterAnimationState.greeting
+
+// 변경 후
+state: CharacterAnimationState.characterGreetingLoop
+```
+
+**파일 2:** `lib/screens/onboarding/personality_test_screen.dart`
+```dart
+// 변경 전
+state: CharacterAnimationState.thinking
+
+// 변경 후 (대기 상태)
+state: CharacterAnimationState.personalityIdle
+
+// 선택 시
+state: CharacterAnimationState.personalitySelected
+// → 2초 후 자동으로 personalityIdle로 전환
+```
+
+**파일 3:** 학습 퀴즈 화면 (미구현, 추후 구현 시)
+```dart
+// 대기
+state: CharacterAnimationState.quizIdle
+
+// 정답 선택
+state: CharacterAnimationState.quizCorrectFlow
+// → 4-6초 후 자동으로 quizIdle로 전환
+
+// 오답 선택
+state: CharacterAnimationState.quizWrongFlow
+// → 4-6초 후 자동으로 quizIdle로 전환
+```
+
+**파일 4:** `lib/services/character_animation_preloader.dart`
+```dart
+// 변경 전
+CharacterAnimationState.greeting
+
+// 변경 후
+CharacterAnimationState.characterGreetingLoop
+```
+
+---
+
+### 7. pubspec.yaml 업데이트 (필수)
+**파일:** `pubspec.yaml`
+
+**변경:** 40개 경로 → 52개 경로 (4캐릭터 × 13상태)
+
+```yaml
+flutter:
+  assets:
+    # hunter_cat (13개 상태)
+    - assets/animations/characters/hunter_cat/character_greeting_loop/
+    - assets/animations/characters/hunter_cat/character_selected/
+    - assets/animations/characters/hunter_cat/personality_idle/
+    - assets/animations/characters/hunter_cat/personality_selected/
+    - assets/animations/characters/hunter_cat/quiz_idle/
+    - assets/animations/characters/hunter_cat/quiz_correct_flow/
+    - assets/animations/characters/hunter_cat/quiz_wrong_flow/
+    - assets/animations/characters/hunter_cat/result_celebration/
+    - assets/animations/characters/hunter_cat/home_idle/
+    - assets/animations/characters/hunter_cat/home_studying/
+    - assets/animations/characters/hunter_cat/home_excited/
+    - assets/animations/characters/hunter_cat/home_sleepy/
+    - assets/animations/characters/hunter_cat/home_celebration/
+    # money_bear, save_sheep, chaser_fox도 동일하게 13개씩
+```
+
+---
+
+### 8. 문서 업데이트 (필수)
+
+**파일 목록:**
+- [x] `docs/TODO.md` - 2025-12-24 작업 항목 추가 ✅
+- [x] `docs/DEVELOPMENT_LOG.md` - 2025-12-24 섹션 추가 ✅
+- [ ] `docs/FRAME_ANIMATION_GUIDE.md` - 13-state, 통합 애니메이션, 유연한 타이밍
+- [ ] `docs/ANIMATION_UPDATE_2025-12-13.md` - 최종 스펙 업데이트
+- [ ] `README.md` - 애니메이션 섹션 업데이트
+- [ ] `assets/animations/characters/README.md` - 폴더 구조 업데이트
+
+---
+
+## 📊 13-State 시스템 상세
+
+### State 체계 (카테고리별)
+
+| 카테고리 | State | 설명 | 시간 | 프레임 | Loop | 자동전환 |
+|---------|-------|------|------|--------|------|----------|
+| **1. 캐릭터 선택** | `characterGreetingLoop` | 손 흔들며 인사 | 약 5초 | ~120 | ✅ | - |
+| | `characterSelected` | 선택 반응 | 약 1-2초 | ~24-48 | ❌ | - |
+| **2-A. 성향 퀴즈** | `personalityIdle` | 성향 문제 대기 | 약 3초 | ~72 | ✅ | - |
+| | `personalitySelected` | 성향 선택 반응 | 약 2초 | ~48 | ❌ | `personalityIdle` |
+| **2-B. 학습 퀴즈** | `quizIdle` | 학습 문제 대기 | 약 3초 | ~72 | ✅ | - |
+| | `quizCorrectFlow` | 통합: thinking→happy→idle | 약 4-6초 | ~96-144 | ❌ | `quizIdle` |
+| | `quizWrongFlow` | 통합: thinking→confused→idle | 약 4-6초 | ~96-144 | ❌ | `quizIdle` |
+| **3. 결과 화면** | `resultCelebration` | 성향 결과 축하 | 약 3초 | ~72 | ❌ | - |
+| **4. 홈 화면** | `homeIdle` | 기본 대기 | 약 5초 | ~120 | ✅ | - |
+| | `homeStudying` | 책 읽기 | 약 3초 | ~72 | ✅ | - |
+| | `homeExcited` | 활기찬 모습 | 약 2초 | ~48 | ✅ | - |
+| | `homeSleepy` | 졸린 모습 | 약 3초 | ~72 | ✅ | - |
+| | `homeCelebration` | 목표 달성 축하 | 약 2초 | ~48 | ❌ | `homeIdle` |
+
+**합계:** 13개 상태
+
+---
+
+### 유연한 타이밍 정책
+
+**Before (경직적):**
+```
+❌ quiz_correct_flow: 정확히 96프레임
+   thinking(24프레임) + happy(48프레임) + idle복귀(24프레임)
+```
+
+**After (유연):**
+```
+✅ quiz_correct_flow: 약 4-6초
+   구성: thinking → happy → idle 복귀
+   실제 프레임 수: 제작 후 확정 (96~144 예상)
+   JSON 설정: frameCount: [실제 프레임 수]
+```
+
+**이유:**
+- Midjourney/Runway는 정확한 프레임 수 통제 불가
+- "4초 목표"로 제작 → 실제 110프레임 나옴 → JSON에 110 기록 → 완벽 작동
+
+---
+
+### 화면별 State 매핑
+
+**1️⃣ 캐릭터 선택 화면**
+```
+[🐻] [🐑] [🐱] [🦊]
+  ↓    ↓    ↓    ↓
+characterGreetingLoop (5초 무한 루프)
+
+터치 →
+characterSelected (1초 원샷) →
+다음 화면
+```
+
+**2️⃣ 성향 퀴즈 화면**
+```
+┌─→ personalityIdle (3초 루프)
+│
+│   Q. 투자할 때 중요한 건?
+│   ○ 안정성 ← 선택!
+│
+│   ↓
+│   personalitySelected (2초)
+│   ↓ 자동 전환
+└───┘
+```
+
+**3️⃣ 학습/퀴즈 화면**
+```
+┌─→ quizIdle (3초 루프)
+│
+│   Q. 복리의 마법이란?
+│   ○ 정답 ← 선택!
+│
+│   ↓
+│   quizCorrectFlow (4-6초)
+│   [thinking → happy → idle]
+│   ↓ 자동 전환
+└───┘
+```
+
+**4️⃣ 홈 화면**
+```
+┌─→ homeIdle (기본)
+│
+├─→ homeStudying (학습 시)
+├─→ homeExcited (활기)
+├─→ homeSleepy (휴식)
+│
+└─→ homeCelebration (달성)
+    ↓ 자동 전환
+    homeIdle
+```
+
+---
+
+### 제작 물량
+
+**총 52개 애니메이션:**
+- Phase 1 (온보딩): 16개 (4상태 × 4캐릭터)
+- Phase 2 (학습): 16개 (4상태 × 4캐릭터)
+- Phase 3 (홈): 20개 (5상태 × 4캐릭터)
+
+**총 용량:**
+- PNG: ~192MB (캐릭터당 48MB)
+- WebP: ~96MB (50% 절감)
+
+---
+
+## 📝 문서 작성 완료
+
+- [x] TODO.md 업데이트 (작업 항목 명시)
+- [x] DEVELOPMENT_LOG.md 업데이트 (2025-12-24 섹션)
+- [ ] 다른 문서들 (다음 단계)
+
+---
+
+## 📅 2025-12-23 세션: 애니메이션 상태 체계 재설계
+
+### 🎯 목표
+애니메이션 상태 시스템 전면 개편 (5개 → 10개 상태)
 
 ---
 
 ## ✅ 완료된 작업
 
-### 1. Pretendard 폰트 도입
-**목표:** 브랜드 아이덴티티 강화 및 가독성 개선
+### 1. 기존 문제 발견
+**문제점:**
+- 기존 "idle"이 실제로는 "손 흔드는 greeting" 애니메이션
+- 진짜 idle (조용한 대기) 상태가 없음
+- 홈 화면용 다양한 상태 부족
 
-#### 구현 내용
-- **폰트 설정** (`pubspec.yaml`)
-  - Pretendard Regular (W400)
-  - Pretendard Medium (W500)
-  - Pretendard SemiBold (W600)
-  - Pretendard Bold (W700)
+### 2. CharacterAnimationState enum 확장
+**파일:** `lib/models/character_animation_config.dart`
 
-- **전역 폰트 적용** (`lib/utils/theme.dart`)
-  - 모든 TextTheme에 `fontFamily: 'Pretendard'` 추가
-  - AppBar, Button, Dialog, SnackBar 등 전체 UI 일관성 유지
+**변경:** 8개 → 14개 상태 (실제 사용 10개)
 
-- **폰트 다운로드 가이드** (`assets/fonts/README.md`)
-  - Pretendard 다운로드 링크 및 설치 방법 안내
+```dart
+enum CharacterAnimationState {
+  // 카테고리 1: 캐릭터 선택 화면 전용 (2개)
+  greeting,  // 손 흔들며 인사 (구 idle, 125 frames)
+  selected,  // 선택됨 반응
 
-#### 디자인 결정
-- **본문**: W500 (Medium) - 존재감 있으면서 편안한 가독성
-- **키워드**: W700 (Bold) - 명확한 강조 효과
-- **이유**: 교육 콘텐츠 특성상 장시간 읽기에 적합한 굵기
+  // 카테고리 2: 범용 상태 (4개)
+  idle,      // 진짜 조용한 대기 (120 frames, 5초 복합)
+  thinking,  // 퀴즈 문제 표시
+  happy,     // 정답/긍정 피드백
+  confused,  // 오답/부정 피드백
 
----
+  // 카테고리 3: 홈 화면 전용 (4개)
+  homeStudying,     // 책 읽기 (60 frames)
+  homeExcited,      // 활기찬 모습 (48 frames)
+  homeSleepy,       // 졸린 모습 (72 frames)
+  homeCelebration,  // 목표 달성 (36 frames)
 
-### 2. 콘텐츠 마크업 시스템 구축
-**목표:** 백오피스에서 텍스트 서식 제어 가능하도록 확장 가능한 시스템 구축
-
-#### 구현된 파일
-1. **ContentTextRenderer** (`lib/utils/text_renderer.dart`)
-   - 마크다운 스타일 마크업 파싱 및 렌더링
-   - **현재 지원**: `**텍스트**` (볼드)
-   - **향후 확장 준비**:
-     - `[color:#HEX]텍스트[/color]` (색상)
-     - `[size:크기]텍스트[/size]` (크기)
-     - 복합 마크업 처리
-
-   - **주요 메서드**:
-     ```dart
-     ContentTextRenderer.render(
-       content,
-       baseStyle: TextStyle(...),
-       boldWeight: FontWeight.w700,
-     )
-     ```
-
-2. **학습 화면 적용** (`lib/screens/learning/learning_screen.dart`)
-   - 학습 카드 `content` 필드에 마크업 렌더링 적용
-   - Tip 영역에도 마크업 렌더링 적용
-   - Pretendard W500 본문 + W700 키워드
-
-#### 사용 예시
-**백오피스 입력:**
-```
-**예금**은 자유롭게 입출금이 가능하고, **적금**은 정해진 기간 동안 저축해요.
-```
-
-**앱 렌더링:**
-- "예금", "적금" → Pretendard W700 (볼드)
-- 나머지 텍스트 → Pretendard W500 (중간)
-
----
-
-### 3. 백오피스 가이드 문서 작성
-**목표:** 콘텐츠 관리자가 마크업을 쉽게 사용할 수 있도록 가이드 제공
-
-#### 작성된 문서
-1. **콘텐츠 마크업 가이드** (`docs/CONTENT_MARKUP_GUIDE.md`)
-   - 현재 지원 문법 (볼드)
-   - 향후 지원 예정 문법 (색상, 크기)
-   - 실제 사용 예시 및 권장사항
-   - 백오피스 구현 가이드 (3단계)
-   - 기술 스펙 및 테스트 체크리스트
-
-2. **폰트 설치 가이드** (`assets/fonts/README.md`)
-   - Pretendard 다운로드 링크
-   - 필요한 폰트 파일 목록
-   - 설치 후 실행 방법
-
----
-
-## 🏗️ 아키텍처 설계
-
-### 확장 가능한 마크업 시스템
-```
-ContentTextRenderer
-├── _parseContent()           // 현재: **볼드** 처리
-├── _parseWithColors()        // 준비: 색상 처리
-├── _parseWithSizes()         // 준비: 크기 처리
-└── _parseWithAllMarkups()    // 향후: 복합 처리
-```
-
-### 백오피스 통합 로드맵
-**Phase 1 (현재)**: 텍스트 입력만
-- `<textarea>` 기반 입력
-- 마크업 직접 작성
-
-**Phase 2 (권장)**: 실시간 프리뷰
-- 입력 영역 + 프리뷰 영역 분할
-- 작성 중 실시간 렌더링 확인
-
-**Phase 3 (향후)**: WYSIWYG 에디터
-- 툴바 기반 서식 버튼
-- 드래그 선택 후 클릭으로 마크업 자동 삽입
-- 모바일 화면 프리뷰
-
----
-
-## 📊 데이터 구조 변경 없음
-
-### Learning Content 구조 유지
-```json
-{
-  "content": "**예금**은 자유롭게...",  // 마크업 포함된 텍스트
-  "tip": "**복리**의 힘은..."
+  // 퀴즈 반응 (기존 호환성 유지)
+  reactionPositive,
+  reactionNegative,
+  reactionNeutral,
 }
 ```
 
-- ✅ 기존 데이터 구조 그대로 사용
-- ✅ Firebase 스키마 변경 불필요
-- ✅ 백오피스 구축 시 별도 수정 불필요
+**커밋:** `94c0a91` - "Redesign animation state system: 5 → 10 states"
 
 ---
 
-## 🎨 디자인 개선 효과
+### 3. 폴더 구조 변경
+**작업:**
+- ✅ `idle/` → `greeting/` 이름 변경 (4개 캐릭터 전체)
+- ✅ 새로운 폴더 생성:
+  - `idle/` (새로운 개념)
+  - `home_studying/`
+  - `home_excited/`
+  - `home_sleepy/`
+  - `home_celebration/`
 
-### Before
-- 시스템 기본 폰트
-- Plain text only
-- 강조 없음
-
-### After
-- Pretendard 폰트 (브랜드 아이덴티티)
-- W500 본문 (읽기 편안)
-- W700 키워드 (명확한 강조)
-- 확장 가능한 서식 시스템
-
----
-
-## 🔧 기술 상세
-
-### 정규식 패턴
-```dart
-// 볼드 패턴 (non-greedy matching)
-final boldPattern = RegExp(r'\*\*(.+?)\*\*');
-
-// 향후 색상 패턴
-final colorPattern = RegExp(r'\[color:(#[0-9A-Fa-f]{6})\](.+?)\[/color\]');
+**결과:**
+```
+assets/animations/characters/
+├── hunter_cat/
+│   ├── greeting/              (125 frames, 구 idle)
+│   ├── selected/              (20 frames)
+│   ├── idle/                  (120 frames, 신규)
+│   ├── thinking/              (24 frames)
+│   ├── happy/                 (30 frames)
+│   ├── confused/              (20 frames)
+│   ├── home_studying/         (60 frames, 신규)
+│   ├── home_excited/          (48 frames, 신규)
+│   ├── home_sleepy/           (72 frames, 신규)
+│   └── home_celebration/      (36 frames, 신규)
 ```
 
-### TextSpan 구조
+---
+
+### 4. Idle 애니메이션 개념 재정의
+**기존:** 단순 숨쉬기 애니메이션
+**신규:** 5초 복합 애니메이션 - 캐릭터 성향 표현
+
+**헌터캣 예시 (5초 구성):**
+- 0-2초: 조용한 숨쉬기 (날카로운 눈빛)
+- 2-3초: 윙크 (사냥꾼 본능)
+- 3-4초: 귀 쫑긋 (집중력)
+- 4-5초: 편안한 복귀
+
+**캐릭터별 차별화:**
+- 🐱 헌터캣: 날카로움, 기민함 → 윙크, 귀 쫑긋
+- 🐻 머니베어: 든든함, 신뢰 → 팔짱, 고개 끄덕임
+- 🐑 세이브쉽: 부드러움, 조화 → 고개 기울임, 미소
+- 🦊 체이서폭스: 영리함, 호기심 → 꼬리 흔들기, 장난기
+
+**핵심:** 같은 "idle"이지만 각 캐릭터의 성향이 명확히 표현됨
+
+---
+
+### 5. character_frame_animation.dart 업데이트
+**파일:** `lib/models/character_frame_animation.dart:67-171`
+
+**추가된 상태 프리셋:**
 ```dart
-RichText(
-  text: TextSpan(
-    children: [
-      TextSpan(text: '일반 텍스트', style: baseStyle),
-      TextSpan(text: '볼드 텍스트', style: baseStyle.copyWith(fontWeight: w700)),
-    ],
-  ),
+// 카테고리 1: 캐릭터 선택 화면
+case CharacterAnimationState.greeting:
+  return CharacterFrameAnimation(
+    frameCount: 125,  // 5.2초
+    loop: true,
+  );
+
+// 카테고리 2: 범용 상태
+case CharacterAnimationState.idle:
+  return CharacterFrameAnimation(
+    frameCount: 120,  // 5초 복합 애니메이션
+    loop: true,
+  );
+
+// 카테고리 3: 홈 화면 전용
+case CharacterAnimationState.homeStudying:
+  return CharacterFrameAnimation(
+    frameCount: 60,  // 2.5초
+    loop: true,
+  );
+// ... (나머지 3개 상태)
+```
+
+---
+
+### 6. 코드 사용처 업데이트
+**수정된 파일:**
+- `lib/screens/onboarding/character_preview_screen.dart:197`
+  - `CharacterAnimationState.idle` → `CharacterAnimationState.greeting`
+
+- `lib/screens/onboarding/personality_test_screen.dart:296`
+  - `CharacterAnimationState.idle` → `CharacterAnimationState.thinking`
+  - (더 적절한 상태로 변경)
+
+- `lib/services/character_animation_preloader.dart:13-27`
+  - `loadAllIdleStates()` → `CharacterAnimationState.greeting` 로드
+  - 주석 업데이트: "Greeting 상태 로드 (캐릭터 선택 화면용)"
+
+---
+
+### 7. animation_config.json 업데이트
+**파일:** 4개 캐릭터 모두 업데이트
+
+**변경 사항:**
+```json
+{
+  "greeting": {  // idle → greeting으로 이름 변경
+    "frameCount": 125,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "손 흔들며 인사 (5.2초)"
+  },
+  "idle": {  // 새로운 idle 추가
+    "frameCount": 120,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "조용한 대기 - 복합 애니메이션 (5초)"
+  },
+  "homeStudying": {  // 신규
+    "frameCount": 60,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "책 읽기 (2.5초)"
+  },
+  // ... 나머지 홈 화면 상태 3개
+}
+```
+
+---
+
+### 8. pubspec.yaml 업데이트
+**파일:** `pubspec.yaml:66-111`
+
+**추가된 폴더 경로:**
+```yaml
+# 각 캐릭터마다 10개 폴더 추가
+- assets/animations/characters/hunter_cat/greeting/
+- assets/animations/characters/hunter_cat/idle/
+- assets/animations/characters/hunter_cat/home_studying/
+- assets/animations/characters/hunter_cat/home_excited/
+- assets/animations/characters/hunter_cat/home_sleepy/
+- assets/animations/characters/hunter_cat/home_celebration/
+# ... (나머지 3개 캐릭터도 동일)
+```
+
+---
+
+### 9. 문서 업데이트
+
+#### FRAME_ANIMATION_GUIDE.md
+**추가/수정 섹션:**
+- ✅ 최종 스펙: 5개 → 10개 상태, 용량 12MB → 40MB
+- ✅ "애니메이션 상태 체계 (2025-12-23 재설계)" 섹션 추가
+  - 카테고리 1, 2, 3 상세 설명
+  - Idle 애니메이션 개념 (5초 복합 구성)
+  - 캐릭터별 차별화 전략
+- ✅ Motion 지시 업데이트: 10개 상태 전체
+- ✅ 폴더 구조 업데이트
+- ✅ animation_config.json 예시 업데이트
+
+#### assets/animations/characters/README.md
+**추가/수정 섹션:**
+- ✅ 폴더 구조: 10개 상태 표시
+- ✅ "상태 체계 (2025-12-23 재설계)" 섹션 추가
+- ✅ ffmpeg 명령어: greeting, idle 예시로 변경
+- ✅ animation_config.json 예시 업데이트
+
+---
+
+## 📊 변경 요약
+
+| 항목 | 이전 | 현재 |
+|------|------|------|
+| **상태 수** | 5개 | 10개 |
+| **enum 크기** | 8개 | 14개 (퀴즈 반응 포함) |
+| **총 애니메이션** | 20개 (4×5) | 40개 (4×10) |
+| **총 프레임 수** | ~500개 | ~2,000개 |
+| **총 용량 (PNG)** | ~12MB | ~40MB |
+
+---
+
+## 🎬 애니메이션 제작 현황
+
+| 상태 | 헌터캣 | 머니베어 | 세이브쉽 | 체이서폭스 |
+|------|--------|---------|---------|-----------|
+| greeting | ✅ | ❌ | ❌ | ❌ |
+| selected | ✅ | ❌ | ❌ | ❌ |
+| **idle (신규)** | ❌ | ❌ | ❌ | ❌ |
+| thinking | ❌ | ❌ | ❌ | ❌ |
+| happy | ❌ | ❌ | ❌ | ❌ |
+| confused | ❌ | ❌ | ❌ | ❌ |
+| home_studying | ❌ | ❌ | ❌ | ❌ |
+| home_excited | ❌ | ❌ | ❌ | ❌ |
+| home_sleepy | ❌ | ❌ | ❌ | ❌ |
+| home_celebration | ❌ | ❌ | ❌ | ❌ |
+
+**총 제작 필요:** 39개 (헌터캣 greeting 1개만 완료)
+
+---
+
+## 🔧 기술적 결정
+
+### Idle 개념 전환
+**선택:** 단순 숨쉬기 → 5초 복합 애니메이션
+**이유:**
+- ✅ 캐릭터 성향 표현 강화
+- ✅ 사용자 경험 향상 (지루함 방지)
+- ✅ 브랜드 아이덴티티 강화
+
+### 홈 화면 상태 4개 추가
+**선택:** home_studying, home_excited, home_sleepy, home_celebration
+**이유:**
+- ✅ 홈 화면 다양성 확보
+- ✅ 사용자 행동에 따른 피드백 가능
+- ✅ 게이미피케이션 요소 강화
+
+---
+
+## 📝 수정된 파일 목록
+
+### Models (2개)
+- `lib/models/character_animation_config.dart` (enum 확장)
+- `lib/models/character_frame_animation.dart` (상태 프리셋 추가)
+
+### Screens (2개)
+- `lib/screens/onboarding/character_preview_screen.dart` (idle → greeting)
+- `lib/screens/onboarding/personality_test_screen.dart` (idle → thinking)
+
+### Services (1개)
+- `lib/services/character_animation_preloader.dart` (주석 업데이트)
+
+### Assets (5개)
+- `assets/animations/characters/hunter_cat/animation_config.json`
+- `assets/animations/characters/money_bear/animation_config.json`
+- `assets/animations/characters/save_sheep/animation_config.json`
+- `assets/animations/characters/chaser_fox/animation_config.json`
+- `pubspec.yaml` (폴더 경로 추가)
+
+### Documentation (2개)
+- `docs/FRAME_ANIMATION_GUIDE.md` (전면 개편)
+- `assets/animations/characters/README.md` (전면 개편)
+
+### Folders (20개)
+- 4개 캐릭터 × 5개 신규 폴더 = 20개 폴더 생성/이름 변경
+
+---
+
+## 🔗 관련 커밋
+- `94c0a91`: Redesign animation state system: 5 → 10 states
+
+---
+
+**작성일:** 2025-12-23
+**다음 작업:** 디자인팀의 신규 애니메이션 제작 (39개)
+
+---
+
+## 📅 2025-12-19 세션: 프레임 애니메이션 버그 수정 및 PNG 지원
+
+### 🎯 목표
+실제 프레임 파일 테스트를 통한 버그 수정 및 안정화
+
+---
+
+## ✅ 완료된 작업
+
+### 1. PNG 포맷 지원
+**파일:** `lib/models/character_frame_animation.dart:28`
+
+**문제:**
+- 코드는 `.webp` 확장자로 하드코딩
+- 실제 프레임 파일은 `.png` 형식
+- 프레임 로드 실패로 placeholder만 표시됨
+
+**수정:**
+```dart
+// Before
+return 'assets/animations/characters/$characterId/$stateFolder/frame_$frameNumber.webp';
+
+// After
+return 'assets/animations/characters/$characterId/$stateFolder/frame_$frameNumber.png';
+```
+
+**커밋:** `6e30cfa` - "Support PNG format for animation frames"
+
+---
+
+### 2. 상태 전환 시 에러 방지
+**파일:** `lib/widgets/animated_character.dart:117`
+
+**문제:**
+- idle → selected 상태 전환 시 `_hasFrames` 플래그가 리셋되지 않음
+- selected 프레임 없으면 에러 발생
+
+**수정:**
+```dart
+setState(() {
+  _isLoading = true;
+  _hasFrames = true; // 새로운 상태에서 다시 체크
+});
+```
+
+**커밋:** `25238a0` - "Fix: Prevent errors during character state transitions"
+
+---
+
+### 3. Placeholder fallback 개선
+**파일:** `lib/widgets/animated_character.dart:178`
+
+**문제:**
+- 프레임 없을 때도 계속 로드 시도
+- 불필요한 에러 로그 발생
+
+**수정:**
+```dart
+if (mounted && _hasFrames) {
+  setState(() {
+    _hasFrames = false;
+  });
+  _controller?.stop(); // 애니메이션 정지
+}
+```
+
+**커밋:** `12e7fa4` - "Improve placeholder fallback for characters without frames"
+
+---
+
+### 4. AnimationController 크래시 수정 (치명적 버그)
+**파일:** `lib/widgets/animated_character.dart:40-111`
+
+**문제:**
+```
+SingleTickerProviderStateMixin can only be used as a TickerProvider once.
+```
+- `SingleTickerProviderStateMixin` 사용 시 상태 전환마다 새 Controller 생성 시도
+- idle → selected 전환 시 앱 크래시
+
+**수정:**
+```dart
+// 1. SingleTickerProviderStateMixin → TickerProviderStateMixin (40번 라인)
+class _AnimatedCharacterState extends State<AnimatedCharacter>
+    with TickerProviderStateMixin {
+
+// 2. Controller 재사용 로직 추가 (70-103번 라인)
+if (_controller == null) {
+  _controller = AnimationController(...); // 최초 1회만 생성
+} else {
+  // Controller 재사용
+  _controller!.stop();
+  _controller!.duration = _animation!.totalDuration;
+  _controller!.reset();
+}
+
+// 3. 애니메이션 시작
+if (_animation!.loop) {
+  _controller!.repeat(); // idle: 루프
+} else {
+  _controller!.forward(); // selected: one-shot
+}
+```
+
+**커밋:** `66cd6dc` - "Fix animation state transitions with proper controller reuse"
+
+---
+
+### 5. Placeholder 깜빡임 제거
+**파일:** `lib/widgets/animated_character.dart:147`
+
+**문제:**
+- 상태 전환 시(idle → selected) placeholder가 잠깐 보임
+- `_isLoading` 체크로 인해 로딩 중 placeholder 표시됨
+
+**수정:**
+```dart
+// Before
+if (_isLoading)
+  _buildPlaceholder() // 로딩 중 placeholder 표시
+else if (_hasFrames)
+  _buildFrameAnimation()
+
+// After
+if (_hasFrames && _animation != null)
+  _buildFrameAnimation() // 로딩 중에도 계속 표시
+else
+  _buildPlaceholder()
+```
+
+**커밋:** `f931c17` - "Remove placeholder flickering during state transitions"
+
+---
+
+### 6. 온보딩 화면 캐릭터 크기 증가
+**파일:**
+- `lib/screens/onboarding/character_preview_screen.dart:199`
+- `lib/screens/onboarding/personality_result_screen.dart:259`
+
+**목적:**
+- 온보딩 화면에서 캐릭터를 더 크게 표시 (1.8배)
+- 애니메이션 시각적 임팩트 향상
+
+**변경 사항:**
+```dart
+// 캐릭터 선택 화면
+AnimatedCharacter(
+  size: 180, // 100 → 180 (1.8배)
+)
+
+// 성향 결과 화면
+AnimatedCharacter(
+  size: 270, // 150 → 270 (1.8배)
 )
 ```
 
----
+**효과:**
+- 캐릭터 선택 화면: 80% 크기 증가
+- 성향 결과 화면: 80% 크기 증가
+- 애니메이션 디테일 가시성 향상
 
-## 📝 문서화
-
-### 추가된 문서
-1. `docs/CONTENT_MARKUP_GUIDE.md` - 백오피스 콘텐츠 작성 가이드
-2. `assets/fonts/README.md` - Pretendard 폰트 설치 가이드
-3. `lib/utils/text_renderer.dart` - 코드 내 상세 주석
-
-### 업데이트된 문서
-1. `docs/DEVELOPMENT_LOG.md` - 이 세션 기록 추가
+**커밋:** `c874ef2` - "Increase character size in onboarding screens (1.8x)"
 
 ---
 
-## 🚀 다음 단계
+### 7. 캐릭터 선택 화면 오버플로우 수정
+**파일:** `lib/screens/onboarding/character_preview_screen.dart`
 
-### 즉시 필요
-1. **Pretendard 폰트 파일 다운로드 및 추가**
-   - `assets/fonts/` 디렉토리에 .otf 파일 추가
-   - `flutter clean && flutter pub get` 실행
+**문제:**
+- 캐릭터 크기 증가(180px)로 인한 레이아웃 오버플로우
+- 헌터캣, 체이서폭스에서 "right overflowed by 29 pixels" 에러
 
-### 백오피스 구축 시
-1. 콘텐츠 입력 UI 구현
-2. 실시간 프리뷰 기능
-3. 색상/크기 마크업 확장
-4. WYSIWYG 에디터 도입
+**원인:**
+```
+캐릭터 크기: 180px × 2 = 360px
+좌우 패딩: 40px × 2 = 80px
+총 필요 너비: 440px (일반 모바일 화면 360~400px 초과)
+```
 
-### 향후 개선 가능
-1. 이탤릭, 밑줄 등 추가 서식
-2. 링크, 목록 등 구조적 요소
-3. 이미지 인라인 배치
-4. 커스텀 컴포넌트 삽입
+**수정:**
+```dart
+// 패딩 및 간격 조정
+padding: const EdgeInsets.symmetric(horizontal: 16), // 40 → 16
+const SizedBox(height: 60), // 80 → 60 (상단)
+const SizedBox(height: 24), // 40 → 24 (캐릭터 사이)
+```
+
+**효과:**
+- 캐릭터 크기 180px 유지
+- 오버플로우 에러 해결
+- 48px 좌우 여백 절약
+
+**커밋:** `eb14c64` - "Fix overflow issue in character selection screen"
 
 ---
 
-## 🐛 이슈 및 해결
+### 8. 성향 테스트 화면 캐릭터 크기 증가
+**파일:** `lib/screens/onboarding/personality_test_screen.dart:298`
 
-### 이슈: 네트워크 제한으로 폰트 자동 다운로드 실패
-**해결:**
-- 폰트 다운로드 가이드 문서 작성
-- 수동 다운로드 및 설치 안내
+**목적:**
+- 성향 테스트 중 표시되는 캐릭터를 더 크게 표시
+- 다른 온보딩 화면과 일관성 유지
 
-### 이슈: 폰트 파일 없이도 빌드 가능해야 함
-**해결:**
-- `fontFamily: 'Pretendard'` 설정 시 폰트 없으면 시스템 기본 폰트 사용
-- 개발 중에도 정상 작동 보장
+**변경:**
+```dart
+AnimatedCharacter(
+  size: 160, // 80 → 160 (2배)
+)
+```
+
+**효과:**
+- 성향 테스트 중 캐릭터 가시성 향상
+- 온보딩 전체 캐릭터 크기 통일감
+
+**커밋:** `8119b82` - "Increase character size in personality test screen"
+
+---
+
+### 9. 성향 테스트 화면 레이아웃 위치 조정
+**파일:** `lib/screens/onboarding/personality_test_screen.dart`
+
+**목적:**
+- 캐릭터와 질문을 화면 상단으로 이동
+- 전체 레이아웃 가시성 향상
+
+**변경:**
+```dart
+const SizedBox(height: 40), // 120 → 40 (상단 여백)
+const SizedBox(height: 32), // 60 → 32 (캐릭터-질문 간격)
+const SizedBox(height: 24), // 32 → 24 (질문-선택지 간격)
+```
+
+**효과:**
+- 총 116px 위로 이동
+- 캐릭터와 질문이 더 잘 보임
+- 선택지까지 한 화면에 노출
+
+**커밋:** `322b5cf` - "Reduce top spacing in personality test screen"
+
+---
+
+## 🎬 테스트 결과
+
+### 동작 확인
+1. ✅ **Hunter cat idle** (125 프레임)
+   - PNG 프레임 정상 로드
+   - 24fps 루프 애니메이션 재생
+
+2. ✅ **Hunter cat selected** (20 프레임)
+   - 클릭 시 one-shot 애니메이션 재생
+   - 완료 후 말풍선 표시
+
+3. ✅ **다른 캐릭터들**
+   - 프레임 없어도 placeholder 안전하게 표시
+   - 에러 없이 클릭/선택 가능
+
+### 수정된 파일
+- `lib/models/character_frame_animation.dart` (PNG 지원)
+- `lib/widgets/animated_character.dart` (Controller 재사용, 에러 방지)
+
+---
+
+## 📝 기술적 결정
+
+### PNG vs WebP
+**선택:** PNG 우선 지원
+**이유:**
+- ffmpeg PNG 추출이 더 간단
+- 투명 배경 보장
+- 추후 WebP 변환 가능 (스크립트 제공)
+
+### Controller 재사용 패턴
+**선택:** 하나의 Controller를 상태 간 재사용
+**이유:**
+- SingleTickerProvider 제약 회피
+- 메모리 효율적
+- 상태 전환 시 안정적
+
+---
+
+## 📅 2025-12-16 세션: JSON 기반 애니메이션 설정 시스템 구축
+
+### 🎯 목표
+프레임 수를 코드 수정 없이 JSON 파일로 관리할 수 있는 설정 시스템 구축
+
+---
+
+## ✅ 완료된 작업
+
+### 1. 문제 인식
+**상황:** 5초 영상(125프레임)을 루프하려면 코드 수정이 필요했음
+```dart
+// 하드코딩 방식
+frameCount: 24,  // → 125로 변경하려면 코드 수정 필요
+```
+
+**해결책:** JSON 설정 파일 시스템 도입
+
+---
+
+### 2. AnimationConfigLoader 서비스 구현
+**파일:** `lib/services/animation_config_loader.dart`
+
+**핵심 기능:**
+- JSON 파일 로드 및 캐싱
+- 자동 fallback (JSON 없으면 하드코딩 값 사용)
+- 여러 상태 동시 로딩 지원
+
+```dart
+class AnimationConfigLoader {
+  static final Map<String, Map<String, dynamic>> _configCache = {};
+
+  // JSON 로드
+  static Future<Map<String, dynamic>> loadConfig(String characterId) async {
+    final jsonString = await rootBundle.loadString(
+      'assets/animations/characters/$characterId/animation_config.json',
+    );
+    return json.decode(jsonString);
+  }
+
+  // CharacterFrameAnimation 생성
+  static Future<CharacterFrameAnimation> createAnimation(
+    String characterId,
+    CharacterAnimationState state,
+  ) async {
+    final config = await loadConfig(characterId);
+    final stateConfig = config[state.name];
+
+    return CharacterFrameAnimation(
+      characterId: characterId,
+      state: state,
+      frameCount: stateConfig['frameCount'],
+      frameDuration: Duration(milliseconds: stateConfig['frameDuration']),
+      loop: stateConfig['loop'],
+    );
+  }
+}
+```
+
+---
+
+### 3. JSON 설정 파일 생성 (4개)
+**파일 위치:**
+- `assets/animations/characters/hunter_cat/animation_config.json`
+- `assets/animations/characters/money_bear/animation_config.json`
+- `assets/animations/characters/save_sheep/animation_config.json`
+- `assets/animations/characters/chaser_fox/animation_config.json`
+
+**JSON 구조:**
+```json
+{
+  "idle": {
+    "frameCount": 125,
+    "frameDuration": 42,
+    "loop": true,
+    "description": "숨쉬기 루프 (5.2초)"
+  },
+  "selected": {
+    "frameCount": 20,
+    "frameDuration": 42,
+    "loop": false,
+    "description": "선택 반응 (0.8초)"
+  }
+}
+```
+
+**헌터캣만 특별 설정:**
+- `idle`: 125프레임 (5.2초) - 5초 영상 대응
+- 나머지 캐릭터: 24프레임 (기본값)
+
+---
+
+### 4. CharacterFrameAnimation 업데이트
+**파일:** `lib/models/character_frame_animation.dart`
+
+**추가된 메서드:**
+```dart
+/// JSON 기반 로딩 (권장)
+static Future<CharacterFrameAnimation> forStateAsync(
+  String characterId,
+  CharacterAnimationState state,
+) async {
+  try {
+    return await AnimationConfigLoader.createAnimation(characterId, state);
+  } catch (e) {
+    return forState(characterId, state);  // fallback
+  }
+}
+```
+
+---
+
+### 5. AnimatedCharacter 위젯 업데이트
+**파일:** `lib/widgets/animated_character.dart`
+
+**변경 사항:**
+- `_setupAnimation()` → `Future<void> _setupAnimation()` (async로 변경)
+- `_isLoading` 상태 추가
+- 로딩 중 Placeholder 표시
+- JSON 로딩 실패 시 자동 fallback
+
+```dart
+Future<void> _setupAnimation() async {
+  // JSON 기반 로딩 시도
+  _animation = await CharacterFrameAnimation.forStateAsync(
+    characterId,
+    widget.state,
+  );
+
+  setState(() {
+    _isLoading = false;
+  });
+
+  _controller = AnimationController(...);
+  // ...
+}
+```
+
+---
+
+### 6. pubspec.yaml 업데이트
+**추가된 asset:**
+```yaml
+assets:
+  # JSON 설정 파일
+  - assets/animations/characters/hunter_cat/animation_config.json
+  - assets/animations/characters/money_bear/animation_config.json
+  - assets/animations/characters/save_sheep/animation_config.json
+  - assets/animations/characters/chaser_fox/animation_config.json
+```
+
+---
+
+### 7. 문서 업데이트
+**업데이트된 파일:**
+- `docs/FRAME_ANIMATION_GUIDE.md` - Step 5 추가 (JSON 설정)
+- `docs/ANIMATION_UPDATE_2025-12-13.md` - JSON 시스템 설명 추가
+- `assets/animations/characters/README.md` - JSON 사용법 추가
+
+---
+
+## 🎯 사용 방법
+
+### **디자이너용: 프레임 수 변경**
+
+```bash
+# 1. JSON 파일 열기
+vim assets/animations/characters/hunter_cat/animation_config.json
+
+# 2. frameCount 수정
+{
+  "idle": {
+    "frameCount": 125,  # 24 → 125로 변경
+    ...
+  }
+}
+
+# 3. 앱 재실행 → 자동 적용 ✅
+```
+
+### **개발자용: 새 캐릭터 추가**
+
+```bash
+# 1. animation_config.json 생성
+cp assets/animations/characters/hunter_cat/animation_config.json \
+   assets/animations/characters/new_character/
+
+# 2. pubspec.yaml에 등록
+assets:
+  - assets/animations/characters/new_character/animation_config.json
+
+# 3. 끝! 자동 로딩됨
+```
+
+---
+
+## 📊 장점
+
+| 항목 | 이전 (하드코딩) | 현재 (JSON) |
+|------|---------------|------------|
+| **프레임 수 변경** | 코드 수정 + 재빌드 | JSON 수정만 |
+| **캐릭터별 설정** | 모두 같은 값 | 독립적 설정 |
+| **디자이너 작업** | 개발자 필요 | 직접 수정 가능 |
+| **영상 길이 대응** | 코드 수정 필요 | 유연하게 대응 |
+
+---
+
+## 🔧 기술 결정 사항
+
+### JSON vs 런타임 감지
+**선택:** JSON 설정 파일
+**이유:**
+- ✅ 성능: 빌드 타임에 결정 (런타임 오버헤드 없음)
+- ✅ 명확성: 설정이 파일로 명시됨
+- ✅ 확장성: 나중에 다른 설정도 추가 가능
+- ❌ 런타임 감지: Flutter에서 asset 파일 시스템 접근 불가
+
+### 캐싱 전략
+- 캐릭터별 설정을 메모리에 캐싱
+- 앱 실행 중 JSON 파일 한 번만 로드
+- 개발 중 `AnimationConfigLoader.clearCache()` 호출 가능
+
+---
+
+## 📦 신규 파일 목록
+
+### Services
+- `lib/services/animation_config_loader.dart` (JSON 로더)
+
+### Assets
+- `assets/animations/characters/hunter_cat/animation_config.json`
+- `assets/animations/characters/money_bear/animation_config.json`
+- `assets/animations/characters/save_sheep/animation_config.json`
+- `assets/animations/characters/chaser_fox/animation_config.json`
+
+---
+
+## 🧪 테스트 방법
+
+```bash
+# 1. hunter_cat idle을 125프레임으로 설정 확인
+cat assets/animations/characters/hunter_cat/animation_config.json | grep frameCount
+
+# 2. 앱 실행
+flutter run
+
+# 3. 헌터캣 선택 → idle 애니메이션 확인
+# → 5.2초 루프 재생됨 ✅
+```
+
+---
+
+## 🔗 관련 커밋
+- `4e2c67e`: Implement JSON-based animation configuration system
+
+---
+
+**작성일:** 2025-12-16
+**다음 작업:** 디자인팀의 애니메이션 제작
+
+---
+
+## 📅 2025-12-13 세션: 프레임 기반 캐릭터 애니메이션 시스템 구현
+
+### 🎯 목표
+Rive 대신 Midjourney로 생성한 GIF에서 추출한 PNG 프레임 시퀀스를 사용하는 애니메이션 시스템 구축
+
+---
+
+## ✅ 완료된 작업
+
+### 1. 애니메이션 전략 변경 결정
+**목표:** Rive 애니메이션 대신 프레임 기반 애니메이션 적용
+
+#### 변경 이유
+- **빠른 프로토타이핑:** Midjourney로 애니메이션 샘플 즉시 생성 가능
+- **디자인 유연성:** GIF/비디오 형태로 결과 확인 후 프레임 추출
+- **제작 비용:** Rive 전문가 대기 없이 내부적으로 제작 가능
+- **실험 용이성:** 다양한 fps (12/18/24) 쉽게 테스트 가능
+
+#### 기술 스택
+- **제작:** Midjourney Video
+- **추출:** ffmpeg (GIF → PNG 프레임)
+- **재생:** Flutter AnimationController + Image.asset
+- **사양:** 300x300px, PNG, 12fps 기준
+
+---
+
+### 2. 캐릭터 이름 최신화
+**파일:** `README.md`, `lib/screens/onboarding/welcome_screen.dart`
+
+**변경 사항:**
+```
+세이빙덕 (Saving Duck) 🦆 → 체이서폭스 (Chaser Fox) 🦊
+밸런스토끼 (Balance Bunny) 🐰 → 세이브쉽 (Save Sheep) 🐑
+코인캣 (Coin Cat) 🐱 → 헌터캣 (Hunter Cat) 🐱
+```
+
+---
+
+### 3. CharacterFrameAnimation 모델 구현
+**파일:** `lib/models/character_frame_animation.dart`
+
+**핵심 기능:**
+```dart
+class CharacterFrameAnimation {
+  final String characterId;
+  final CharacterAnimationState state;
+  final int frameCount;
+  final Duration frameDuration;
+  final bool loop;
+
+  // 프레임 경로 자동 생성
+  String getFramePath(int frameIndex) {
+    final stateFolder = state.name;
+    final frameNumber = (frameIndex + 1).toString().padLeft(2, '0');
+    return 'assets/animations/characters/$characterId/$stateFolder/frame_$frameNumber.png';
+  }
+
+  // 프리셋 설정
+  static CharacterFrameAnimation forState(
+    String characterId,
+    CharacterAnimationState state, {
+    int? frameCountOverride,
+  }) {
+    switch (state) {
+      case CharacterAnimationState.idle:
+        return CharacterFrameAnimation(
+          characterId: characterId,
+          state: state,
+          frameCount: frameCountOverride ?? 12,
+          frameDuration: const Duration(milliseconds: 83), // 12fps
+          loop: true,
+        );
+      // ... 다른 상태들
+    }
+  }
+}
+```
+
+**프리셋 설정:**
+- `idle`: 12프레임, 83ms, 반복
+- `selected`: 10프레임, 60ms, 1회
+- `happy`: 15프레임, 66ms, 1회
+- `thinking`: 10프레임, 100ms, 반복
+- `confused`: 10프레임, 80ms, 1회
+
+---
+
+### 4. AnimatedCharacter 위젯 완전 재작성
+**파일:** `lib/widgets/animated_character.dart`
+
+**주요 구현:**
+1. **AnimationController 기반 프레임 시퀀싱**
+   ```dart
+   _controller = AnimationController(
+     duration: _animation.totalDuration,
+     vsync: this,
+   );
+
+   _controller.addListener(() {
+     final progress = _controller.value;
+     final frameIndex = (progress * _animation.frameCount).floor();
+     if (frameIndex != _currentFrame) {
+       setState(() {
+         _currentFrame = frameIndex.clamp(0, _animation.frameCount - 1);
+       });
+     }
+   });
+   ```
+
+2. **자동 Fallback**
+   ```dart
+   Image.asset(
+     _animation.getFramePath(_currentFrame),
+     gaplessPlayback: true,
+     errorBuilder: (context, error, stackTrace) {
+       setState(() => _hasFrames = false);
+       return _buildPlaceholder();
+     },
+   );
+   ```
+
+3. **상태 변경 처리**
+   - `widget.state` 변경 시 자동으로 새 애니메이션 로드
+   - 기존 controller dispose 후 새로 생성
+
+4. **애니메이션 완료 콜백**
+   ```dart
+   if (_animation.loop) {
+     _controller.repeat();
+   } else {
+     _controller.forward().then((_) {
+       widget.onAnimationComplete?.call();
+     });
+   }
+   ```
+
+---
+
+### 5. CharacterAnimationPreloader 서비스 구현
+**파일:** `lib/services/character_animation_preloader.dart`
+
+**Progressive Loading 전략:**
+```dart
+// 1단계: 모든 캐릭터 Idle 상태 (앱 시작 시)
+static Future<void> loadAllIdleStates(BuildContext context) async {
+  // 4 캐릭터 × 12프레임 = 48장 (~2MB)
+  // 로딩 시간: 2-3초
+}
+
+// 2단계: 선택된 캐릭터의 나머지 상태 (캐릭터 선택 시)
+static Future<void> loadCharacterAllStates(
+  BuildContext context,
+  String characterId,
+) async {
+  // selected, happy, thinking, confused = 45프레임 (~1.6MB)
+}
+
+// 3단계: 나머지 캐릭터들 (백그라운드)
+static Future<void> loadRemainingCharacters(
+  BuildContext context,
+  String selectedCharacterId,
+) async {
+  // 나머지 3 캐릭터 × 4 상태 × 평균 11프레임 = ~4.5MB
+}
+```
+
+**최적화 효과:**
+- 초기 로딩: 2-3초 (Idle만)
+- 선택 후: 1-2초 (해당 캐릭터 상태들)
+- 전체 로딩: 백그라운드 진행
+
+---
+
+### 6. CharacterAnimationState enum 확장
+**파일:** `lib/models/character_animation_config.dart`
+
+**Before:**
+```dart
+enum CharacterAnimationState {
+  idle,
+  selected,
+}
+```
+
+**After:**
+```dart
+enum CharacterAnimationState {
+  idle,      // 숨쉬기 (대기)
+  selected,  // 선택 반응
+  happy,     // 기쁨 (학습 완료)
+  thinking,  // 생각하는 모습 (퀴즈)
+  confused,  // 혼란 (오답)
+}
+```
+
+---
+
+### 7. 폴더 구조 및 Asset 등록
+**폴더 구조 생성:**
+```
+assets/animations/characters/
+├── hunter_cat/
+│   ├── idle/.gitkeep
+│   ├── selected/.gitkeep
+│   ├── happy/.gitkeep
+│   ├── thinking/.gitkeep
+│   └── confused/.gitkeep
+├── money_bear/
+├── save_sheep/
+└── chaser_fox/
+```
+
+**pubspec.yaml 업데이트:**
+```yaml
+assets:
+  - assets/animations/characters/hunter_cat/idle/
+  - assets/animations/characters/hunter_cat/selected/
+  - assets/animations/characters/hunter_cat/happy/
+  - assets/animations/characters/hunter_cat/thinking/
+  - assets/animations/characters/hunter_cat/confused/
+  # ... (총 20개 경로 - 4 캐릭터 × 5 상태)
+```
+
+---
+
+### 8. 종합 문서 작성
+
+**1. `docs/FRAME_ANIMATION_GUIDE.md`**
+- 전체 워크플로우 가이드
+- Midjourney 프롬프트 예시
+- ffmpeg 추출 명령어
+- 파일 배치 방법
+- 테스트 가이드
+- FAQ
+
+**2. `docs/ANIMATION_UPDATE_2025-12-13.md`**
+- 전략 변경 요약
+- 결정 배경
+- 기술 사양
+- 완료된 작업
+- 다음 단계 (디자인팀)
+
+**3. `assets/animations/characters/README.md`**
+- 디자이너를 위한 빠른 참조 가이드
+- 파일 명명 규칙
+- ffmpeg 명령어
+
+---
+
+### 9. 버그 수정 및 개선
+
+**1. AnimatedCharacter 파라미터 일관성**
+- 기존: `character` 파라미터 사용
+- 수정: `characterType`으로 통일
+- 영향받은 파일:
+  - `lib/screens/onboarding/character_preview_screen.dart`
+  - `lib/screens/onboarding/personality_result_screen.dart`
+  - `lib/screens/onboarding/personality_test_screen.dart`
+
+---
+
+## 📊 업데이트된 문서
+- ✅ `docs/FRAME_ANIMATION_GUIDE.md` (신규)
+- ✅ `docs/ANIMATION_UPDATE_2025-12-13.md` (신규)
+- ✅ `assets/animations/characters/README.md` (신규)
+- ✅ `docs/TODO.md` (Rive → 프레임 기반 애니메이션 섹션 교체)
+- ✅ `README.md` (캐릭터 이름 업데이트)
+
+---
+
+## 🎯 다음 우선순위 (디자인팀)
+
+### 애니메이션 제작 작업
+1. **Midjourney로 애니메이션 생성**
+   - 각 캐릭터별 5가지 상태 비디오/GIF 생성
+   - 참고: `docs/FRAME_ANIMATION_GUIDE.md`의 프롬프트
+
+2. **ffmpeg로 프레임 추출**
+   ```bash
+   ffmpeg -i input.gif -vf "fps=12,scale=300:300" frame_%02d.png
+   ```
+
+3. **파일 배치**
+   - `assets/animations/characters/[캐릭터ID]/[상태]/frame_01.png` 형식
+   - 예: `assets/animations/characters/money_bear/idle/frame_01.png`
+
+4. **테스트**
+   - `flutter pub get` 실행
+   - 앱에서 해당 캐릭터/상태 확인
+   - 부드러움 확인 후 fps 조정 (12 → 18 → 24 테스트)
+
+---
+
+## 📦 신규 파일 목록
+
+### Models
+- `lib/models/character_frame_animation.dart`
+
+### Services
+- `lib/services/character_animation_preloader.dart`
+
+### Widgets
+- `lib/widgets/animated_character.dart` (완전 재작성)
+
+### Documentation
+- `docs/FRAME_ANIMATION_GUIDE.md`
+- `docs/ANIMATION_UPDATE_2025-12-13.md`
+- `assets/animations/characters/README.md`
+
+### Assets
+- 폴더 구조 생성 (20개 폴더 with .gitkeep)
+
+---
+
+## 🔧 기술 결정 사항
+
+### 프레임 레이트
+- **기본:** 12fps (1초당 12프레임)
+- **이유:** 부드러움과 용량의 균형
+- **유연성:** 동일한 GIF에서 다른 fps로 추출 가능
+
+### 파일 포맷
+- **PNG:** 투명 배경 지원, 무손실
+- **해상도:** 300x300px (Flutter에서 크기 조정)
+
+### Loading 전략
+- **Progressive:** 필요한 것부터 순차 로딩
+- **Preloading:** `precacheImage`로 미리 로드
+- **Fallback:** 프레임 없을 시 Placeholder
+
+---
+
+## 🧪 테스트 가이드
+
+### 디자이너용 테스트 방법
+1. 프레임 파일을 해당 폴더에 배치
+2. 터미널에서 `flutter pub get` 실행
+3. 앱 실행 (Hot Reload 가능)
+4. 온보딩 화면에서 해당 캐릭터 선택
+5. 애니메이션 확인:
+   - 부드러움
+   - 반복 여부
+   - 전환 자연스러움
+
+### 프레임 없을 때
+- 자동으로 Placeholder (이모지 원형) 표시
+- 에러 없이 정상 동작
+
+---
+
+## 📊 성능 지표
+
+### 파일 용량
+- 프레임당: ~40KB (PNG, 300x300px)
+- Idle (12프레임): ~480KB × 4캐릭터 = ~2MB
+- 전체 (57프레임 × 4): ~8MB
+
+### 로딩 시간
+- 1단계 (Idle): 2-3초
+- 2단계 (선택 캐릭터): 1-2초
+- 3단계 (나머지): 백그라운드
+
+### 메모리
+- 로드된 프레임: 메모리에 캐시
+- Flutter Image cache 사용
+
+---
+
+## 🔗 관련 문서
+- [FRAME_ANIMATION_GUIDE.md](./FRAME_ANIMATION_GUIDE.md) - 완전한 워크플로우 가이드
+- [ANIMATION_UPDATE_2025-12-13.md](./ANIMATION_UPDATE_2025-12-13.md) - 전략 변경 요약
+- [TODO.md](./TODO.md) - 업데이트된 작업 목록
+
+---
+
+**작성일:** 2025-12-13
+**다음 작업:** 디자인팀의 Midjourney 애니메이션 제작
 
 ---
 

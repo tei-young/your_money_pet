@@ -61,3 +61,10 @@ app.*.map.json
 scripts/service-account-key.json
 scripts/node_modules/
 scripts/package-lock.json
+
+# Backoffice (Next.js)
+backoffice/node_modules/
+backoffice/.next/
+backoffice/out/
+backoffice/.env*.local
+backoffice/package-lock.json

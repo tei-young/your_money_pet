@@ -312,12 +312,31 @@ PUT    /api/v1/characters/{characterId}
 - [ ] Content CRUD 구현
 - [ ] 로컬 캐싱 전략
 
-### Phase 3: 백오피스 웹 개발 📋 예정
-- [ ] 관리자 인증 (Firebase Auth)
-- [ ] 사용자 관리 페이지
-- [ ] 콘텐츠 관리 페이지 (WYSIWYG 에디터)
-- [ ] 퀴즈 관리 페이지
-- [ ] 통계 대시보드
+### Phase 3: 백오피스 웹 개발 🚧 진행 중 (2025-12-30)
+- [x] **백오피스 프로젝트 생성** (2025-12-30 완료)
+  - Next.js 15 (App Router) + TypeScript
+  - Tailwind CSS + shadcn/ui
+  - Firebase Client SDK 연동
+  - 프로젝트 위치: `backoffice/`
+- [x] **관리자 인증** (2025-12-30 완료)
+  - Firebase Auth 로그인 페이지 (`/login`)
+  - Admin custom claim 검증
+  - 보호된 라우트 구현
+  - 관리자 계정: admin@moneypet.com
+- [x] **대시보드** (2025-12-30 완료)
+  - 관리자 대시보드 (`/dashboard`)
+  - 로그아웃 기능
+  - 자동 리다이렉트 로직
+- [ ] **학습 콘텐츠 관리 페이지** (다음 단계)
+  - 목록 조회 (Day별/성향별 필터)
+  - 신규 작성 (폼 형태, 카드 동적 추가)
+  - 이미지 업로드 (Firebase Storage)
+  - 수정/삭제
+- [ ] **퀴즈 관리 페이지** (다음 단계)
+  - 목록 조회
+  - 신규 작성
+  - 수정/삭제
+- [ ] 사용자 관리 페이지 (유저 활성화/비활성화, 탈퇴 처리)
 
 ### Phase 4: 고도화 📋 예정
 - [ ] 버전 관리 시스템

@@ -3017,55 +3017,247 @@ cd scripts
 node init-firestore.js
 ```
 
-### 다음 단계 (Phase 3: 백오피스 웹 개발)
+### Phase 3: 백오피스 웹 개발 ✅ 완료 (2025-12-30)
 
-#### 예정 작업:
-1. **웹 프로젝트 생성**
-   - Next.js + TypeScript
-   - Firebase Admin SDK 연동
-   - Tailwind CSS
+#### 1. Next.js 프로젝트 생성
+**프로젝트 위치:** `backoffice/`
 
-2. **관리자 로그인**
-   - Firebase Auth 연동
-   - 이메일/비밀번호 로그인
-   - Admin claim 확인
+**기술 스택:**
+- Next.js 15.1.6 (App Router)
+- React 19.0.0
+- TypeScript 5
+- Tailwind CSS 3.4.1
+- Firebase 11.1.0 (Client SDK)
 
-3. **콘텐츠 관리 페이지**
-   - 학습 콘텐츠 CRUD
-   - 퀴즈 CRUD
-   - WYSIWYG 에디터
+**생성 명령:**
+```bash
+npx create-next-app@latest backoffice
+# ✅ TypeScript: Yes
+# ✅ ESLint: Yes
+# ✅ Tailwind CSS: Yes
+# ✅ src/ directory: No
+# ✅ App Router: Yes
+# ✅ Import alias: @/*
+```
 
-4. **통계 대시보드**
-   - 사용자 통계
-   - 학습 진행률
-   - 퀴즈 정답률
+#### 2. Firebase Client SDK 연동
+**설정 파일:** `backoffice/lib/firebase.ts`
+
+**Firebase 웹 앱 추가:**
+- Firebase Console > Project Settings > 앱 추가 > Web
+- 앱 닉네임: "MoneyPet Backoffice"
+
+**환경 변수:** `backoffice/.env.local`
+```bash
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyAGQtxbbHxGMENh9XSsma-b9Lqoiewk-OY
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=moneypet-74066.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=moneypet-74066
+# ... (기타 Firebase 설정)
+```
+
+**주요 코드:**
+```typescript
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+```
+
+#### 3. shadcn/ui 설치 및 설정
+**설치 명령:**
+```bash
+npx shadcn@latest init
+# ✅ Style: New York
+# ✅ Base color: Zinc
+# ✅ CSS variables: Yes
+```
+
+**추가한 컴포넌트:**
+```bash
+npx shadcn@latest add button
+npx shadcn@latest add input
+npx shadcn@latest add card
+```
+
+**커스텀 색상 추가:** `tailwind.config.ts`
+```typescript
+colors: {
+  safe: "hsl(210, 20%, 55%)",      // 머니베어 - 회색
+  balanced: "hsl(142, 76%, 36%)",  // 세이브쉽 - 초록
+  aggressive: "hsl(4, 90%, 58%)",  // 헌터캣 - 빨강
+  challenger: "hsl(27, 96%, 61%)"  // 체이서폭스 - 주황
+}
+```
+
+#### 4. React 19 호환성 수정
+**문제:**
+- lucide-react 0.344.0이 React 19를 지원하지 않음
+- @radix-ui/react-slot 1.0.2가 React 19를 지원하지 않음
+
+**해결:**
+```json
+{
+  "lucide-react": "^0.460.0",       // 0.344.0 → 0.460.0
+  "@radix-ui/react-slot": "^1.1.0"  // 1.0.2 → 1.1.0
+}
+```
+
+#### 5. 관리자 로그인 페이지 구현
+**파일:** `backoffice/app/login/page.tsx`
+
+**기능:**
+- Firebase Auth 이메일/비밀번호 로그인
+- Admin custom claim 검증
+- 에러 처리 (invalid-credential, too-many-requests 등)
+- shadcn/ui Card, Input, Button 컴포넌트 사용
+
+**핵심 로직:**
+```typescript
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user;
+  const idTokenResult = await user.getIdTokenResult();
+
+  if (!idTokenResult.claims.admin) {
+    setError("관리자 권한이 필요합니다.");
+    await auth.signOut();
+    return;
+  }
+
+  router.push("/dashboard");
+};
+```
+
+#### 6. 대시보드 페이지 구현
+**파일:** `backoffice/app/dashboard/page.tsx`
+
+**기능:**
+- 관리자 전용 보호된 라우트
+- 로그아웃 기능
+- 학습 콘텐츠/퀴즈 관리 카드 (준비 중)
+- 로그인 성공 상태 카드
+
+**인증 검증:**
+```typescript
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    if (!currentUser) {
+      router.push("/login");
+      return;
+    }
+
+    const idTokenResult = await currentUser.getIdTokenResult();
+    if (!idTokenResult.claims.admin) {
+      await signOut(auth);
+      router.push("/login");
+      return;
+    }
+
+    setUser(currentUser);
+    setLoading(false);
+  });
+
+  return () => unsubscribe();
+}, [router]);
+```
+
+#### 7. 자동 리다이렉트 로직
+**파일:** `backoffice/app/page.tsx`
+
+**기능:**
+- 루트 경로(`/`) 접근 시 자동 판별
+- 로그인 + Admin → `/dashboard`
+- 로그인 + Non-Admin → `/login` (강제 로그아웃)
+- 미로그인 → `/login`
+
+#### 8. 관리자 계정 생성
+**계정 정보:**
+- 이메일: `admin@moneypet.com`
+- 비밀번호: `admin123!`
+- UID: `H1krNK1xjZextFIdzPCVY1haQHb2`
+- Admin Claim: `true`
+
+**설정 방법:**
+```bash
+cd scripts
+node set-admin.js H1krNK1xjZextFIdzPCVY1haQHb2
+```
 
 ### 프로젝트 구조 업데이트
 
 ```
 your_money_pet/
-├── lib/                        # Flutter 앱
-│   ├── firebase_options.dart   ✅ Firebase 설정
+├── lib/                          # Flutter 앱
+│   ├── firebase_options.dart     ✅ Firebase 설정
 │   └── ...
-├── scripts/                    ✅ 신규
+├── backoffice/                   ✅ 신규 (2025-12-30)
+│   ├── app/
+│   │   ├── page.tsx              # 자동 리다이렉트
+│   │   ├── login/
+│   │   │   └── page.tsx          # 로그인 페이지
+│   │   ├── dashboard/
+│   │   │   └── page.tsx          # 대시보드
+│   │   ├── globals.css
+│   │   └── layout.tsx
+│   ├── components/
+│   │   └── ui/                   # shadcn/ui 컴포넌트
+│   │       ├── button.tsx
+│   │       ├── input.tsx
+│   │       └── card.tsx
+│   ├── lib/
+│   │   ├── firebase.ts           # Firebase 초기화
+│   │   └── utils.ts              # cn 유틸리티
+│   ├── .env.local                # Firebase 설정 (gitignore)
 │   ├── package.json
-│   ├── set-admin.js            # 관리자 권한 부여
-│   ├── init-firestore.js       # Firestore 초기화
-│   ├── service-account-key.json # (gitignore)
-│   └── node_modules/           # (gitignore)
+│   ├── tailwind.config.ts
+│   ├── tsconfig.json
+│   └── next.config.ts
+├── scripts/                      ✅ (2025-12-29)
+│   ├── package.json
+│   ├── set-admin.js              # 관리자 권한 부여
+│   ├── init-firestore.js         # Firestore 초기화
+│   ├── service-account-key.json  # (gitignore)
+│   └── node_modules/             # (gitignore)
 ├── docs/
-│   ├── BACKOFFICE_DESIGN.md    ✅ 업데이트
-│   └── DEVELOPMENT_LOG.md      ✅ 업데이트
-└── .gitignore                  ✅ 업데이트
+│   ├── BACKOFFICE_DESIGN.md      ✅ 업데이트
+│   └── DEVELOPMENT_LOG.md        ✅ 업데이트
+└── .gitignore                    ✅ 업데이트
 ```
+
+### 다음 단계 (Phase 3 계속)
+
+#### 예정 작업:
+1. **학습 콘텐츠 관리 페이지** (`/dashboard/learning`)
+   - 목록 조회 (Day별/성향별 필터)
+   - 신규 작성 (폼 형태, 카드 동적 추가)
+   - 이미지 업로드 (Firebase Storage)
+   - 수정/삭제
+
+2. **퀴즈 관리 페이지** (`/dashboard/quiz`)
+   - 목록 조회
+   - 신규 작성
+   - 수정/삭제
+
+3. **유저 관리 페이지** (향후)
+   - 사용자 활성화/비활성화
+   - 탈퇴 처리
 
 ### Git 커밋 히스토리
 ```bash
+6410834 - Fix: Update lucide-react and @radix-ui/react-slot to support React 19 (2025-12-30)
+592e6a2 - Implement admin login and dashboard pages (2025-12-30)
+dd73792 - Add shadcn/ui setup and components (2025-12-30)
+2b2ca0f - Add Firebase client SDK integration to backoffice (2025-12-30)
+27ec664 - Add Next.js backoffice project (2025-12-30)
 390dbae - Add Firestore initialization script (2025-12-29)
 7f2f4d3 - Add Firebase Admin scripts for setting admin custom claims (2025-12-29)
 ```
 
 ---
 
-**Last Updated:** 2025-12-29
+**Last Updated:** 2025-12-30
 **Contributors:** Claude AI

@@ -1,16 +1,36 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+
 export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // 로그인된 경우 - Admin claim 확인
+        const idTokenResult = await user.getIdTokenResult();
+        if (idTokenResult.claims.admin) {
+          router.push("/dashboard");
+        } else {
+          router.push("/login");
+        }
+      } else {
+        // 로그인 안 된 경우
+        router.push("/login");
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100">
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          🐻 MoneyPet 백오피스
-        </h1>
-        <p className="text-gray-600">
-          학습 콘텐츠 및 퀴즈 관리 시스템
-        </p>
-        <div className="mt-8 text-sm text-gray-500">
-          Next.js + TypeScript + Tailwind CSS
-        </div>
+        <p className="text-gray-600">로딩 중...</p>
       </div>
     </div>
   );

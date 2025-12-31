@@ -3228,26 +3228,186 @@ your_money_pet/
 └── .gitignore                    ✅ 업데이트
 ```
 
+### Phase 3 계속: 학습 콘텐츠 관리 구현 ✅ 완료 (2025-12-31)
+
+#### 9. 성향별 페이지 구현
+**파일:** `backoffice/app/dashboard/[personality]/page.tsx`
+
+**기능:**
+- 동적 라우팅으로 4개 성향 지원 (safe/balanced/aggressive/challenger)
+- Tabs 컴포넌트로 학습 콘텐츠/퀴즈 구분
+- 성향별 정보 표시 (이름, 한글명, 이모지, 색상)
+- 대시보드로 돌아가기 버튼
+
+**성향 정보:**
+```typescript
+const personalities = {
+  safe: { name: "머니베어", nameKo: "안전형", emoji: "🐻", color: "text-safe" },
+  balanced: { name: "세이브쉽", nameKo: "균형형", emoji: "🐑", color: "text-balanced" },
+  aggressive: { name: "헌터캡", nameKo: "공격형", emoji: "🐱", color: "text-aggressive" },
+  challenger: { name: "체이서폭스", nameKo: "도전형", emoji: "🦊", color: "text-challenger" },
+};
+```
+
+#### 10. 학습 콘텐츠 목록 페이지
+**컴포넌트:** `components/learning/LearningContentList.tsx`
+
+**기능:**
+- Firestore 쿼리: `where("personality", "==", personality), orderBy("day", "asc")`
+- Day 필터 드롭다운 (전체/Day 1-365)
+- 정렬: Day 오름차순/내림차순
+- 테이블 컬럼: Day, 제목, 카드 개수, 작성일, 수정일, 액션
+- 수정/삭제 버튼 (수정 → `/dashboard/[personality]/learning/[id]`)
+- 삭제 확인 모달 (⚠️ 되돌릴 수 없음 경고)
+- "새 학습 콘텐츠 추가" 버튼
+
+**데이터 관리:**
+```typescript
+// Firestore 조회
+const q = query(
+  collection(db, "learning_contents"),
+  where("personality", "==", personality),
+  orderBy("day", "asc")
+);
+
+// 삭제
+await deleteDoc(doc(db, "learning_contents", id));
+```
+
+#### 11. 학습 콘텐츠 작성/수정 폼
+**컴포넌트:** `components/learning/LearningContentForm.tsx`
+
+**기본 정보 필드:**
+- Day (1-365, number input)
+- 제목 (text input, 필수)
+- 예상 소요 시간 (분, number input, 기본값: 3)
+- 포인트 (number input, 기본값: 50)
+
+**동적 카드 관리:**
+- 카드 추가/삭제 (최소 1개 유지)
+- 카드 순서 자동 관리 (order: 1, 2, 3...)
+- 카드 타입 선택: text, image, tip, quiz_link
+
+**카드 타입별 입력:**
+1. **text**: textarea (학습 내용)
+2. **image**:
+   - File input (accept="image/*")
+   - Firebase Storage 업로드 (`learning/{personality}/{timestamp}_{filename}`)
+   - 이미지 미리보기
+   - 선택적 설명 (content)
+3. **tip**: textarea (💡 팁 내용)
+4. **quiz_link**: textarea (퀴즈 ID/링크)
+
+**Firebase Storage 업로드:**
+```typescript
+const storageRef = ref(storage, `learning/${personality}/${timestamp}_${file.name}`);
+await uploadBytes(storageRef, file);
+const downloadURL = await getDownloadURL(storageRef);
+```
+
+**폼 검증:**
+- 제목 필수
+- Day 범위 (1-365)
+- 카드 최소 1개
+- 각 카드 내용 필수 (image 타입은 imageUrl 필수)
+
+**저장/수정:**
+```typescript
+// 신규 저장
+await addDoc(collection(db, "learning_contents"), {
+  ...formData,
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp(),
+});
+
+// 수정
+await updateDoc(doc(db, "learning_contents", contentId), {
+  ...formData,
+  updatedAt: serverTimestamp(),
+});
+```
+
+#### 12. 신규 작성 페이지
+**파일:** `backoffice/app/dashboard/[personality]/learning/new/page.tsx`
+
+**기능:**
+- 성향별 보호된 라우트
+- Admin 인증 확인
+- LearningContentForm 컴포넌트 사용 (contentId 없음)
+- 저장 후 성향 페이지로 리다이렉트
+
+#### 13. 수정 페이지
+**파일:** `backoffice/app/dashboard/[personality]/learning/[id]/page.tsx`
+
+**기능:**
+- 성향별 보호된 라우트
+- Admin 인증 확인
+- LearningContentForm 컴포넌트 사용 (contentId 전달)
+- 기존 데이터 자동 로드
+- 수정 후 성향 페이지로 리다이렉트
+
+#### 14. UI 컴포넌트 추가
+**파일:** `components/ui/tabs.tsx`
+
+**설치:**
+```bash
+npm install @radix-ui/react-tabs
+```
+
+**컴포넌트:**
+- Tabs (root)
+- TabsList (탭 버튼 컨테이너)
+- TabsTrigger (개별 탭 버튼)
+- TabsContent (탭 내용)
+
+### 프로젝트 구조 업데이트 (2025-12-31)
+
+```
+backoffice/
+├── app/
+│   ├── dashboard/
+│   │   ├── page.tsx                           # 성향 선택 대시보드
+│   │   └── [personality]/
+│   │       ├── page.tsx                       # 성향별 메인 (탭)
+│   │       └── learning/
+│   │           ├── new/
+│   │           │   └── page.tsx               # 신규 작성 ✅ 신규
+│   │           └── [id]/
+│   │               └── page.tsx               # 수정 ✅ 신규
+│   ├── login/
+│   │   └── page.tsx
+│   └── page.tsx
+├── components/
+│   ├── learning/
+│   │   ├── LearningContentList.tsx            # 목록 ✅ 신규
+│   │   └── LearningContentForm.tsx            # 작성/수정 폼 ✅ 신규
+│   └── ui/
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── input.tsx
+│       └── tabs.tsx                           # ✅ 신규
+└── lib/
+    ├── firebase.ts
+    └── utils.ts
+```
+
 ### 다음 단계 (Phase 3 계속)
 
 #### 예정 작업:
-1. **학습 콘텐츠 관리 페이지** (`/dashboard/learning`)
-   - 목록 조회 (Day별/성향별 필터)
-   - 신규 작성 (폼 형태, 카드 동적 추가)
-   - 이미지 업로드 (Firebase Storage)
-   - 수정/삭제
-
-2. **퀴즈 관리 페이지** (`/dashboard/quiz`)
+1. **퀴즈 관리 페이지** (`/dashboard/quiz`)
    - 목록 조회
    - 신규 작성
    - 수정/삭제
 
-3. **유저 관리 페이지** (향후)
+2. **유저 관리 페이지** (향후)
    - 사용자 활성화/비활성화
    - 탈퇴 처리
 
 ### Git 커밋 히스토리
 ```bash
+c4e8b3f - Feat: Implement learning content create and edit pages (2025-12-31)
+1f8e030 - Feat: Implement learning content list page with personality selection (2025-12-31)
+080d765 - Docs: Update backoffice development progress (Phase 3) (2025-12-30)
 6410834 - Fix: Update lucide-react and @radix-ui/react-slot to support React 19 (2025-12-30)
 592e6a2 - Implement admin login and dashboard pages (2025-12-30)
 dd73792 - Add shadcn/ui setup and components (2025-12-30)
@@ -3259,5 +3419,5 @@ dd73792 - Add shadcn/ui setup and components (2025-12-30)
 
 ---
 
-**Last Updated:** 2025-12-30
+**Last Updated:** 2025-12-31
 **Contributors:** Claude AI

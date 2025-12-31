@@ -62,60 +62,76 @@ export default function DashboardPage() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>학습 콘텐츠</CardTitle>
-              <CardDescription>Day별/성향별 학습 자료 관리</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full" disabled>
-                관리하기 (준비 중)
-              </Button>
-            </CardContent>
-          </Card>
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">성향별 콘텐츠 관리</h2>
+          <p className="text-gray-600 mb-6">관리할 캐릭터 성향을 선택하세요</p>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>퀴즈 관리</CardTitle>
-              <CardDescription>퀴즈 문제 및 정답 관리</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full" disabled>
-                관리하기 (준비 중)
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card
+              className="cursor-pointer hover:shadow-lg transition-shadow border-2 hover:border-safe"
+              onClick={() => router.push("/dashboard/safe")}
+            >
+              <CardHeader>
+                <div className="text-4xl mb-2">🐻</div>
+                <CardTitle className="text-safe">머니베어</CardTitle>
+                <CardDescription>(안전형)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">
+                  안정적이고 신중한 투자 성향
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>사용자 통계</CardTitle>
-              <CardDescription>앱 사용자 데이터 및 분석</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button className="w-full" disabled>
-                보기 (준비 중)
-              </Button>
-            </CardContent>
-          </Card>
+            <Card
+              className="cursor-pointer hover:shadow-lg transition-shadow border-2 hover:border-balanced"
+              onClick={() => router.push("/dashboard/balanced")}
+            >
+              <CardHeader>
+                <div className="text-4xl mb-2">🐑</div>
+                <CardTitle className="text-balanced">세이브쉽</CardTitle>
+                <CardDescription>(균형형)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">
+                  안정과 수익의 균형을 추구
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="cursor-pointer hover:shadow-lg transition-shadow border-2 hover:border-aggressive"
+              onClick={() => router.push("/dashboard/aggressive")}
+            >
+              <CardHeader>
+                <div className="text-4xl mb-2">🐱</div>
+                <CardTitle className="text-aggressive">헌터캣</CardTitle>
+                <CardDescription>(공격형)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">
+                  적극적이고 공격적인 투자 성향
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card
+              className="cursor-pointer hover:shadow-lg transition-shadow border-2 hover:border-challenger"
+              onClick={() => router.push("/dashboard/challenger")}
+            >
+              <CardHeader>
+                <div className="text-4xl mb-2">🦊</div>
+                <CardTitle className="text-challenger">체이서폭스</CardTitle>
+                <CardDescription>(도전형)</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">
+                  고위험 고수익을 추구하는 도전적 성향
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>🎉 로그인 성공!</CardTitle>
-            <CardDescription>관리자 권한으로 로그인되었습니다</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-sm">
-              <p>✅ Firebase Auth 로그인 완료</p>
-              <p>✅ Admin custom claim 확인 완료</p>
-              <p>✅ Firestore 연결 준비 완료</p>
-              <p className="mt-4 text-muted-foreground">
-                다음 단계: 학습 콘텐츠 및 퀴즈 관리 페이지 구현
-              </p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

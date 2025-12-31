@@ -75,7 +75,7 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
 {
   "quizId": "day_001_safe_quiz",
   "day": 1,
-  "personalityType": "safe",
+  "personality": "safe",  // "safe", "balanced", "aggressive", "challenger"
   "questions": [
     {
       "order": 1,
@@ -92,13 +92,12 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
   ],
   "totalPoints": 100,
   "passingScore": 60,
-  "isPublished": true,
-  "version": "1.0",
-  "createdAt": "2025-01-01T00:00:00Z",
-  "updatedAt": "2025-01-15T10:00:00Z",
-  "createdBy": "admin_user_id"
+  "createdAt": Timestamp,
+  "updatedAt": Timestamp
 }
 ```
+
+**참고:** 퀴즈 백오피스는 아직 미구현 상태. 학습 콘텐츠와 동일한 최소 구조로 구현 예정.
 
 #### 2.3 Character Config (캐릭터 설정)
 ```dart

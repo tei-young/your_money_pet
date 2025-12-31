@@ -14,9 +14,10 @@ import { Plus, Trash2, Upload, ArrowLeft } from "lucide-react";
 
 interface LearningCard {
   order: number;
-  type: "text" | "image" | "tip" | "quiz_link";
+  type: "text" | "image" | "quiz_link";
   content: string;
   imageUrl?: string;
+  tip?: string;
 }
 
 interface LearningContentData {
@@ -121,6 +122,13 @@ export default function LearningContentForm({ personality, contentId }: Learning
   const updateCardContent = (index: number, content: string) => {
     const newCards = [...formData.cards];
     newCards[index] = { ...newCards[index], content };
+    setFormData({ ...formData, cards: newCards });
+  };
+
+  // 카드 팁 변경
+  const updateCardTip = (index: number, tip: string) => {
+    const newCards = [...formData.cards];
+    newCards[index] = { ...newCards[index], tip };
     setFormData({ ...formData, cards: newCards });
   };
 
@@ -338,7 +346,6 @@ export default function LearningContentForm({ personality, contentId }: Learning
                   >
                     <option value="text">텍스트</option>
                     <option value="image">이미지</option>
-                    <option value="tip">팁</option>
                     <option value="quiz_link">퀴즈 링크</option>
                   </select>
                 </div>
@@ -384,9 +391,7 @@ export default function LearningContentForm({ personality, contentId }: Learning
                       onChange={(e) => updateCardContent(index, e.target.value)}
                       className="w-full border rounded-md px-3 py-2 min-h-[100px]"
                       placeholder={
-                        card.type === "tip"
-                          ? "💡 팁 내용을 입력하세요"
-                          : card.type === "quiz_link"
+                        card.type === "quiz_link"
                           ? "퀴즈 ID 또는 링크를 입력하세요"
                           : "학습 내용을 입력하세요"
                       }
@@ -394,6 +399,21 @@ export default function LearningContentForm({ personality, contentId }: Learning
                     />
                   </div>
                 )}
+
+                {/* 팁 추가 섹션 (선택사항) */}
+                <details className="mt-3">
+                  <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
+                    💡 팁 추가하기 (선택사항)
+                  </summary>
+                  <div className="mt-2">
+                    <textarea
+                      value={card.tip || ""}
+                      onChange={(e) => updateCardTip(index, e.target.value)}
+                      className="w-full border rounded-md px-3 py-2 min-h-[80px]"
+                      placeholder="이 카드와 관련된 팁이나 추가 정보를 입력하세요"
+                    />
+                  </div>
+                </details>
               </CardContent>
             </Card>
           ))}

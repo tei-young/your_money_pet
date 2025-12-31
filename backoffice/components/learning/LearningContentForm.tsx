@@ -127,7 +127,7 @@ export default function LearningContentForm({ personality, contentId }: Learning
   // 이미지 업로드
   const handleImageUpload = async (index: number, file: File) => {
     try {
-      setUploadingImages({ ...uploadingImages, [index]: true });
+      setUploadingImages(prev => ({ ...prev, [index]: true }));
 
       // Firebase Storage에 업로드
       const timestamp = Date.now();
@@ -137,20 +137,25 @@ export default function LearningContentForm({ personality, contentId }: Learning
       await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(storageRef);
 
-      // 카드에 이미지 URL 저장
-      const newCards = [...formData.cards];
-      newCards[index] = {
-        ...newCards[index],
-        imageUrl: downloadURL,
-        content: newCards[index].content || file.name, // content가 비어있으면 파일명 사용
-      };
-      setFormData({ ...formData, cards: newCards });
+      // 카드에 이미지 URL 저장 (함수형 업데이트)
+      setFormData(prev => {
+        const newCards = [...prev.cards];
+        newCards[index] = {
+          ...newCards[index],
+          imageUrl: downloadURL,
+          content: newCards[index].content || file.name, // content가 비어있으면 파일명 사용
+        };
+        return { ...prev, cards: newCards };
+      });
 
-      setUploadingImages({ ...uploadingImages, [index]: false });
+      setUploadingImages(prev => ({ ...prev, [index]: false }));
+
+      // 업로드 성공 피드백
+      console.log(`✅ 이미지 업로드 완료 (카드 ${index + 1}):`, downloadURL);
     } catch (error) {
       console.error("Error uploading image:", error);
       alert("이미지 업로드 중 오류가 발생했습니다.");
-      setUploadingImages({ ...uploadingImages, [index]: false });
+      setUploadingImages(prev => ({ ...prev, [index]: false }));
     }
   };
 

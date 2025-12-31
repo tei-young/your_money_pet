@@ -1,6 +1,6 @@
-import { initializeApp, getApps } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
+import { getAuth, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,10 +13,20 @@ const firebaseConfig = {
 };
 
 // Firebase 초기화 (중복 방지)
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+let app: FirebaseApp;
+let authInstance: Auth;
+let dbInstance: Firestore;
 
-// Firebase 서비스 인스턴스
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+// 클라이언트 사이드에서만 초기화
+if (typeof window !== 'undefined') {
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  authInstance = getAuth(app);
+  dbInstance = getFirestore(app);
+}
 
+// @ts-ignore - These are only used in client components
+export const auth = authInstance;
+// @ts-ignore - These are only used in client components
+export const db = dbInstance;
+// @ts-ignore - These are only used in client components
 export default app;

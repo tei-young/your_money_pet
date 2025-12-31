@@ -106,7 +106,7 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
 // CharacterConfig Collection
 {
   "characterId": "money_bear",
-  "personalityType": "safe",
+  "personality": "safe",  // "safe", "balanced", "aggressive", "challenger"
   "displayName": "머니베어",
   "fullName": "Money Bear 머니베어",
   "description": "든든하게 지키는",
@@ -125,10 +125,11 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
   "curriculum": "예적금의 기본과 복리의 힘부터...",
   "isActive": true,
   "sortOrder": 1,
-  "version": "1.0",
-  "updatedAt": "2025-01-15T10:00:00Z"
+  "updatedAt": Timestamp
 }
 ```
+
+**참고:** 캐릭터 설정 백오피스는 아직 미구현 상태. 향후 구현 예정.
 
 #### 2.4 App Config (앱 설정)
 ```dart
@@ -149,10 +150,11 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
     "learningPoints": 50,
     "quizPointsPerQuestion": 20
   },
-  "updatedAt": "2025-01-15T10:00:00Z",
-  "updatedBy": "admin_user_id"
+  "updatedAt": Timestamp
 }
 ```
+
+**참고:** 앱 설정 백오피스는 아직 미구현 상태. 향후 구현 예정.
 
 ## 백오피스 기능 요구사항
 

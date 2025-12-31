@@ -43,7 +43,15 @@ class _LearningScreenState extends State<LearningScreen> {
 
   Future<void> _loadLearningContent() async {
     final learningProvider = context.read<LearningProvider>();
-    await learningProvider.loadLearningDay(widget.dayNumber);
+    final userProvider = context.read<UserProvider>();
+
+    // 사용자 성향 가져오기
+    final personality = userProvider.user!.personalityType.name;
+
+    await learningProvider.loadLearningDay(
+      widget.dayNumber,
+      personality: personality,
+    );
 
     setState(() {
       _learningDay = learningProvider.currentLearningDay;
@@ -101,11 +109,54 @@ class _LearningScreenState extends State<LearningScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading || _learningDay == null) {
+    if (_isLoading) {
       return Scaffold(
         backgroundColor: Colors.white,
         body: const Center(
           child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    // 콘텐츠 없음 처리
+    if (_learningDay == null) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.close, color: Colors.black),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.construction,
+                size: 64,
+                color: Colors.grey.shade400,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '준비 중인 학습입니다',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '곧 새로운 학습 콘텐츠를 만나보실 수 있습니다!',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -436,18 +487,46 @@ class _LearningScreenState extends State<LearningScreen> {
                       card.imageUrl!,
                       width: double.infinity,
                       fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          height: 200,
+                          alignment: Alignment.center,
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.learningAccent,
+                            ),
+                          ),
+                        );
+                      },
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
                           height: 200,
                           decoration: BoxDecoration(
-                            color: AppColors.learningAccent.withOpacity(0.1),
+                            color: Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Center(
-                            child: Icon(
-                              Icons.image_not_supported,
-                              color: AppColors.learningAccent.withOpacity(0.3),
-                            ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.broken_image,
+                                size: 48,
+                                color: Colors.grey.shade600,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '이미지를 불러올 수 없습니다',
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       },

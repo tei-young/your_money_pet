@@ -1,5 +1,9 @@
 import 'package:flutter/foundation.dart';
 import '../models/learning_day_model.dart';
+import '../models/learning_content_model.dart';
+import '../models/quiz_model.dart';
+import '../services/learning_content_service.dart';
+import '../utils/constants.dart';
 
 /// 학습 진행 상태 관리 Provider
 class LearningProvider with ChangeNotifier {
@@ -8,6 +12,9 @@ class LearningProvider with ChangeNotifier {
 
   // 현재 로드된 학습 Day
   LearningDayModel? _currentLearningDay;
+
+  // Firestore 서비스
+  final LearningContentService _contentService = LearningContentService();
 
   LearningDayModel? get currentLearningDay => _currentLearningDay;
 
@@ -41,16 +48,78 @@ class LearningProvider with ChangeNotifier {
   }
 
   /// 학습 Day 로드
-  Future<void> loadLearningDay(int dayNumber) async {
-    // TODO: Firestore에서 학습 데이터 로드
-    // 임시 데이터로 Day 1 생성
-    if (dayNumber == 1) {
-      _currentLearningDay = _createDay1();
-    } else {
-      _currentLearningDay = _createPlaceholderDay(dayNumber);
-    }
+  Future<void> loadLearningDay(int dayNumber, {required String personality}) async {
+    try {
+      // Firestore에서 학습 콘텐츠와 퀴즈 병렬 로드
+      final (learningContent, quiz) = await _contentService.getLearningContentWithQuiz(
+        dayNumber,
+        personality,
+      );
 
-    notifyListeners();
+      // 콘텐츠가 없으면 null 설정
+      if (learningContent == null) {
+        _currentLearningDay = null;
+        notifyListeners();
+        return;
+      }
+
+      // LearningContent와 Quiz를 LearningDayModel로 변환
+      _currentLearningDay = _convertToLearningDayModel(
+        learningContent,
+        quiz,
+      );
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('❌ Error loading learning day: $e');
+      // 에러 발생 시 임시 데이터 사용 (개발 중)
+      if (dayNumber == 1) {
+        _currentLearningDay = _createDay1();
+      } else {
+        _currentLearningDay = _createPlaceholderDay(dayNumber);
+      }
+      notifyListeners();
+    }
+  }
+
+  /// LearningContent와 Quiz를 LearningDayModel로 변환 (어댑터)
+  LearningDayModel _convertToLearningDayModel(
+    LearningContent learningContent,
+    Quiz? quiz,
+  ) {
+    // LearningCard 변환 (quiz_link 타입 제외)
+    final cards = learningContent.cards
+        .where((card) => card.type != 'quiz_link')
+        .map((card) => LearningCard(
+              id: 'card_${card.order}',
+              content: card.content,
+              imageUrl: card.imageUrl,
+              tip: card.tip,
+            ))
+        .toList();
+
+    // Quiz를 QuizQuestion 리스트로 변환
+    final quizQuestions = quiz?.questions.map((q) {
+          // 정답 인덱스 찾기
+          final correctIndex = q.options.indexWhere((opt) => opt.isCorrect);
+
+          return QuizQuestion(
+            id: 'quiz_${q.order}',
+            question: q.question,
+            options: q.options.map((opt) => opt.text).toList(),
+            correctAnswerIndex: correctIndex,
+            explanation: q.options[correctIndex].explanation,
+          );
+        }).toList() ??
+        [];
+
+    return LearningDayModel(
+      dayNumber: learningContent.day,
+      title: learningContent.title,
+      cards: cards,
+      quizQuestions: quizQuestions,
+      points: learningContent.points,
+    );
   }
 
   /// 학습 완료 처리

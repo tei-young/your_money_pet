@@ -3421,3 +3421,199 @@ dd73792 - Add shadcn/ui setup and components (2025-12-30)
 
 **Last Updated:** 2025-12-31
 **Contributors:** Claude AI
+
+---
+
+## 2025-12-31: Tip 구조 변경 및 Flutter 팀 협의 완료
+
+### 배경
+Flutter 팀과 백오피스 데이터 구조 정합성 검토 진행
+
+### Flutter 팀 질문 사항
+1. **Tip 필드 처리 방식**
+   - 방안 A: tip을 별도 카드 타입으로 처리
+   - 방안 B: tip을 카드 속성으로 처리 (선택적 필드)
+
+2. **기존 데이터 마이그레이션**
+   - 현재 백오피스에 저장된 테스트 데이터 처리 방법
+
+3. **성향(personality) 매칭**
+   - UserProvider에 사용자 성향 정보(personalityType) 존재 여부
+
+### 의사결정 결과
+
+#### 1. Tip 구조: 방안 B 선택 (카드 속성)
+**이유:**
+- 모든 카드에 선택적으로 팁 추가 가능
+- 데이터 구조가 더 유연함
+- Flutter 모델과 일치
+
+**백오피스 수정 사항:**
+```typescript
+interface LearningCard {
+  order: number;
+  type: "text" | "image" | "quiz_link";  // "tip" 제거됨
+  content: string;
+  imageUrl?: string;
+  tip?: string;  // 선택적 팁 필드 추가
+}
+```
+
+**UI 변경:**
+- 카드 타입 드롭다운에서 "팁" 옵션 제거
+- 모든 카드에 접을 수 있는 "💡 팁 추가하기" 섹션 추가
+
+#### 2. 데이터 마이그레이션: 깔끔하게 새로 시작
+**방법:**
+- Firebase Console 또는 삭제 스크립트로 테스트 데이터 삭제
+- 새로운 데이터 구조로 콘텐츠 재입력
+
+**삭제 스크립트:**
+```javascript
+// scripts/delete-test-data.js
+const admin = require("firebase-admin");
+const serviceAccount = require("./service-account-key.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+const db = admin.firestore();
+
+async function deleteCollection(collectionName) {
+  const snapshot = await db.collection(collectionName).get();
+  const batch = db.batch();
+  snapshot.docs.forEach(doc => batch.delete(doc.ref));
+  await batch.commit();
+  console.log(`✅ ${collectionName} 삭제 완료`);
+}
+
+async function main() {
+  await deleteCollection("learning_contents");
+  await deleteCollection("quiz_contents");
+  console.log("✅ 모든 테스트 데이터 삭제 완료");
+}
+
+main();
+```
+
+#### 3. UserProvider 확인: personalityType 존재 ✅
+**Flutter 팀 답변:**
+- UserModel에 `personalityType` 필드 존재 (Line 7)
+- UserProvider에서 `user.personalityType`로 접근 가능
+- Enum: `PersonalityType.safe`, `balanced`, `aggressive`, `challenger`
+- JSON 변환: `personalityType.name` → `"safe"`, `"balanced"` 등
+- **완벽하게 백오피스 Firestore 구조와 매칭 가능**
+
+### 구현 완료
+
+#### 파일 수정: `backoffice/components/learning/LearningContentForm.tsx`
+
+**변경 사항:**
+1. LearningCard 인터페이스 업데이트
+2. 카드 타입에서 "tip" 제거
+3. tip 필드 추가 (선택적)
+4. updateCardTip 핸들러 추가
+5. 접을 수 있는 팁 입력 섹션 UI 추가
+
+**구현 코드:**
+```typescript
+// 인터페이스
+interface LearningCard {
+  order: number;
+  type: "text" | "image" | "quiz_link";
+  content: string;
+  imageUrl?: string;
+  tip?: string;
+}
+
+// 핸들러
+const updateCardTip = (index: number, tip: string) => {
+  const newCards = [...formData.cards];
+  newCards[index] = { ...newCards[index], tip };
+  setFormData({ ...formData, cards: newCards });
+};
+
+// UI
+<details className="mt-3">
+  <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
+    💡 팁 추가하기 (선택사항)
+  </summary>
+  <div className="mt-2">
+    <textarea
+      value={card.tip || ""}
+      onChange={(e) => updateCardTip(index, e.target.value)}
+      className="w-full border rounded-md px-3 py-2 min-h-[80px]"
+      placeholder="이 카드와 관련된 팁이나 추가 정보를 입력하세요"
+    />
+  </div>
+</details>
+```
+
+### Flutter 팀 전달 사항
+
+#### 최종 데이터 구조
+```typescript
+// Firestore: learning_contents
+{
+  day: 1,
+  personality: "safe",
+  title: "예적금의 기본",
+  estimatedMinutes: 3,
+  points: 50,
+  cards: [
+    {
+      order: 1,
+      type: "text",
+      content: "예금과 적금의 차이는...",
+      tip: "💡 금리가 높을수록 이자를 더 많이 받아요!"  // 선택적
+    }
+  ],
+  createdAt: Timestamp,
+  updatedAt: Timestamp
+}
+```
+
+#### Flutter 모델 구조 (권장)
+```dart
+class LearningCard {
+  final int order;
+  final String type;  // "text", "image", "quiz_link"
+  final String content;
+  final String? imageUrl;
+  final String? tip;  // 선택적 필드
+
+  bool get hasTip => tip != null && tip!.isNotEmpty;
+}
+```
+
+#### Firestore 조회
+```dart
+// 사용자 성향에 맞는 콘텐츠 조회
+final user = context.read<UserProvider>().user;
+final personality = user.personalityType.name;  // "safe", "balanced", etc.
+
+final contents = await FirebaseFirestore.instance
+  .collection('learning_contents')
+  .where('personality', isEqualTo: personality)
+  .orderBy('day')
+  .get();
+```
+
+### Git 커밋
+```bash
+7cc08f4 - Refactor: Change tip from card type to optional property (2025-12-31)
+ac9de6f - Fix: Resolve image upload state update issue in LearningContentForm (2025-12-31)
+```
+
+### 다음 단계
+1. Flutter 팀: LearningCard 모델 업데이트 (tip 필드 추가)
+2. Flutter 팀: Firestore 연동 구현
+3. 백오피스: 새 데이터 구조로 콘텐츠 1개 생성하여 테스트
+4. Flutter 앱에서 정상 표시 확인
+5. 확인 완료 후 본격적인 콘텐츠 입력 시작
+
+---
+
+**Last Updated:** 2025-12-31
+**Contributors:** Claude AI

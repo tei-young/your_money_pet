@@ -41,26 +41,33 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
 {
   "contentId": "day_001_safe",
   "day": 1,
-  "personalityType": "safe",  // null이면 공통
+  "personality": "safe",  // "safe", "balanced", "aggressive", "challenger"
   "title": "예적금의 기본",
   "cards": [
     {
       "order": 1,
-      "type": "text",  // text, image, video
+      "type": "text",  // "text", "image", "quiz_link"
       "content": "예금과 적금의 차이는...",
-      "imageUrl": null
+      "imageUrl": null,
+      "tip": "💡 금리가 높을수록 이자를 더 많이 받아요!"  // 선택적 팁 필드
     }
   ],
   "estimatedMinutes": 3,
   "points": 50,
-  "isPublished": true,
-  "version": "1.0",
   "createdAt": "2025-01-01T00:00:00Z",
-  "updatedAt": "2025-01-15T10:00:00Z",
-  "createdBy": "admin_user_id",
-  "tags": ["예금", "적금", "기본"]
+  "updatedAt": "2025-01-15T10:00:00Z"
 }
 ```
+
+**카드 타입:**
+- `text`: 텍스트 학습 내용
+- `image`: 이미지 카드 (imageUrl 필수)
+- `quiz_link`: 퀴즈 링크 (quiz_contents 컬렉션 ID 참조)
+
+**Tip 필드:**
+- 모든 카드 타입에 선택적으로 추가 가능
+- Flutter 앱에서 💡 아이콘과 함께 표시
+- 없으면 null 또는 빈 문자열
 
 #### 2.2 Quiz Content (퀴즈 콘텐츠)
 ```dart
@@ -327,13 +334,18 @@ PUT    /api/v1/characters/{characterId}
   - **신규 작성 페이지** (`/dashboard/[personality]/learning/new`)
     - 기본 정보: Day, 제목, 예상 소요 시간, 포인트
     - 동적 카드 폼 (추가/삭제)
-    - 카드 타입: text, image, tip, quiz_link
+    - 카드 타입: text, image, quiz_link
+    - 접을 수 있는 "💡 팁 추가하기" 섹션 (모든 카드에 선택적)
     - Firebase Storage 이미지 업로드 및 미리보기
     - 폼 검증 및 Firestore 저장
   - **수정 페이지** (`/dashboard/[personality]/learning/[id]`)
     - 기존 데이터 자동 로드
     - 모든 필드 수정 가능
     - Firestore 업데이트
+  - **Flutter 팀 협의 완료** (2025-12-31)
+    - Tip을 별도 카드 타입에서 카드 속성으로 변경
+    - 데이터 구조 Flutter 모델과 정합성 확인
+    - UserProvider.user.personalityType 존재 확인
 - [ ] **퀴즈 관리 페이지** (다음 단계)
   - 목록 조회
   - 신규 작성

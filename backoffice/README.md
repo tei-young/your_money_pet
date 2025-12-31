@@ -44,8 +44,15 @@ npm run dev
 
 ## 주요 기능
 
-- [ ] 관리자 로그인
-- [ ] 학습 콘텐츠 관리 (CRUD)
+- [x] 관리자 로그인 (Firebase Auth + Custom Claims)
+- [x] 학습 콘텐츠 관리 (CRUD)
+  - [x] 성향별 콘텐츠 목록 조회
+  - [x] 신규 콘텐츠 생성
+  - [x] 기존 콘텐츠 수정
+  - [x] 콘텐츠 삭제
+  - [x] 이미지 업로드 (Firebase Storage)
+  - [x] 동적 카드 관리 (text, image, quiz_link)
+  - [x] 선택적 팁 추가
 - [ ] 퀴즈 관리 (CRUD)
 - [ ] 사용자 통계 대시보드
 - [ ] 캐릭터 설정 관리
@@ -54,14 +61,34 @@ npm run dev
 
 ```
 backoffice/
-├── app/                  # Next.js App Router
-│   ├── layout.tsx        # 루트 레이아웃
-│   ├── page.tsx          # 홈 페이지
-│   └── globals.css       # 전역 스타일
-├── components/           # 재사용 가능한 컴포넌트
-├── lib/                  # 유틸리티 함수
-│   └── firebase.ts       # Firebase 설정
-├── public/               # 정적 파일
+├── app/                                    # Next.js App Router
+│   ├── dashboard/
+│   │   ├── page.tsx                        # 성향 선택 대시보드
+│   │   └── [personality]/
+│   │       ├── page.tsx                    # 성향별 메인 (탭)
+│   │       └── learning/
+│   │           ├── new/
+│   │           │   └── page.tsx            # 신규 콘텐츠 작성
+│   │           └── [id]/
+│   │               └── page.tsx            # 콘텐츠 수정
+│   ├── login/
+│   │   └── page.tsx                        # 관리자 로그인
+│   ├── layout.tsx                          # 루트 레이아웃
+│   ├── page.tsx                            # 홈 페이지 (리다이렉트)
+│   └── globals.css                         # 전역 스타일
+├── components/
+│   ├── learning/
+│   │   ├── LearningContentList.tsx         # 콘텐츠 목록
+│   │   └── LearningContentForm.tsx         # 작성/수정 폼
+│   └── ui/                                 # shadcn/ui 컴포넌트
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── input.tsx
+│       └── tabs.tsx
+├── lib/                                    # 유틸리티 함수
+│   ├── firebase.ts                         # Firebase 설정
+│   └── utils.ts                            # Tailwind 유틸리티
+├── public/                                 # 정적 파일
 └── package.json
 ```
 

@@ -3617,3 +3617,252 @@ ac9de6f - Fix: Resolve image upload state update issue in LearningContentForm (2
 
 **Last Updated:** 2025-12-31
 **Contributors:** Claude AI
+
+---
+
+## 2026-01-01: 퀴즈 관리 기능 구현 완료
+
+### 배경
+Flutter 팀의 Quiz 모델 구현 완료 후 백오피스에서 퀴즈 관리 기능 구현
+
+### 구현 내용
+
+#### 1. QuizContentList 컴포넌트
+**파일:** `backoffice/components/quiz/QuizContentList.tsx`
+
+**기능:**
+- Firestore quiz_contents 컬렉션 조회 (personality + day 필터)
+- Day 필터 (1-365 입력)
+- 정렬 토글 (오름차순/내림차순)
+- 테이블 뷰
+  - Day, 문제 개수, 총점, 통과점수
+  - 작성일, 수정일
+  - 수정/삭제 액션
+- 삭제 확인 모달
+
+**Firestore 쿼리:**
+```typescript
+const q = query(
+  collection(db, "quiz_contents"),
+  where("personality", "==", personality),
+  orderBy("day", sortOrder)
+);
+```
+
+#### 2. QuizContentForm 컴포넌트
+**파일:** `backoffice/components/quiz/QuizContentForm.tsx`
+
+**기능:**
+- 기본 정보 입력
+  - Day (1-365)
+  - 성향 (자동 설정)
+  - 총점
+  - 통과점수
+  
+- 동적 질문 관리
+  - 질문 추가/삭제
+  - order 자동 관리 (1, 2, 3...)
+  - 질문 텍스트 입력
+  - 배점 설정
+  
+- 질문별 선택지 관리
+  - 선택지 추가/삭제 (최소 2개)
+  - 선택지 텍스트 입력
+  - 정답 선택 (라디오 버튼)
+  - 해설 입력 (정답/오답 모두)
+  
+- 폼 검증
+  - Day 범위 (1-365)
+  - 최소 1문제
+  - 질문 텍스트 필수
+  - 최소 2선택지
+  - 정답 1개 필수
+  - 선택지 텍스트 필수
+  - 해설 필수
+  - 배점 > 0
+  - 총점 > 0
+  - 통과점수 ≤ 총점
+
+**데이터 구조:**
+```typescript
+interface QuizContentData {
+  day: number;
+  personality: string;
+  questions: QuizQuestion[];
+  totalPoints: number;
+  passingScore: number;
+}
+
+interface QuizQuestion {
+  order: number;  // 질문 순서
+  question: string;
+  options: QuizOption[];  // 배열 순서 보장
+  points: number;
+}
+
+interface QuizOption {
+  text: string;
+  isCorrect: boolean;
+  explanation: string;
+  // order 필드 없음 - 배열 순서 사용
+}
+```
+
+#### 3. 퀴즈 라우트 페이지
+
+**신규 작성:** `backoffice/app/dashboard/[personality]/quiz/new/page.tsx`
+- Admin 권한 확인
+- QuizContentForm 사용 (quizId 없음)
+- 저장 후 성향 페이지로 리다이렉트
+
+**수정:** `backoffice/app/dashboard/[personality]/quiz/[id]/page.tsx`
+- Admin 권한 확인
+- QuizContentForm 사용 (quizId 전달)
+- 기존 데이터 자동 로드
+- 수정 후 성향 페이지로 리다이렉트
+
+**Next.js 15 호환:**
+```typescript
+// params가 Promise로 변경됨
+export default function EditQuizPage({ 
+  params 
+}: { 
+  params: Promise<{ personality: string; id: string }> 
+}) {
+  const [personality, setPersonality] = useState<PersonalityType | null>(null);
+  const [quizId, setQuizId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    params.then(p => {
+      setPersonality(p.personality as PersonalityType);
+      setQuizId(p.id);
+    });
+  }, [params]);
+}
+```
+
+#### 4. 성향별 페이지 통합
+**파일:** `backoffice/app/dashboard/[personality]/page.tsx`
+
+**변경사항:**
+```typescript
+import QuizContentList from "@/components/quiz/QuizContentList";
+
+// 퀴즈 탭
+<TabsContent value="quiz" className="space-y-4">
+  <QuizContentList personality={personality} />
+</TabsContent>
+```
+
+### 프로젝트 구조 업데이트
+
+```
+backoffice/
+├── app/
+│   └── dashboard/
+│       └── [personality]/
+│           ├── page.tsx               # 학습/퀴즈 탭 (업데이트)
+│           ├── learning/
+│           │   ├── new/page.tsx
+│           │   └── [id]/page.tsx
+│           └── quiz/                  # ✅ 신규
+│               ├── new/page.tsx       # ✅ 신규
+│               └── [id]/page.tsx      # ✅ 신규
+└── components/
+    ├── learning/
+    │   ├── LearningContentList.tsx
+    │   └── LearningContentForm.tsx
+    └── quiz/                          # ✅ 신규
+        ├── QuizContentList.tsx        # ✅ 신규
+        └── QuizContentForm.tsx        # ✅ 신규
+```
+
+### Flutter 팀 협의 사항 반영
+
+#### 선택지 순서 보장
+**결정:** 옵션 A 선택 - 배열 순서 보장
+
+**Firestore 동작:**
+- 배열은 저장된 순서를 유지
+- 백오피스에서 순서대로 저장하면 그대로 조회됨
+
+**Flutter 처리:**
+```dart
+// 배열 순서 그대로 사용 (정렬 불필요)
+final options = (json['options'] as List)
+  .map((o) => QuizOption.fromJson(o))
+  .toList();
+```
+
+**백오피스 처리:**
+- 선택지 추가 시 배열 끝에 추가
+- 선택지 삭제 시 filter로 제거
+- Firestore 저장 시 배열 순서 유지
+
+#### Firebase Composite Index
+**필요 인덱스:**
+- Collection: `quiz_contents`
+- Fields: `personality` (Ascending) + `day` (Ascending)
+
+**생성 방법:**
+- 첫 쿼리 실행 시 Firebase가 자동으로 생성 링크 제공
+- 링크 클릭하면 자동 생성 (1-2분 소요)
+
+### 빌드 검증
+
+**빌드 결과:**
+```
+✓ Compiled successfully in 10.6s
+✓ Generating static pages (6/6)
+
+Route (app)
+├ ƒ /dashboard/[personality]/quiz/new
+└ ƒ /dashboard/[personality]/quiz/[id]
+```
+
+**ESLint 경고:**
+```
+QuizContentList.tsx:50:6
+Warning: React Hook useEffect has a missing dependency: 'loadQuizzes'
+```
+- 비중요 경고 (useEffect 의존성 최적화)
+- 기능에 영향 없음
+
+### Git 커밋
+```bash
+c1d7ac7 - Feat: Implement quiz management feature (complete CRUD)
+7cc08f4 - Refactor: Change tip from card type to optional property
+```
+
+### 다음 단계
+
+#### 즉시 가능
+1. **테스트 데이터 입력**
+   - Day 1~10 퀴즈 생성 (4개 성향 × 10일 = 40개)
+   - Flutter 앱에서 퀴즈 풀기 테스트
+   - quiz_link 카드 동작 확인
+
+2. **Firebase Composite Index 생성**
+   - 퀴즈 목록 조회 시 인덱스 생성 링크 클릭
+   - 생성 완료 대기 (1-2분)
+
+#### 향후 개선
+1. **UI/UX 개선**
+   - 선택지 드래그 앤 드롭 순서 변경
+   - 질문 미리보기 모드
+   - 통과점수 자동 계산 (총점의 60%)
+
+2. **데이터 검증 강화**
+   - 중복 Day 체크
+   - 총 배점과 totalPoints 일치 검증
+   - 선택지 중복 텍스트 경고
+
+3. **통계 기능**
+   - 퀴즈별 정답률 표시
+   - 난이도 분석
+   - 사용자 피드백 수집
+
+---
+
+**Last Updated:** 2026-01-01
+**Contributors:** Claude AI

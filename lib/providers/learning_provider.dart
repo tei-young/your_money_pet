@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 import '../models/learning_day_model.dart';
-import '../models/learning_content_model.dart';
-import '../models/quiz_model.dart';
+import '../models/learning_content_model.dart' show LearningContent;
+import '../models/quiz_model.dart' show Quiz;
 import '../services/learning_content_service.dart';
-import '../utils/constants.dart';
 
 /// 학습 진행 상태 관리 Provider
 class LearningProvider with ChangeNotifier {

@@ -53,7 +53,13 @@ npm run dev
   - [x] 이미지 업로드 (Firebase Storage)
   - [x] 동적 카드 관리 (text, image, quiz_link)
   - [x] 선택적 팁 추가
-- [ ] 퀴즈 관리 (CRUD)
+- [x] 퀴즈 관리 (CRUD)
+  - [x] 성향별 퀴즈 목록 조회
+  - [x] 신규 퀴즈 생성 (동적 질문/선택지)
+  - [x] 기존 퀴즈 수정
+  - [x] 퀴즈 삭제
+  - [x] 정답 선택 (라디오 버튼)
+  - [x] 선택지별 해설 관리
 - [ ] 사용자 통계 대시보드
 - [ ] 캐릭터 설정 관리
 
@@ -65,12 +71,17 @@ backoffice/
 │   ├── dashboard/
 │   │   ├── page.tsx                        # 성향 선택 대시보드
 │   │   └── [personality]/
-│   │       ├── page.tsx                    # 성향별 메인 (탭)
-│   │       └── learning/
+│   │       ├── page.tsx                    # 성향별 메인 (학습/퀴즈 탭)
+│   │       ├── learning/
+│   │       │   ├── new/
+│   │       │   │   └── page.tsx            # 신규 학습 콘텐츠 작성
+│   │       │   └── [id]/
+│   │       │       └── page.tsx            # 학습 콘텐츠 수정
+│   │       └── quiz/
 │   │           ├── new/
-│   │           │   └── page.tsx            # 신규 콘텐츠 작성
+│   │           │   └── page.tsx            # 신규 퀴즈 작성
 │   │           └── [id]/
-│   │               └── page.tsx            # 콘텐츠 수정
+│   │               └── page.tsx            # 퀴즈 수정
 │   ├── login/
 │   │   └── page.tsx                        # 관리자 로그인
 │   ├── layout.tsx                          # 루트 레이아웃
@@ -78,8 +89,11 @@ backoffice/
 │   └── globals.css                         # 전역 스타일
 ├── components/
 │   ├── learning/
-│   │   ├── LearningContentList.tsx         # 콘텐츠 목록
-│   │   └── LearningContentForm.tsx         # 작성/수정 폼
+│   │   ├── LearningContentList.tsx         # 학습 콘텐츠 목록
+│   │   └── LearningContentForm.tsx         # 학습 콘텐츠 작성/수정 폼
+│   ├── quiz/
+│   │   ├── QuizContentList.tsx             # 퀴즈 목록
+│   │   └── QuizContentForm.tsx             # 퀴즈 작성/수정 폼
 │   └── ui/                                 # shadcn/ui 컴포넌트
 │       ├── button.tsx
 │       ├── card.tsx

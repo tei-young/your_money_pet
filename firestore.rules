@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // === Helper Functions ===
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // === User Data (사용자 데이터) ===
+    // 본인만 읽기/쓰기 가능
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      // 학습 진행 기록 (하위 컬렉션)
+      match /learning_progress/{dayId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // 퀴즈 결과 (하위 컬렉션)
+      match /quiz_results/{quizId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // === Learning Content (학습 콘텐츠) ===
+    // 모두 읽기, 관리자만 쓰기
+    match /learning_contents/{contentId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // === Quiz Content (퀴즈 콘텐츠) ===
+    // 모두 읽기, 관리자만 쓰기
+    match /quiz_contents/{quizId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // === Character Config (캐릭터 설정) ===
+    // 모두 읽기, 관리자만 쓰기
+    match /character_configs/{characterId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // === App Config (앱 설정) ===
+    // 모두 읽기, 관리자만 쓰기
+    match /app_config/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

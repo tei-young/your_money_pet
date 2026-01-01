@@ -1,5 +1,161 @@
 # MoneyPet 개발 로그
 
+## 📅 2026-01-01 세션: Firestore 백오피스 통합 구현
+
+### 🎯 목표
+백오피스 팀이 설계한 Firestore 스키마에 맞춰 학습 콘텐츠 및 퀴즈 데이터 통합
+
+### 📋 완료된 작업
+
+#### 1. Firestore 모델 생성 ✅
+**커밋:** 8800ae0
+**파일:** `lib/models/learning_content_model.dart`, `lib/models/quiz_model.dart`
+**날짜:** 2026-01-01
+
+**변경 사항:**
+- ✅ **LearningContent 모델** (`learning_content_model.dart`)
+  - Firestore `learning_contents` 컬렉션 매핑
+  - 필드: `day`, `personality`, `title`, `estimatedMinutes`, `points`, `cards[]`, `createdAt`, `updatedAt`
+  - 중요: `personality` 필드 사용 (personalityType 아님)
+  - Firestore Timestamp → DateTime 자동 변환
+  - cards 배열 자동 정렬 (order 필드 기준)
+
+- ✅ **LearningCard 모델**
+  - 필드: `order`, `type` ("text", "image", "quiz_link"), `content`, `imageUrl`, `tip`
+  - type 기반 카드 렌더링 지원
+  - quiz_link는 향후 구현 예정 (현재는 필터링)
+
+- ✅ **Quiz 모델** (`quiz_model.dart`)
+  - Firestore `quiz_contents` 컬렉션 매핑
+  - 필드: `day`, `personality`, `questions[]`, `totalPoints`, `passingScore`, `createdAt`, `updatedAt`
+  - questions 배열 자동 정렬 (order 필드 기준)
+
+- ✅ **QuizQuestion 모델**
+  - 필드: `order`, `question`, `options[]`, `points`
+  - options는 배열 순서 보장 (별도 order 필드 없음)
+
+- ✅ **QuizOption 모델**
+  - 필드: `text`, `isCorrect`, `explanation`
+  - 각 선택지마다 개별 해설 제공
+
+**코드 예시:**
+```dart
+// LearningContent.fromJson() - Firestore 데이터 변환
+factory LearningContent.fromJson(Map<String, dynamic> json) {
+  final cardsList = (json['cards'] as List)
+      .map((c) => LearningCard.fromJson(c))
+      .toList();
+  cardsList.sort((a, b) => a.order.compareTo(b.order));
+
+  return LearningContent(
+    day: json['day'] as int,
+    personality: json['personality'] as String,
+    title: json['title'] as String,
+    estimatedMinutes: json['estimatedMinutes'] as int,
+    points: json['points'] as int,
+    cards: cardsList,
+    createdAt: (json['createdAt'] as Timestamp).toDate(),
+    updatedAt: (json['updatedAt'] as Timestamp).toDate(),
+  );
+}
+```
+
+---
+
+#### 2. Firestore 서비스 생성 ✅
+**커밋:** 8800ae0
+**파일:** `lib/services/learning_content_service.dart`
+**날짜:** 2026-01-01
+
+**변경 사항:**
+- ✅ **LearningContentService 클래스 구현**
+  - `getLearningContent(day, personality)`: 학습 콘텐츠 조회
+  - `getQuiz(day, personality)`: 퀴즈 조회
+  - `getLearningContentWithQuiz(day, personality)`: 병렬 로딩으로 성능 최적화
+  - `getQuizById(quizId)`: quiz_link 카드용 (향후 사용)
+
+- ✅ **Firestore 쿼리 구조**
+  - Composite Index 필요: (personality, day)
+  - learning_contents: 백오피스 팀이 이미 생성 완료
+  - quiz_contents: 첫 실행 시 Firebase 자동 생성 안내
+
+- ✅ **병렬 로딩 구현** (백오피스 팀 권장)
+  - Future.wait()로 학습 콘텐츠 + 퀴즈 동시 조회
+  - 순차 대비 ~50% 시간 단축
+
+---
+
+#### 3. LearningProvider Firestore 통합 ✅
+**커밋:** 8800ae0
+**파일:** `lib/providers/learning_provider.dart`
+**날짜:** 2026-01-01
+
+**변경 사항:**
+- ✅ **loadLearningDay() 메서드 업데이트**
+  - 기존: 하드코딩된 임시 데이터 사용
+  - 변경: Firestore에서 실시간 조회 (`personality` 파라미터 추가)
+
+- ✅ **어댑터 패턴 구현**
+  - Firestore 모델 → 기존 LearningDayModel 변환
+  - 기존 UI 화면 로직 유지 (최소한의 변경)
+  - quiz_link 카드 필터링 (향후 구현 예정)
+
+---
+
+#### 4. LearningScreen 업데이트 ✅
+**커밋:** 8800ae0
+**파일:** `lib/screens/learning/learning_screen.dart`
+**날짜:** 2026-01-01
+
+**변경 사항:**
+- ✅ **personality 자동 전달**
+  - UserProvider에서 personalityType.name 추출
+
+- ✅ **콘텐츠 없음 에러 처리** (백오피스 가이드 적용)
+  - "준비 중인 학습입니다" 메시지 표시
+
+- ✅ **이미지 로딩 인디케이터 추가**
+  - loadingBuilder로 진행률 표시
+
+- ✅ **이미지 로드 실패 처리 개선**
+  - errorBuilder로 명확한 에러 메시지
+
+---
+
+#### 5. BACKOFFICE_DESIGN.md 문서 업데이트 ✅
+**파일:** `docs/BACKOFFICE_DESIGN.md`
+**날짜:** 2026-01-01
+
+**변경 사항:**
+- ✅ **필드명 일관성 수정**: `personalityType` → `personality`
+- ✅ **제거된 필드 삭제**: `isPublished`, `version`, `createdBy`, `tags`
+- ✅ **Timestamp 필드 수정**: 문자열 → Firestore Timestamp
+- ✅ **미구현 섹션 표시**: Character Config, App Config 경고 추가
+
+---
+
+### 🎯 구현 완료 요약
+
+#### 핵심 기능
+1. ✅ Firestore 스키마에 맞춘 모델 생성 (LearningContent, Quiz)
+2. ✅ Firestore 조회 서비스 구현 (병렬 로딩 최적화)
+3. ✅ 기존 화면과 호환되는 어댑터 패턴 적용
+4. ✅ personality 기반 콘텐츠 필터링
+5. ✅ 종합적인 에러 처리 (콘텐츠 없음, 이미지 로드 실패)
+
+#### 기술적 결정
+- **어댑터 패턴**: 기존 UI 로직 유지, 점진적 마이그레이션 가능
+- **병렬 로딩**: Future.wait()로 성능 최적화
+- **quiz_link 필터링**: 현재 앱 구조에서는 학습→퀴즈 순차 진행
+
+#### 향후 작업
+- quiz_link 카드 타입 구현 (학습 중간 퀴즈 삽입)
+- estimatedMinutes UI 표시
+- SharedPreferences 학습 진행 상태 영구 저장
+- Firebase Crashlytics 에러 로깅
+
+---
+
 ## 📅 2025-12-26 세션: 홈 화면 랜덤 애니메이션 로직 추가
 
 ### 🎯 목표

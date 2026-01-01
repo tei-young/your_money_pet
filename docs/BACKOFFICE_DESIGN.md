@@ -48,12 +48,12 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
 {
   "contentId": "day_001_safe",
   "day": 1,
-  "personalityType": "safe",  // null이면 공통
+  "personality": "safe",  // "safe", "balanced", "aggressive", "challenger" (필수)
   "title": "예적금의 기본",
   "cards": [
     {
       "order": 1,
-      "type": "text",  // text, image, video
+      "type": "text",  // "text", "image", "quiz_link"
       "content": "**예금**은 자유롭게 입출금이 가능하고, **적금**은 정해진 기간 동안 저축해요.",
       "imageUrl": null,
       "tip": "**복리**의 힘은 시간이 지날수록 커져요!"  // 선택적 필드
@@ -61,12 +61,8 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
   ],
   "estimatedMinutes": 3,
   "points": 50,
-  "isPublished": true,
-  "version": "1.0",
-  "createdAt": "2025-01-01T00:00:00Z",
-  "updatedAt": "2025-01-15T10:00:00Z",
-  "createdBy": "admin_user_id",
-  "tags": ["예금", "적금", "기본"]
+  "createdAt": Timestamp,
+  "updatedAt": Timestamp
 }
 ```
 
@@ -81,12 +77,12 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
 {
   "quizId": "day_001_safe_quiz",
   "day": 1,
-  "personalityType": "safe",
+  "personality": "safe",  // "safe", "balanced", "aggressive", "challenger" (필수)
   "questions": [
     {
       "order": 1,
       "question": "예금과 적금의 차이는?",
-      "options": [
+      "options": [  // 배열 순서 보장 (order 필드 없음)
         {
           "text": "예금은 자유입출금",
           "isCorrect": true,
@@ -98,20 +94,19 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
   ],
   "totalPoints": 100,
   "passingScore": 60,
-  "isPublished": true,
-  "version": "1.0",
-  "createdAt": "2025-01-01T00:00:00Z",
-  "updatedAt": "2025-01-15T10:00:00Z",
-  "createdBy": "admin_user_id"
+  "createdAt": Timestamp,
+  "updatedAt": Timestamp
 }
 ```
 
 #### 2.3 Character Config (캐릭터 설정)
+**⚠️ 참고: 미구현 섹션 (향후 백오피스 구현 예정)**
+
 ```dart
 // CharacterConfig Collection
 {
   "characterId": "money_bear",
-  "personalityType": "safe",
+  "personality": "safe",  // "safe", "balanced", "aggressive", "challenger"
   "displayName": "머니베어",
   "fullName": "Money Bear 머니베어",
   "description": "든든하게 지키는",
@@ -130,12 +125,13 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
   "curriculum": "예적금의 기본과 복리의 힘부터...",
   "isActive": true,
   "sortOrder": 1,
-  "version": "1.0",
-  "updatedAt": "2025-01-15T10:00:00Z"
+  "updatedAt": Timestamp
 }
 ```
 
 #### 2.4 App Config (앱 설정)
+**⚠️ 참고: 미구현 섹션 (향후 백오피스 구현 예정)**
+
 ```dart
 // AppConfig Collection
 {
@@ -154,8 +150,7 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
     "learningPoints": 50,
     "quizPointsPerQuestion": 20
   },
-  "updatedAt": "2025-01-15T10:00:00Z",
-  "updatedBy": "admin_user_id"
+  "updatedAt": Timestamp
 }
 ```
 

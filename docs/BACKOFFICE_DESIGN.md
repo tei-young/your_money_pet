@@ -48,7 +48,7 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
 {
   "contentId": "day_001_safe",
   "day": 1,
-  "personality": "safe",  // "safe", "balanced", "aggressive", "challenger" (필수)
+  "personality": "safe",  // "safe", "balanced", "aggressive", "challenger"
   "title": "예적금의 기본",
   "cards": [
     {
@@ -61,8 +61,8 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
   ],
   "estimatedMinutes": 3,
   "points": 50,
-  "createdAt": Timestamp,
-  "updatedAt": Timestamp
+  "createdAt": "2025-01-01T00:00:00Z",
+  "updatedAt": "2025-01-15T10:00:00Z"
 }
 ```
 
@@ -77,7 +77,7 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
 {
   "quizId": "day_001_safe_quiz",
   "day": 1,
-  "personality": "safe",  // "safe", "balanced", "aggressive", "challenger" (필수)
+  "personality": "safe",  // "safe", "balanced", "aggressive", "challenger"
   "questions": [
     {
       "order": 1,
@@ -98,6 +98,8 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
   "updatedAt": Timestamp
 }
 ```
+
+**참고:** 퀴즈 백오피스는 아직 미구현 상태. 학습 콘텐츠와 동일한 최소 구조로 구현 예정.
 
 #### 2.3 Character Config (캐릭터 설정)
 **⚠️ 참고: 미구현 섹션 (향후 백오피스 구현 예정)**
@@ -129,6 +131,8 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
 }
 ```
 
+**참고:** 캐릭터 설정 백오피스는 아직 미구현 상태. 향후 구현 예정.
+
 #### 2.4 App Config (앱 설정)
 **⚠️ 참고: 미구현 섹션 (향후 백오피스 구현 예정)**
 
@@ -153,6 +157,8 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
   "updatedAt": Timestamp
 }
 ```
+
+**참고:** 앱 설정 백오피스는 아직 미구현 상태. 향후 구현 예정.
 
 ## 백오피스 기능 요구사항
 
@@ -285,26 +291,95 @@ PUT    /api/v1/characters/{characterId}
 
 ## 구현 우선순위
 
-### Phase 1: 데이터 모델 개선
-- [ ] User 모델에 백오피스 필드 추가 (createdAt, updatedAt, metadata)
-- [ ] Content 모델 생성 (LearningContent, QuizContent)
-- [ ] CharacterConfig 모델 생성
-- [ ] AppConfig 모델 생성
+### Phase 1: 데이터 모델 개선 ✅ 완료 (2025-12-29)
+- [x] User 모델에 백오피스 필드 추가 (createdAt, updatedAt, metadata)
+- [x] Content 모델 생성 (LearningContent, QuizContent)
+- [x] CharacterConfig 모델 생성
+- [x] AppConfig 모델 생성
 
-### Phase 2: Firebase 연동
-- [ ] Firestore 컬렉션 설계 및 생성
+### Phase 2: Firebase 연동 🚧 진행 중
+- [x] **Firestore 컬렉션 설계 및 생성** (2025-12-29 완료)
+  - Firebase 프로젝트: `moneypet-74066`
+  - 위치: `asia-northeast3 (Seoul)`
+  - 모드: Production mode
+  - Security Rules 설정 완료
+  - 관리자 계정 생성 및 admin custom claim 설정 완료
+  - 초기 데이터 생성 완료:
+    - app_config: 1개
+    - character_configs: 4개 (머니베어, 세이브쉽, 헌터캣, 체이서폭스)
+    - learning_contents: 1개 (샘플)
+    - quiz_contents: 1개 (샘플)
 - [ ] User CRUD 구현
 - [ ] Content CRUD 구현
 - [ ] 로컬 캐싱 전략
 
-### Phase 3: 백오피스 웹 개발
-- [ ] 관리자 인증 (Firebase Auth)
-- [ ] 사용자 관리 페이지
-- [ ] 콘텐츠 관리 페이지 (WYSIWYG 에디터)
-- [ ] 퀴즈 관리 페이지
-- [ ] 통계 대시보드
+### Phase 3: 백오피스 웹 개발 🚧 진행 중 (2025-12-30 ~ 2025-12-31)
+- [x] **백오피스 프로젝트 생성** (2025-12-30 완료)
+  - Next.js 15 (App Router) + TypeScript
+  - Tailwind CSS + shadcn/ui
+  - Firebase Client SDK 연동
+  - 프로젝트 위치: `backoffice/`
+- [x] **관리자 인증** (2025-12-30 완료)
+  - Firebase Auth 로그인 페이지 (`/login`)
+  - Admin custom claim 검증
+  - 보호된 라우트 구현
+  - 관리자 계정: admin@moneypet.com
+- [x] **대시보드** (2025-12-30 완료)
+  - 성향별 콘텐츠 관리 카드 (🐻 머니베어, 🐑 세이브쉽, 🐱 헌터캣, 🦊 체이서폭스)
+  - 로그아웃 기능
+  - 자동 리다이렉트 로직
+- [x] **성향별 페이지** (2025-12-31 완료)
+  - 동적 라우팅: `/dashboard/[personality]`
+  - 탭 UI (학습 콘텐츠 / 퀴즈)
+  - 성향별 색상 및 아이콘 표시
+- [x] **학습 콘텐츠 관리 페이지** (2025-12-31 완료)
+  - **목록 페이지** (`/dashboard/[personality]` - 학습 콘텐츠 탭)
+    - Firestore 데이터 조회 (성향별 필터링)
+    - Day 필터 (1-365) 및 정렬 (오름차순/내림차순)
+    - 테이블 뷰: Day, 제목, 카드 개수, 작성일, 수정일, 액션
+    - 삭제 확인 모달
+  - **신규 작성 페이지** (`/dashboard/[personality]/learning/new`)
+    - 기본 정보: Day, 제목, 예상 소요 시간, 포인트
+    - 동적 카드 폼 (추가/삭제)
+    - 카드 타입: text, image, quiz_link
+    - 접을 수 있는 "💡 팁 추가하기" 섹션 (모든 카드에 선택적)
+    - Firebase Storage 이미지 업로드 및 미리보기
+    - 폼 검증 및 Firestore 저장
+  - **수정 페이지** (`/dashboard/[personality]/learning/[id]`)
+    - 기존 데이터 자동 로드
+    - 모든 필드 수정 가능
+    - Firestore 업데이트
+  - **Flutter 팀 협의 완료** (2025-12-31)
+    - Tip을 별도 카드 타입에서 카드 속성으로 변경
+    - 데이터 구조 Flutter 모델과 정합성 확인
+    - UserProvider.user.personalityType 존재 확인
+- [x] **퀴즈 관리 페이지** (2026-01-01 완료)
+  - **목록 페이지** (`/dashboard/[personality]` - 퀴즈 탭)
+    - Firestore 데이터 조회 (성향별 필터링)
+    - Day 필터 (1-365) 및 정렬 (오름차순/내림차순)
+    - 테이블 뷰: Day, 문제 개수, 총점, 통과점수, 작성일, 수정일, 액션
+    - 삭제 확인 모달
+  - **신규 작성 페이지** (`/dashboard/[personality]/quiz/new`)
+    - 기본 정보: Day, 총점, 통과점수
+    - 동적 질문 폼 (추가/삭제, order 자동 관리)
+    - 질문별 동적 선택지 폼 (최소 2개, 추가/삭제)
+    - 정답 선택 (라디오 버튼)
+    - 선택지별 해설 입력
+    - 질문별 배점 설정
+    - 종합 폼 검증 (최소 1문제, 최소 2선택지, 정답 필수)
+  - **수정 페이지** (`/dashboard/[personality]/quiz/[id]`)
+    - 기존 데이터 자동 로드
+    - 모든 필드 수정 가능
+    - Firestore 업데이트
+  - **Flutter 팀 협의 확정** (2025-12-31)
+    - 질문은 order 필드로 정렬
+    - 선택지는 배열 순서 보장 (order 필드 없음)
+    - 모든 유저가 동일한 선택지 순서 확인
+- [ ] **사용자 관리 페이지** (향후)
+  - 유저 활성화/비활성화
+  - 탈퇴 처리
 
-### Phase 4: 고도화
+### Phase 4: 고도화 📋 예정
 - [ ] 버전 관리 시스템
 - [ ] A/B 테스트 기능
 - [ ] 푸시 알림 관리

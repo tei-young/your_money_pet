@@ -3053,5 +3053,972 @@ f0efa57 - Add character selection flow to onboarding
 
 ---
 
-**Last Updated:** 2025-01-15
+## 🏢 백오피스 개발 (2025-12-29)
+
+### 개요
+관리자가 학습 콘텐츠와 퀴즈를 관리할 수 있는 백오피스 시스템 개발 시작
+
+### Phase 1: Firebase 인프라 구축 ✅ 완료
+
+#### 1. Firebase 프로젝트 설정
+**프로젝트 정보:**
+- 프로젝트 ID: `moneypet-74066`
+- Storage Bucket: `moneypet-74066.firebasestorage.app`
+- 플랫폼: Android, iOS 설정 완료
+
+**설정 파일:**
+- `lib/firebase_options.dart` - Flutter Firebase 설정
+- `android/app/google-services.json` - Android 설정
+- `ios/Runner/GoogleService-Info.plist` - iOS 설정
+
+#### 2. Firestore Database 생성
+**설정:**
+- 위치: `asia-northeast3 (Seoul)` - 한국 사용자 최적화
+- 모드: Production mode - 보안 우선
+
+**컬렉션 구조:**
+```
+firestore/
+├── users/                     # 사용자 데이터
+│   └── {userId}/
+│       ├── learning_progress/ # 학습 진행 기록
+│       └── quiz_results/      # 퀴즈 결과
+├── learning_contents/         # 학습 콘텐츠 (관리자 관리)
+├── quiz_contents/             # 퀴즈 콘텐츠 (관리자 관리)
+├── character_configs/         # 캐릭터 설정 (관리자 관리)
+└── app_config/                # 앱 설정 (관리자 관리)
+```
+
+#### 3. Security Rules 설정
+**파일 위치:** Firebase Console > Firestore Database > Rules
+
+**핵심 규칙:**
+- 사용자 데이터: 본인만 읽기/쓰기
+- 콘텐츠/설정: 모두 읽기, 관리자만 쓰기
+- 관리자 판별: `request.auth.token.admin == true`
+
+**주요 함수:**
+```javascript
+function isAdmin() {
+  return request.auth != null && request.auth.token.admin == true;
+}
+
+function isOwner(userId) {
+  return request.auth != null && request.auth.uid == userId;
+}
+```
+
+#### 4. 관리자 계정 설정
+**스크립트:** `scripts/set-admin.js`
+
+**기능:**
+- Firebase Admin SDK를 사용해 특정 사용자에게 admin custom claim 부여
+- 관리자는 Firestore에서 콘텐츠 쓰기 권한 획득
+
+**사용법:**
+```bash
+cd scripts
+npm install
+node set-admin.js <USER_UID>
+```
+
+**보안:**
+- Service Account Key는 `.gitignore`에 추가 (절대 커밋 금지)
+- `scripts/service-account-key.json` 파일 필요
+
+#### 5. 초기 데이터 생성
+**스크립트:** `scripts/init-firestore.js`
+
+**생성된 데이터:**
+
+1. **App Config** (1개)
+```javascript
+{
+  minAppVersion: "1.0.0",
+  forceUpdateVersion: "1.0.0",
+  maintenanceMode: false,
+  features: {
+    characterSelection: true,
+    dailyReminder: true,
+    sharing: true
+  },
+  constants: {
+    totalDays: 365,
+    learningPoints: 50,
+    quizPointsPerQuestion: 20
+  }
+}
+```
+
+2. **Character Configs** (4개)
+- 머니베어 (money_bear) - 안전형 🐻
+- 세이브쉽 (save_sheep) - 균형형 🐑
+- 헌터캣 (hunter_cat) - 공격형 🐱
+- 체이서폭스 (chaser_fox) - 도전형 🦊
+
+3. **샘플 Learning Content** (1개)
+- Day 1 안전형: "예적금의 기본"
+- 3개의 학습 카드
+- 예상 소요시간: 3분
+- 포인트: 50점
+
+4. **샘플 Quiz Content** (1개)
+- Day 1 안전형 퀴즈
+- 2개의 문제 (각 50점)
+- 합격 점수: 60점
+
+**사용법:**
+```bash
+cd scripts
+node init-firestore.js
+```
+
+### Phase 3: 백오피스 웹 개발 ✅ 완료 (2025-12-30)
+
+#### 1. Next.js 프로젝트 생성
+**프로젝트 위치:** `backoffice/`
+
+**기술 스택:**
+- Next.js 15.1.6 (App Router)
+- React 19.0.0
+- TypeScript 5
+- Tailwind CSS 3.4.1
+- Firebase 11.1.0 (Client SDK)
+
+**생성 명령:**
+```bash
+npx create-next-app@latest backoffice
+# ✅ TypeScript: Yes
+# ✅ ESLint: Yes
+# ✅ Tailwind CSS: Yes
+# ✅ src/ directory: No
+# ✅ App Router: Yes
+# ✅ Import alias: @/*
+```
+
+#### 2. Firebase Client SDK 연동
+**설정 파일:** `backoffice/lib/firebase.ts`
+
+**Firebase 웹 앱 추가:**
+- Firebase Console > Project Settings > 앱 추가 > Web
+- 앱 닉네임: "MoneyPet Backoffice"
+
+**환경 변수:** `backoffice/.env.local`
+```bash
+NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyAGQtxbbHxGMENh9XSsma-b9Lqoiewk-OY
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=moneypet-74066.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=moneypet-74066
+# ... (기타 Firebase 설정)
+```
+
+**주요 코드:**
+```typescript
+import { initializeApp, getApps } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+```
+
+#### 3. shadcn/ui 설치 및 설정
+**설치 명령:**
+```bash
+npx shadcn@latest init
+# ✅ Style: New York
+# ✅ Base color: Zinc
+# ✅ CSS variables: Yes
+```
+
+**추가한 컴포넌트:**
+```bash
+npx shadcn@latest add button
+npx shadcn@latest add input
+npx shadcn@latest add card
+```
+
+**커스텀 색상 추가:** `tailwind.config.ts`
+```typescript
+colors: {
+  safe: "hsl(210, 20%, 55%)",      // 머니베어 - 회색
+  balanced: "hsl(142, 76%, 36%)",  // 세이브쉽 - 초록
+  aggressive: "hsl(4, 90%, 58%)",  // 헌터캣 - 빨강
+  challenger: "hsl(27, 96%, 61%)"  // 체이서폭스 - 주황
+}
+```
+
+#### 4. React 19 호환성 수정
+**문제:**
+- lucide-react 0.344.0이 React 19를 지원하지 않음
+- @radix-ui/react-slot 1.0.2가 React 19를 지원하지 않음
+
+**해결:**
+```json
+{
+  "lucide-react": "^0.460.0",       // 0.344.0 → 0.460.0
+  "@radix-ui/react-slot": "^1.1.0"  // 1.0.2 → 1.1.0
+}
+```
+
+#### 5. 관리자 로그인 페이지 구현
+**파일:** `backoffice/app/login/page.tsx`
+
+**기능:**
+- Firebase Auth 이메일/비밀번호 로그인
+- Admin custom claim 검증
+- 에러 처리 (invalid-credential, too-many-requests 등)
+- shadcn/ui Card, Input, Button 컴포넌트 사용
+
+**핵심 로직:**
+```typescript
+const handleLogin = async (e: React.FormEvent) => {
+  e.preventDefault();
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user;
+  const idTokenResult = await user.getIdTokenResult();
+
+  if (!idTokenResult.claims.admin) {
+    setError("관리자 권한이 필요합니다.");
+    await auth.signOut();
+    return;
+  }
+
+  router.push("/dashboard");
+};
+```
+
+#### 6. 대시보드 페이지 구현
+**파일:** `backoffice/app/dashboard/page.tsx`
+
+**기능:**
+- 관리자 전용 보호된 라우트
+- 로그아웃 기능
+- 학습 콘텐츠/퀴즈 관리 카드 (준비 중)
+- 로그인 성공 상태 카드
+
+**인증 검증:**
+```typescript
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    if (!currentUser) {
+      router.push("/login");
+      return;
+    }
+
+    const idTokenResult = await currentUser.getIdTokenResult();
+    if (!idTokenResult.claims.admin) {
+      await signOut(auth);
+      router.push("/login");
+      return;
+    }
+
+    setUser(currentUser);
+    setLoading(false);
+  });
+
+  return () => unsubscribe();
+}, [router]);
+```
+
+#### 7. 자동 리다이렉트 로직
+**파일:** `backoffice/app/page.tsx`
+
+**기능:**
+- 루트 경로(`/`) 접근 시 자동 판별
+- 로그인 + Admin → `/dashboard`
+- 로그인 + Non-Admin → `/login` (강제 로그아웃)
+- 미로그인 → `/login`
+
+#### 8. 관리자 계정 생성
+**계정 정보:**
+- 이메일: `admin@moneypet.com`
+- 비밀번호: `admin123!`
+- UID: `H1krNK1xjZextFIdzPCVY1haQHb2`
+- Admin Claim: `true`
+
+**설정 방법:**
+```bash
+cd scripts
+node set-admin.js H1krNK1xjZextFIdzPCVY1haQHb2
+```
+
+### 프로젝트 구조 업데이트
+
+```
+your_money_pet/
+├── lib/                          # Flutter 앱
+│   ├── firebase_options.dart     ✅ Firebase 설정
+│   └── ...
+├── backoffice/                   ✅ 신규 (2025-12-30)
+│   ├── app/
+│   │   ├── page.tsx              # 자동 리다이렉트
+│   │   ├── login/
+│   │   │   └── page.tsx          # 로그인 페이지
+│   │   ├── dashboard/
+│   │   │   └── page.tsx          # 대시보드
+│   │   ├── globals.css
+│   │   └── layout.tsx
+│   ├── components/
+│   │   └── ui/                   # shadcn/ui 컴포넌트
+│   │       ├── button.tsx
+│   │       ├── input.tsx
+│   │       └── card.tsx
+│   ├── lib/
+│   │   ├── firebase.ts           # Firebase 초기화
+│   │   └── utils.ts              # cn 유틸리티
+│   ├── .env.local                # Firebase 설정 (gitignore)
+│   ├── package.json
+│   ├── tailwind.config.ts
+│   ├── tsconfig.json
+│   └── next.config.ts
+├── scripts/                      ✅ (2025-12-29)
+│   ├── package.json
+│   ├── set-admin.js              # 관리자 권한 부여
+│   ├── init-firestore.js         # Firestore 초기화
+│   ├── service-account-key.json  # (gitignore)
+│   └── node_modules/             # (gitignore)
+├── docs/
+│   ├── BACKOFFICE_DESIGN.md      ✅ 업데이트
+│   └── DEVELOPMENT_LOG.md        ✅ 업데이트
+└── .gitignore                    ✅ 업데이트
+```
+
+### Phase 3 계속: 학습 콘텐츠 관리 구현 ✅ 완료 (2025-12-31)
+
+#### 9. 성향별 페이지 구현
+**파일:** `backoffice/app/dashboard/[personality]/page.tsx`
+
+**기능:**
+- 동적 라우팅으로 4개 성향 지원 (safe/balanced/aggressive/challenger)
+- Tabs 컴포넌트로 학습 콘텐츠/퀴즈 구분
+- 성향별 정보 표시 (이름, 한글명, 이모지, 색상)
+- 대시보드로 돌아가기 버튼
+
+**성향 정보:**
+```typescript
+const personalities = {
+  safe: { name: "머니베어", nameKo: "안전형", emoji: "🐻", color: "text-safe" },
+  balanced: { name: "세이브쉽", nameKo: "균형형", emoji: "🐑", color: "text-balanced" },
+  aggressive: { name: "헌터캡", nameKo: "공격형", emoji: "🐱", color: "text-aggressive" },
+  challenger: { name: "체이서폭스", nameKo: "도전형", emoji: "🦊", color: "text-challenger" },
+};
+```
+
+#### 10. 학습 콘텐츠 목록 페이지
+**컴포넌트:** `components/learning/LearningContentList.tsx`
+
+**기능:**
+- Firestore 쿼리: `where("personality", "==", personality), orderBy("day", "asc")`
+- Day 필터 드롭다운 (전체/Day 1-365)
+- 정렬: Day 오름차순/내림차순
+- 테이블 컬럼: Day, 제목, 카드 개수, 작성일, 수정일, 액션
+- 수정/삭제 버튼 (수정 → `/dashboard/[personality]/learning/[id]`)
+- 삭제 확인 모달 (⚠️ 되돌릴 수 없음 경고)
+- "새 학습 콘텐츠 추가" 버튼
+
+**데이터 관리:**
+```typescript
+// Firestore 조회
+const q = query(
+  collection(db, "learning_contents"),
+  where("personality", "==", personality),
+  orderBy("day", "asc")
+);
+
+// 삭제
+await deleteDoc(doc(db, "learning_contents", id));
+```
+
+#### 11. 학습 콘텐츠 작성/수정 폼
+**컴포넌트:** `components/learning/LearningContentForm.tsx`
+
+**기본 정보 필드:**
+- Day (1-365, number input)
+- 제목 (text input, 필수)
+- 예상 소요 시간 (분, number input, 기본값: 3)
+- 포인트 (number input, 기본값: 50)
+
+**동적 카드 관리:**
+- 카드 추가/삭제 (최소 1개 유지)
+- 카드 순서 자동 관리 (order: 1, 2, 3...)
+- 카드 타입 선택: text, image, tip, quiz_link
+
+**카드 타입별 입력:**
+1. **text**: textarea (학습 내용)
+2. **image**:
+   - File input (accept="image/*")
+   - Firebase Storage 업로드 (`learning/{personality}/{timestamp}_{filename}`)
+   - 이미지 미리보기
+   - 선택적 설명 (content)
+3. **tip**: textarea (💡 팁 내용)
+4. **quiz_link**: textarea (퀴즈 ID/링크)
+
+**Firebase Storage 업로드:**
+```typescript
+const storageRef = ref(storage, `learning/${personality}/${timestamp}_${file.name}`);
+await uploadBytes(storageRef, file);
+const downloadURL = await getDownloadURL(storageRef);
+```
+
+**폼 검증:**
+- 제목 필수
+- Day 범위 (1-365)
+- 카드 최소 1개
+- 각 카드 내용 필수 (image 타입은 imageUrl 필수)
+
+**저장/수정:**
+```typescript
+// 신규 저장
+await addDoc(collection(db, "learning_contents"), {
+  ...formData,
+  createdAt: serverTimestamp(),
+  updatedAt: serverTimestamp(),
+});
+
+// 수정
+await updateDoc(doc(db, "learning_contents", contentId), {
+  ...formData,
+  updatedAt: serverTimestamp(),
+});
+```
+
+#### 12. 신규 작성 페이지
+**파일:** `backoffice/app/dashboard/[personality]/learning/new/page.tsx`
+
+**기능:**
+- 성향별 보호된 라우트
+- Admin 인증 확인
+- LearningContentForm 컴포넌트 사용 (contentId 없음)
+- 저장 후 성향 페이지로 리다이렉트
+
+#### 13. 수정 페이지
+**파일:** `backoffice/app/dashboard/[personality]/learning/[id]/page.tsx`
+
+**기능:**
+- 성향별 보호된 라우트
+- Admin 인증 확인
+- LearningContentForm 컴포넌트 사용 (contentId 전달)
+- 기존 데이터 자동 로드
+- 수정 후 성향 페이지로 리다이렉트
+
+#### 14. UI 컴포넌트 추가
+**파일:** `components/ui/tabs.tsx`
+
+**설치:**
+```bash
+npm install @radix-ui/react-tabs
+```
+
+**컴포넌트:**
+- Tabs (root)
+- TabsList (탭 버튼 컨테이너)
+- TabsTrigger (개별 탭 버튼)
+- TabsContent (탭 내용)
+
+### 프로젝트 구조 업데이트 (2025-12-31)
+
+```
+backoffice/
+├── app/
+│   ├── dashboard/
+│   │   ├── page.tsx                           # 성향 선택 대시보드
+│   │   └── [personality]/
+│   │       ├── page.tsx                       # 성향별 메인 (탭)
+│   │       └── learning/
+│   │           ├── new/
+│   │           │   └── page.tsx               # 신규 작성 ✅ 신규
+│   │           └── [id]/
+│   │               └── page.tsx               # 수정 ✅ 신규
+│   ├── login/
+│   │   └── page.tsx
+│   └── page.tsx
+├── components/
+│   ├── learning/
+│   │   ├── LearningContentList.tsx            # 목록 ✅ 신규
+│   │   └── LearningContentForm.tsx            # 작성/수정 폼 ✅ 신규
+│   └── ui/
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── input.tsx
+│       └── tabs.tsx                           # ✅ 신규
+└── lib/
+    ├── firebase.ts
+    └── utils.ts
+```
+
+### 다음 단계 (Phase 3 계속)
+
+#### 예정 작업:
+1. **퀴즈 관리 페이지** (`/dashboard/quiz`)
+   - 목록 조회
+   - 신규 작성
+   - 수정/삭제
+
+2. **유저 관리 페이지** (향후)
+   - 사용자 활성화/비활성화
+   - 탈퇴 처리
+
+### Git 커밋 히스토리
+```bash
+c4e8b3f - Feat: Implement learning content create and edit pages (2025-12-31)
+1f8e030 - Feat: Implement learning content list page with personality selection (2025-12-31)
+080d765 - Docs: Update backoffice development progress (Phase 3) (2025-12-30)
+6410834 - Fix: Update lucide-react and @radix-ui/react-slot to support React 19 (2025-12-30)
+592e6a2 - Implement admin login and dashboard pages (2025-12-30)
+dd73792 - Add shadcn/ui setup and components (2025-12-30)
+2b2ca0f - Add Firebase client SDK integration to backoffice (2025-12-30)
+27ec664 - Add Next.js backoffice project (2025-12-30)
+390dbae - Add Firestore initialization script (2025-12-29)
+7f2f4d3 - Add Firebase Admin scripts for setting admin custom claims (2025-12-29)
+```
+
+---
+
+**Last Updated:** 2025-12-31
+**Contributors:** Claude AI
+
+---
+
+## 2025-12-31: Tip 구조 변경 및 Flutter 팀 협의 완료
+
+### 배경
+Flutter 팀과 백오피스 데이터 구조 정합성 검토 진행
+
+### Flutter 팀 질문 사항
+1. **Tip 필드 처리 방식**
+   - 방안 A: tip을 별도 카드 타입으로 처리
+   - 방안 B: tip을 카드 속성으로 처리 (선택적 필드)
+
+2. **기존 데이터 마이그레이션**
+   - 현재 백오피스에 저장된 테스트 데이터 처리 방법
+
+3. **성향(personality) 매칭**
+   - UserProvider에 사용자 성향 정보(personalityType) 존재 여부
+
+### 의사결정 결과
+
+#### 1. Tip 구조: 방안 B 선택 (카드 속성)
+**이유:**
+- 모든 카드에 선택적으로 팁 추가 가능
+- 데이터 구조가 더 유연함
+- Flutter 모델과 일치
+
+**백오피스 수정 사항:**
+```typescript
+interface LearningCard {
+  order: number;
+  type: "text" | "image" | "quiz_link";  // "tip" 제거됨
+  content: string;
+  imageUrl?: string;
+  tip?: string;  // 선택적 팁 필드 추가
+}
+```
+
+**UI 변경:**
+- 카드 타입 드롭다운에서 "팁" 옵션 제거
+- 모든 카드에 접을 수 있는 "💡 팁 추가하기" 섹션 추가
+
+#### 2. 데이터 마이그레이션: 깔끔하게 새로 시작
+**방법:**
+- Firebase Console 또는 삭제 스크립트로 테스트 데이터 삭제
+- 새로운 데이터 구조로 콘텐츠 재입력
+
+**삭제 스크립트:**
+```javascript
+// scripts/delete-test-data.js
+const admin = require("firebase-admin");
+const serviceAccount = require("./service-account-key.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+const db = admin.firestore();
+
+async function deleteCollection(collectionName) {
+  const snapshot = await db.collection(collectionName).get();
+  const batch = db.batch();
+  snapshot.docs.forEach(doc => batch.delete(doc.ref));
+  await batch.commit();
+  console.log(`✅ ${collectionName} 삭제 완료`);
+}
+
+async function main() {
+  await deleteCollection("learning_contents");
+  await deleteCollection("quiz_contents");
+  console.log("✅ 모든 테스트 데이터 삭제 완료");
+}
+
+main();
+```
+
+#### 3. UserProvider 확인: personalityType 존재 ✅
+**Flutter 팀 답변:**
+- UserModel에 `personalityType` 필드 존재 (Line 7)
+- UserProvider에서 `user.personalityType`로 접근 가능
+- Enum: `PersonalityType.safe`, `balanced`, `aggressive`, `challenger`
+- JSON 변환: `personalityType.name` → `"safe"`, `"balanced"` 등
+- **완벽하게 백오피스 Firestore 구조와 매칭 가능**
+
+### 구현 완료
+
+#### 파일 수정: `backoffice/components/learning/LearningContentForm.tsx`
+
+**변경 사항:**
+1. LearningCard 인터페이스 업데이트
+2. 카드 타입에서 "tip" 제거
+3. tip 필드 추가 (선택적)
+4. updateCardTip 핸들러 추가
+5. 접을 수 있는 팁 입력 섹션 UI 추가
+
+**구현 코드:**
+```typescript
+// 인터페이스
+interface LearningCard {
+  order: number;
+  type: "text" | "image" | "quiz_link";
+  content: string;
+  imageUrl?: string;
+  tip?: string;
+}
+
+// 핸들러
+const updateCardTip = (index: number, tip: string) => {
+  const newCards = [...formData.cards];
+  newCards[index] = { ...newCards[index], tip };
+  setFormData({ ...formData, cards: newCards });
+};
+
+// UI
+<details className="mt-3">
+  <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
+    💡 팁 추가하기 (선택사항)
+  </summary>
+  <div className="mt-2">
+    <textarea
+      value={card.tip || ""}
+      onChange={(e) => updateCardTip(index, e.target.value)}
+      className="w-full border rounded-md px-3 py-2 min-h-[80px]"
+      placeholder="이 카드와 관련된 팁이나 추가 정보를 입력하세요"
+    />
+  </div>
+</details>
+```
+
+### Flutter 팀 전달 사항
+
+#### 최종 데이터 구조
+```typescript
+// Firestore: learning_contents
+{
+  day: 1,
+  personality: "safe",
+  title: "예적금의 기본",
+  estimatedMinutes: 3,
+  points: 50,
+  cards: [
+    {
+      order: 1,
+      type: "text",
+      content: "예금과 적금의 차이는...",
+      tip: "💡 금리가 높을수록 이자를 더 많이 받아요!"  // 선택적
+    }
+  ],
+  createdAt: Timestamp,
+  updatedAt: Timestamp
+}
+```
+
+#### Flutter 모델 구조 (권장)
+```dart
+class LearningCard {
+  final int order;
+  final String type;  // "text", "image", "quiz_link"
+  final String content;
+  final String? imageUrl;
+  final String? tip;  // 선택적 필드
+
+  bool get hasTip => tip != null && tip!.isNotEmpty;
+}
+```
+
+#### Firestore 조회
+```dart
+// 사용자 성향에 맞는 콘텐츠 조회
+final user = context.read<UserProvider>().user;
+final personality = user.personalityType.name;  // "safe", "balanced", etc.
+
+final contents = await FirebaseFirestore.instance
+  .collection('learning_contents')
+  .where('personality', isEqualTo: personality)
+  .orderBy('day')
+  .get();
+```
+
+### Git 커밋
+```bash
+7cc08f4 - Refactor: Change tip from card type to optional property (2025-12-31)
+ac9de6f - Fix: Resolve image upload state update issue in LearningContentForm (2025-12-31)
+```
+
+### 다음 단계
+1. Flutter 팀: LearningCard 모델 업데이트 (tip 필드 추가)
+2. Flutter 팀: Firestore 연동 구현
+3. 백오피스: 새 데이터 구조로 콘텐츠 1개 생성하여 테스트
+4. Flutter 앱에서 정상 표시 확인
+5. 확인 완료 후 본격적인 콘텐츠 입력 시작
+
+---
+
+**Last Updated:** 2025-12-31
+**Contributors:** Claude AI
+
+---
+
+## 2026-01-01: 퀴즈 관리 기능 구현 완료
+
+### 배경
+Flutter 팀의 Quiz 모델 구현 완료 후 백오피스에서 퀴즈 관리 기능 구현
+
+### 구현 내용
+
+#### 1. QuizContentList 컴포넌트
+**파일:** `backoffice/components/quiz/QuizContentList.tsx`
+
+**기능:**
+- Firestore quiz_contents 컬렉션 조회 (personality + day 필터)
+- Day 필터 (1-365 입력)
+- 정렬 토글 (오름차순/내림차순)
+- 테이블 뷰
+  - Day, 문제 개수, 총점, 통과점수
+  - 작성일, 수정일
+  - 수정/삭제 액션
+- 삭제 확인 모달
+
+**Firestore 쿼리:**
+```typescript
+const q = query(
+  collection(db, "quiz_contents"),
+  where("personality", "==", personality),
+  orderBy("day", sortOrder)
+);
+```
+
+#### 2. QuizContentForm 컴포넌트
+**파일:** `backoffice/components/quiz/QuizContentForm.tsx`
+
+**기능:**
+- 기본 정보 입력
+  - Day (1-365)
+  - 성향 (자동 설정)
+  - 총점
+  - 통과점수
+  
+- 동적 질문 관리
+  - 질문 추가/삭제
+  - order 자동 관리 (1, 2, 3...)
+  - 질문 텍스트 입력
+  - 배점 설정
+  
+- 질문별 선택지 관리
+  - 선택지 추가/삭제 (최소 2개)
+  - 선택지 텍스트 입력
+  - 정답 선택 (라디오 버튼)
+  - 해설 입력 (정답/오답 모두)
+  
+- 폼 검증
+  - Day 범위 (1-365)
+  - 최소 1문제
+  - 질문 텍스트 필수
+  - 최소 2선택지
+  - 정답 1개 필수
+  - 선택지 텍스트 필수
+  - 해설 필수
+  - 배점 > 0
+  - 총점 > 0
+  - 통과점수 ≤ 총점
+
+**데이터 구조:**
+```typescript
+interface QuizContentData {
+  day: number;
+  personality: string;
+  questions: QuizQuestion[];
+  totalPoints: number;
+  passingScore: number;
+}
+
+interface QuizQuestion {
+  order: number;  // 질문 순서
+  question: string;
+  options: QuizOption[];  // 배열 순서 보장
+  points: number;
+}
+
+interface QuizOption {
+  text: string;
+  isCorrect: boolean;
+  explanation: string;
+  // order 필드 없음 - 배열 순서 사용
+}
+```
+
+#### 3. 퀴즈 라우트 페이지
+
+**신규 작성:** `backoffice/app/dashboard/[personality]/quiz/new/page.tsx`
+- Admin 권한 확인
+- QuizContentForm 사용 (quizId 없음)
+- 저장 후 성향 페이지로 리다이렉트
+
+**수정:** `backoffice/app/dashboard/[personality]/quiz/[id]/page.tsx`
+- Admin 권한 확인
+- QuizContentForm 사용 (quizId 전달)
+- 기존 데이터 자동 로드
+- 수정 후 성향 페이지로 리다이렉트
+
+**Next.js 15 호환:**
+```typescript
+// params가 Promise로 변경됨
+export default function EditQuizPage({ 
+  params 
+}: { 
+  params: Promise<{ personality: string; id: string }> 
+}) {
+  const [personality, setPersonality] = useState<PersonalityType | null>(null);
+  const [quizId, setQuizId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    params.then(p => {
+      setPersonality(p.personality as PersonalityType);
+      setQuizId(p.id);
+    });
+  }, [params]);
+}
+```
+
+#### 4. 성향별 페이지 통합
+**파일:** `backoffice/app/dashboard/[personality]/page.tsx`
+
+**변경사항:**
+```typescript
+import QuizContentList from "@/components/quiz/QuizContentList";
+
+// 퀴즈 탭
+<TabsContent value="quiz" className="space-y-4">
+  <QuizContentList personality={personality} />
+</TabsContent>
+```
+
+### 프로젝트 구조 업데이트
+
+```
+backoffice/
+├── app/
+│   └── dashboard/
+│       └── [personality]/
+│           ├── page.tsx               # 학습/퀴즈 탭 (업데이트)
+│           ├── learning/
+│           │   ├── new/page.tsx
+│           │   └── [id]/page.tsx
+│           └── quiz/                  # ✅ 신규
+│               ├── new/page.tsx       # ✅ 신규
+│               └── [id]/page.tsx      # ✅ 신규
+└── components/
+    ├── learning/
+    │   ├── LearningContentList.tsx
+    │   └── LearningContentForm.tsx
+    └── quiz/                          # ✅ 신규
+        ├── QuizContentList.tsx        # ✅ 신규
+        └── QuizContentForm.tsx        # ✅ 신규
+```
+
+### Flutter 팀 협의 사항 반영
+
+#### 선택지 순서 보장
+**결정:** 옵션 A 선택 - 배열 순서 보장
+
+**Firestore 동작:**
+- 배열은 저장된 순서를 유지
+- 백오피스에서 순서대로 저장하면 그대로 조회됨
+
+**Flutter 처리:**
+```dart
+// 배열 순서 그대로 사용 (정렬 불필요)
+final options = (json['options'] as List)
+  .map((o) => QuizOption.fromJson(o))
+  .toList();
+```
+
+**백오피스 처리:**
+- 선택지 추가 시 배열 끝에 추가
+- 선택지 삭제 시 filter로 제거
+- Firestore 저장 시 배열 순서 유지
+
+#### Firebase Composite Index
+**필요 인덱스:**
+- Collection: `quiz_contents`
+- Fields: `personality` (Ascending) + `day` (Ascending)
+
+**생성 방법:**
+- 첫 쿼리 실행 시 Firebase가 자동으로 생성 링크 제공
+- 링크 클릭하면 자동 생성 (1-2분 소요)
+
+### 빌드 검증
+
+**빌드 결과:**
+```
+✓ Compiled successfully in 10.6s
+✓ Generating static pages (6/6)
+
+Route (app)
+├ ƒ /dashboard/[personality]/quiz/new
+└ ƒ /dashboard/[personality]/quiz/[id]
+```
+
+**ESLint 경고:**
+```
+QuizContentList.tsx:50:6
+Warning: React Hook useEffect has a missing dependency: 'loadQuizzes'
+```
+- 비중요 경고 (useEffect 의존성 최적화)
+- 기능에 영향 없음
+
+### Git 커밋
+```bash
+c1d7ac7 - Feat: Implement quiz management feature (complete CRUD)
+7cc08f4 - Refactor: Change tip from card type to optional property
+```
+
+### 다음 단계
+
+#### 즉시 가능
+1. **테스트 데이터 입력**
+   - Day 1~10 퀴즈 생성 (4개 성향 × 10일 = 40개)
+   - Flutter 앱에서 퀴즈 풀기 테스트
+   - quiz_link 카드 동작 확인
+
+2. **Firebase Composite Index 생성**
+   - 퀴즈 목록 조회 시 인덱스 생성 링크 클릭
+   - 생성 완료 대기 (1-2분)
+
+#### 향후 개선
+1. **UI/UX 개선**
+   - 선택지 드래그 앤 드롭 순서 변경
+   - 질문 미리보기 모드
+   - 통과점수 자동 계산 (총점의 60%)
+
+2. **데이터 검증 강화**
+   - 중복 Day 체크
+   - 총 배점과 totalPoints 일치 검증
+   - 선택지 중복 텍스트 경고
+
+3. **통계 기능**
+   - 퀴즈별 정답률 표시
+   - 난이도 분석
+   - 사용자 피드백 수집
+
+---
+
+**Last Updated:** 2026-01-01
 **Contributors:** Claude AI

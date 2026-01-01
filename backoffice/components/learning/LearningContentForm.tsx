@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { collection, addDoc, doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL, UploadTask } from "firebase/storage";
 import { db } from "@/lib/firebase";
 import { getStorage } from "firebase/storage";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,8 @@ export default function LearningContentForm({ personality, contentId }: Learning
   });
 
   const [uploadingImages, setUploadingImages] = useState<{ [key: number]: boolean }>({});
+  const [uploadProgress, setUploadProgress] = useState<{ [key: number]: number }>({});
+  const [uploadTasks, setUploadTasks] = useState<{ [key: number]: UploadTask }>({});
 
   // 수정 모드일 때 기존 데이터 불러오기
   useEffect(() => {
@@ -132,38 +134,114 @@ export default function LearningContentForm({ personality, contentId }: Learning
     setFormData({ ...formData, cards: newCards });
   };
 
+  // 이미지 업로드 취소
+  const cancelImageUpload = (index: number) => {
+    const task = uploadTasks[index];
+    if (task) {
+      task.cancel();
+      setUploadingImages(prev => ({ ...prev, [index]: false }));
+      setUploadProgress(prev => ({ ...prev, [index]: 0 }));
+      setUploadTasks(prev => {
+        const newTasks = { ...prev };
+        delete newTasks[index];
+        return newTasks;
+      });
+    }
+  };
+
   // 이미지 업로드
   const handleImageUpload = async (index: number, file: File) => {
+    // 기존 업로드가 있으면 취소
+    if (index in uploadTasks) {
+      cancelImageUpload(index);
+    }
+
     try {
       setUploadingImages(prev => ({ ...prev, [index]: true }));
+      setUploadProgress(prev => ({ ...prev, [index]: 0 }));
 
       // Firebase Storage에 업로드
       const timestamp = Date.now();
       const fileName = `learning/${personality}/${timestamp}_${file.name}`;
       const storageRef = ref(storage, fileName);
 
-      await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(storageRef);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+      setUploadTasks(prev => ({ ...prev, [index]: uploadTask }));
 
-      // 카드에 이미지 URL 저장 (함수형 업데이트)
-      setFormData(prev => {
-        const newCards = [...prev.cards];
-        newCards[index] = {
-          ...newCards[index],
-          imageUrl: downloadURL,
-          content: newCards[index].content || file.name, // content가 비어있으면 파일명 사용
-        };
-        return { ...prev, cards: newCards };
-      });
+      // 타임아웃 설정 (30초)
+      const timeout = setTimeout(() => {
+        cancelImageUpload(index);
+        alert("업로드 시간이 초과되었습니다. 이미지 크기가 너무 크거나 네트워크 상태를 확인해주세요.");
+      }, 30000);
 
-      setUploadingImages(prev => ({ ...prev, [index]: false }));
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          // 진행률 업데이트
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setUploadProgress(prev => ({ ...prev, [index]: Math.round(progress) }));
+        },
+        (error) => {
+          // 에러 처리
+          clearTimeout(timeout);
+          console.error("Error uploading image:", error);
 
-      // 업로드 성공 피드백
-      console.log(`✅ 이미지 업로드 완료 (카드 ${index + 1}):`, downloadURL);
+          let errorMessage = "이미지 업로드 중 오류가 발생했습니다.";
+          if (error.code === "storage/canceled") {
+            errorMessage = "업로드가 취소되었습니다.";
+          } else if (error.code === "storage/unauthorized") {
+            errorMessage = "업로드 권한이 없습니다.";
+          } else if (error.code === "storage/quota-exceeded") {
+            errorMessage = "저장 공간이 부족합니다.";
+          }
+
+          alert(errorMessage);
+          setUploadingImages(prev => ({ ...prev, [index]: false }));
+          setUploadProgress(prev => ({ ...prev, [index]: 0 }));
+          setUploadTasks(prev => {
+            const newTasks = { ...prev };
+            delete newTasks[index];
+            return newTasks;
+          });
+        },
+        async () => {
+          // 업로드 완료
+          clearTimeout(timeout);
+          try {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+            // 카드에 이미지 URL 저장 (함수형 업데이트)
+            setFormData(prev => {
+              const newCards = [...prev.cards];
+              newCards[index] = {
+                ...newCards[index],
+                imageUrl: downloadURL,
+                content: newCards[index].content || file.name, // content가 비어있으면 파일명 사용
+              };
+              return { ...prev, cards: newCards };
+            });
+
+            // 업로드 성공 피드백
+            console.log(`✅ 이미지 업로드 완료 (카드 ${index + 1}):`, downloadURL);
+          } catch (error) {
+            console.error("Error getting download URL:", error);
+            alert("이미지 URL을 가져오는 중 오류가 발생했습니다.");
+          } finally {
+            setUploadingImages(prev => ({ ...prev, [index]: false }));
+            setUploadProgress(prev => ({ ...prev, [index]: 0 }));
+            setUploadTasks(prev => {
+              const newTasks = { ...prev };
+              delete newTasks[index];
+              return newTasks;
+            });
+          }
+        }
+      );
     } catch (error) {
-      console.error("Error uploading image:", error);
-      alert("이미지 업로드 중 오류가 발생했습니다.");
+      console.error("Error starting upload:", error);
+      alert("업로드를 시작할 수 없습니다.");
       setUploadingImages(prev => ({ ...prev, [index]: false }));
+      setUploadProgress(prev => ({ ...prev, [index]: 0 }));
     }
   };
 
@@ -371,9 +449,35 @@ export default function LearningContentForm({ personality, contentId }: Learning
                       disabled={uploadingImages[index]}
                     />
                     {uploadingImages[index] && (
-                      <p className="text-sm text-gray-500">업로드 중...</p>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <div className="flex-1 bg-gray-200 rounded-full h-2.5">
+                                <div
+                                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                                  style={{ width: `${uploadProgress[index] || 0}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-sm font-medium text-gray-700">
+                                {uploadProgress[index] || 0}%
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">업로드 중...</p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => cancelImageUpload(index)}
+                            className="ml-2"
+                          >
+                            취소
+                          </Button>
+                        </div>
+                      </div>
                     )}
-                    {card.imageUrl && (
+                    {card.imageUrl && !uploadingImages[index] && (
                       <div className="mt-2">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img

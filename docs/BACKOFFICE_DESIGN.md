@@ -53,7 +53,7 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
   "cards": [
     {
       "order": 1,
-      "type": "text",  // text, image, video
+      "type": "text",  // "text", "image", "quiz_link"
       "content": "**예금**은 자유롭게 입출금이 가능하고, **적금**은 정해진 기간 동안 저축해요.",
       "imageUrl": null,
       "tip": "**복리**의 힘은 시간이 지날수록 커져요!"  // 선택적 필드
@@ -82,7 +82,7 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
     {
       "order": 1,
       "question": "예금과 적금의 차이는?",
-      "options": [
+      "options": [  // 배열 순서 보장 (order 필드 없음)
         {
           "text": "예금은 자유입출금",
           "isCorrect": true,
@@ -102,6 +102,8 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
 **참고:** 퀴즈 백오피스는 아직 미구현 상태. 학습 콘텐츠와 동일한 최소 구조로 구현 예정.
 
 #### 2.3 Character Config (캐릭터 설정)
+**⚠️ 참고: 미구현 섹션 (향후 백오피스 구현 예정)**
+
 ```dart
 // CharacterConfig Collection
 {
@@ -132,6 +134,8 @@ MoneyPet 앱의 콘텐츠 및 사용자 데이터를 백오피스에서 효율�
 **참고:** 캐릭터 설정 백오피스는 아직 미구현 상태. 향후 구현 예정.
 
 #### 2.4 App Config (앱 설정)
+**⚠️ 참고: 미구현 섹션 (향후 백오피스 구현 예정)**
+
 ```dart
 // AppConfig Collection
 {

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft } from "lucide-react";
 import LearningContentList from "@/components/learning/LearningContentList";
+import QuizContentList from "@/components/quiz/QuizContentList";
 
 // 성향 정보 타입
 type PersonalityType = "safe" | "balanced" | "aggressive" | "challenger";
@@ -148,10 +149,7 @@ export default function PersonalityPage() {
           </TabsContent>
 
           <TabsContent value="quiz" className="space-y-4">
-            {/* 퀴즈 리스트 컴포넌트가 여기 들어갈 예정 */}
-            <div className="bg-white rounded-lg p-6 shadow">
-              <p className="text-gray-500">퀴즈 목록 (구현 예정)</p>
-            </div>
+            <QuizContentList personality={personality} />
           </TabsContent>
         </Tabs>
       </div>

@@ -184,6 +184,13 @@ export default function LearningContentForm({ personality, contentId }: Learning
       return false;
     }
 
+    // 이미지 업로드 중인지 확인
+    const isUploading = Object.values(uploadingImages).some(uploading => uploading);
+    if (isUploading) {
+      alert("이미지 업로드가 진행 중입니다. 잠시만 기다려주세요.");
+      return false;
+    }
+
     for (let i = 0; i < formData.cards.length; i++) {
       const card = formData.cards[i];
       if (!card.content.trim() && card.type !== "image") {

@@ -1,0 +1,61 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "learning_contents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "personality",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "day",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "learning_contents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "personality",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "day",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "quiz_contents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "personality",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "day",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "quiz_contents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "personality",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "day",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

@@ -301,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
           AnimatedCharacter(
             characterType: personalityType,
             state: _currentHomeState,
-            size: 140,
+            size: 200,
           ),
 
           const SizedBox(height: 16),

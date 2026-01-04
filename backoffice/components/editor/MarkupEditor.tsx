@@ -157,18 +157,18 @@ export default function MarkupEditor({
 
           {/* 색상 선택기 */}
           {showColorPicker && (
-            <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg p-2 z-10">
-              <div className="grid grid-cols-3 gap-1.5">
+            <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg p-3 z-10">
+              <div className="grid grid-cols-3 gap-2.5">
                 {colors.map((color) => (
                   <button
                     key={color.value}
                     type="button"
                     onClick={() => insertColor(color.value)}
-                    className="p-1 rounded hover:bg-gray-100 transition-colors"
+                    className="p-1.5 rounded hover:bg-gray-100 transition-colors"
                     title={color.name}
                   >
                     <div
-                      className="w-7 h-7 rounded border border-gray-300"
+                      className="w-9 h-9 rounded-md border border-gray-300"
                       style={{ backgroundColor: color.value }}
                     />
                   </button>

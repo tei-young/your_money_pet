@@ -312,16 +312,16 @@ static List<TextSpan> _parseWithColors(
 
 ## 📱 적용 위치
 
-### 현재 적용 중
+### 학습 콘텐츠 (필수)
 - ✅ 학습 카드 `content` 필드
 - ✅ 학습 카드 `tip` 필드
 
-### 추가 적용 (선택)
-- ☐ 퀴즈 `question` 필드
-- ☐ 퀴즈 `options.text` 필드
-- ☐ 퀴즈 `options.explanation` 필드
+### 퀴즈 (필수)
+- ✅ 퀴즈 `question` 필드
+- ✅ 퀴즈 `options.text` 필드
+- ✅ 퀴즈 `options.explanation` 필드
 
-**결정 필요**: 퀴즈에도 마크업 적용할지 논의 후 결정
+**확정**: 학습 콘텐츠와 퀴즈 모두 마크업 적용 필수
 
 ---
 

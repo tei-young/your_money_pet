@@ -47,7 +47,7 @@ export default function MobilePreview({ cards, title = "예적금의 기본" }: 
         className="relative bg-black rounded-[40px] shadow-2xl overflow-hidden"
         style={{
           width: '390px',
-          height: '844px',
+          height: '700px',
         }}
       >
         {/* 노치 */}
@@ -96,7 +96,7 @@ export default function MobilePreview({ cards, title = "예적금의 기본" }: 
           {/* 학습 카드 영역 (스크롤 가능) */}
           <div className="flex-1 overflow-y-auto px-5 py-4">
             <div
-              className="bg-white rounded-[20px] p-5 shadow-xl min-h-full"
+              className="bg-white rounded-[20px] p-5 shadow-xl"
               style={{
                 boxShadow: '0 8px 20px rgba(183, 148, 246, 0.15), 0 4px 10px rgba(0, 0, 0, 0.08)',
               }}

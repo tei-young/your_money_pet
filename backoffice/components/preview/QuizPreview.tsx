@@ -63,7 +63,7 @@ export default function QuizPreview({ questions, title = "퀴즈" }: QuizPreview
         className="relative bg-black rounded-[40px] shadow-2xl overflow-hidden"
         style={{
           width: '390px',
-          height: '844px',
+          height: '700px',
         }}
       >
         {/* 노치 */}

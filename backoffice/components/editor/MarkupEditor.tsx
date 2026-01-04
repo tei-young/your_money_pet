@@ -157,21 +157,20 @@ export default function MarkupEditor({
 
           {/* 색상 선택기 */}
           {showColorPicker && (
-            <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg p-2 z-10 min-w-[200px]">
-              <div className="text-xs font-medium text-gray-600 mb-2">색상 선택</div>
-              <div className="grid grid-cols-3 gap-2">
+            <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg p-1.5 z-10">
+              <div className="flex gap-1">
                 {colors.map((color) => (
                   <button
                     key={color.value}
                     type="button"
                     onClick={() => insertColor(color.value)}
-                    className="flex flex-col items-center gap-1 p-2 rounded hover:bg-gray-50 transition-colors"
+                    className="p-1 rounded hover:bg-gray-100 transition-colors"
+                    title={color.name}
                   >
                     <div
-                      className="w-8 h-8 rounded border-2 border-gray-200"
+                      className="w-6 h-6 rounded border border-gray-300"
                       style={{ backgroundColor: color.value }}
                     />
-                    <span className="text-xs text-gray-600">{color.name}</span>
                   </button>
                 ))}
               </div>

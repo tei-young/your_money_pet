@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
+import QuizPreview from "@/components/preview/QuizPreview";
 
 interface QuizOption {
   text: string;
@@ -277,8 +278,22 @@ export default function QuizContentForm({ personality, quizId }: QuizContentForm
     }
   };
 
+  // 미리보기용 질문 배열
+  const previewQuestions = formData.questions.map(q => ({
+    question: q.question || "",
+    options: q.options.map(opt => ({
+      text: opt.text || "",
+      isCorrect: opt.isCorrect,
+      explanation: opt.explanation || "",
+    })),
+    points: q.points,
+  }));
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* 왼쪽: 폼 */}
+      <div className="w-full">
+        <form onSubmit={handleSubmit} className="space-y-6">
       {/* 기본 정보 */}
       <Card>
         <CardHeader>
@@ -459,6 +474,16 @@ export default function QuizContentForm({ personality, quizId }: QuizContentForm
           {loading ? "저장 중..." : quizId ? "수정" : "저장"}
         </Button>
       </div>
-    </form>
+        </form>
+      </div>
+
+      {/* 오른쪽: 실시간 미리보기 */}
+      <div className="hidden lg:block">
+        <QuizPreview
+          questions={previewQuestions}
+          title="퀴즈"
+        />
+      </div>
+    </div>
   );
 }

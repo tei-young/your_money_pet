@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, Upload, ArrowLeft } from "lucide-react";
 import MobilePreview from "@/components/preview/MobilePreview";
+import MarkupEditor from "@/components/editor/MarkupEditor";
 
 interface LearningCard {
   order: number;
@@ -509,16 +510,15 @@ export default function LearningContentForm({ personality, contentId }: Learning
                 ) : (
                   <div>
                     <label className="block text-sm font-medium mb-2">내용 *</label>
-                    <textarea
+                    <MarkupEditor
                       value={card.content}
-                      onChange={(e) => updateCardContent(index, e.target.value)}
-                      className="w-full border rounded-md px-3 py-2 min-h-[100px]"
+                      onChange={(value) => updateCardContent(index, value)}
                       placeholder={
                         card.type === "quiz_link"
                           ? "퀴즈 ID 또는 링크를 입력하세요"
                           : "학습 내용을 입력하세요"
                       }
-                      required
+                      minHeight="150px"
                     />
                   </div>
                 )}
@@ -529,11 +529,11 @@ export default function LearningContentForm({ personality, contentId }: Learning
                     💡 팁 추가하기 (선택사항)
                   </summary>
                   <div className="mt-2">
-                    <textarea
+                    <MarkupEditor
                       value={card.tip || ""}
-                      onChange={(e) => updateCardTip(index, e.target.value)}
-                      className="w-full border rounded-md px-3 py-2 min-h-[80px]"
+                      onChange={(value) => updateCardTip(index, value)}
                       placeholder="이 카드와 관련된 팁이나 추가 정보를 입력하세요"
+                      minHeight="120px"
                     />
                   </div>
                 </details>

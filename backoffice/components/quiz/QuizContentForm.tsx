@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 import QuizPreview from "@/components/preview/QuizPreview";
+import MarkupEditor from "@/components/editor/MarkupEditor";
 
 interface QuizOption {
   text: string;
@@ -372,12 +373,11 @@ export default function QuizContentForm({ personality, quizId }: QuizContentForm
                 {/* 질문 텍스트 */}
                 <div>
                   <label className="block text-sm font-medium mb-2">질문 *</label>
-                  <textarea
+                  <MarkupEditor
                     value={question.question}
-                    onChange={(e) => updateQuestion(qIndex, e.target.value)}
-                    className="w-full border rounded-md px-3 py-2 min-h-[80px]"
+                    onChange={(value) => updateQuestion(qIndex, value)}
                     placeholder="질문을 입력하세요"
-                    required
+                    minHeight="120px"
                   />
                 </div>
 
@@ -435,21 +435,25 @@ export default function QuizContentForm({ personality, quizId }: QuizContentForm
                         )}
                       </div>
 
-                      <Input
-                        type="text"
-                        value={option.text}
-                        onChange={(e) => updateOptionText(qIndex, oIndex, e.target.value)}
-                        placeholder="선택지 텍스트"
-                        required
-                      />
+                      <div>
+                        <label className="block text-sm font-medium mb-1">선택지 텍스트 *</label>
+                        <MarkupEditor
+                          value={option.text}
+                          onChange={(value) => updateOptionText(qIndex, oIndex, value)}
+                          placeholder="선택지 텍스트"
+                          minHeight="80px"
+                        />
+                      </div>
 
-                      <textarea
-                        value={option.explanation}
-                        onChange={(e) => updateOptionExplanation(qIndex, oIndex, e.target.value)}
-                        className="w-full border rounded-md px-3 py-2 min-h-[60px]"
-                        placeholder="해설 (정답/오답 모두 입력)"
-                        required
-                      />
+                      <div>
+                        <label className="block text-sm font-medium mb-1">해설 (정답/오답 모두 입력) *</label>
+                        <MarkupEditor
+                          value={option.explanation}
+                          onChange={(value) => updateOptionExplanation(qIndex, oIndex, value)}
+                          placeholder="해설을 입력하세요"
+                          minHeight="100px"
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>

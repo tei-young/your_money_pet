@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, Upload, ArrowLeft } from "lucide-react";
+import MobilePreview from "@/components/preview/MobilePreview";
 
 interface LearningCard {
   order: number;
@@ -53,6 +54,7 @@ export default function LearningContentForm({ personality, contentId }: Learning
   const [uploadingImages, setUploadingImages] = useState<{ [key: number]: boolean }>({});
   const [uploadProgress, setUploadProgress] = useState<{ [key: number]: number }>({});
   const [uploadTasks, setUploadTasks] = useState<{ [key: number]: UploadTask }>({});
+  const [previewCardIndex, setPreviewCardIndex] = useState<number>(0); // 미리보기할 카드 인덱스
 
   // 수정 모드일 때 기존 데이터 불러오기
   useEffect(() => {
@@ -330,8 +332,14 @@ export default function LearningContentForm({ personality, contentId }: Learning
     );
   }
 
+  // 현재 미리보기할 카드
+  const currentPreviewCard = formData.cards[previewCardIndex] || formData.cards[0];
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* 왼쪽: 폼 */}
+      <div className="w-full">
+        <form onSubmit={handleSubmit} className="space-y-6">
       {/* 기본 정보 */}
       <Card>
         <CardHeader>
@@ -547,5 +555,17 @@ export default function LearningContentForm({ personality, contentId }: Learning
         </Button>
       </div>
     </form>
+      </div>
+
+      {/* 오른쪽: 실시간 미리보기 */}
+      <div className="hidden lg:block">
+        <MobilePreview
+          content={currentPreviewCard?.content || ""}
+          tip={currentPreviewCard?.tip}
+          imageUrl={currentPreviewCard?.imageUrl}
+          type="learning"
+        />
+      </div>
+    </div>
   );
 }

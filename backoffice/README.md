@@ -44,6 +44,7 @@ npm run dev
 
 ## 주요 기능
 
+### 콘텐츠 관리
 - [x] 관리자 로그인 (Firebase Auth + Custom Claims)
 - [x] 학습 콘텐츠 관리 (CRUD)
   - [x] 성향별 콘텐츠 목록 조회
@@ -60,8 +61,35 @@ npm run dev
   - [x] 퀴즈 삭제
   - [x] 정답 선택 (라디오 버튼)
   - [x] 선택지별 해설 관리
+
+### 🎨 WYSIWYG 에디터 (2026-01-04 구현 완료)
+- [x] 텍스트 마크업 에디터
+  - [x] 툴바 버튼 (Bold, Italic, Underline, Strikethrough)
+  - [x] 색상 선택기 (앱 컬러 팔레트 6가지)
+  - [x] 크기 선택기 (large/normal/small)
+  - [x] 텍스트 선택 자동 감지
+  - [x] 마크업 자동 삽입
+- [x] 마크업 파싱 시스템
+  - [x] 6가지 마크업 문법 지원
+  - [x] HTML 변환 로직
+  - [x] 실시간 렌더링
+
+### 📱 실시간 미리보기 (2026-01-04 구현 완료)
+- [x] 학습 콘텐츠 미리보기
+  - [x] iPhone 14 프레임 (390x700px)
+  - [x] 실제 Flutter 앱 UI 재현
+  - [x] 카드 네비게이션 (이전/다음)
+  - [x] 자동 카드 높이 조절
+- [x] 퀴즈 미리보기
+  - [x] 문제/선택지/해설 렌더링
+  - [x] 정답/오답 인터랙션
+  - [x] 실시간 마크업 표시
+
+### 향후 계획
 - [ ] 사용자 통계 대시보드
 - [ ] 캐릭터 설정 관리
+- [ ] 콘텐츠 버전 관리
+- [ ] 이미지 최적화
 
 ## 프로젝트 구조
 
@@ -88,12 +116,17 @@ backoffice/
 │   ├── page.tsx                            # 홈 페이지 (리다이렉트)
 │   └── globals.css                         # 전역 스타일
 ├── components/
+│   ├── editor/                             # 🆕 WYSIWYG 에디터
+│   │   └── MarkupEditor.tsx                # 마크업 에디터 컴포넌트
+│   ├── preview/                            # 🆕 실시간 미리보기
+│   │   ├── MobilePreview.tsx               # 학습 콘텐츠 미리보기
+│   │   └── QuizPreview.tsx                 # 퀴즈 미리보기
 │   ├── learning/
 │   │   ├── LearningContentList.tsx         # 학습 콘텐츠 목록
-│   │   └── LearningContentForm.tsx         # 학습 콘텐츠 작성/수정 폼
+│   │   └── LearningContentForm.tsx         # 학습 콘텐츠 작성/수정 폼 (에디터 통합)
 │   ├── quiz/
 │   │   ├── QuizContentList.tsx             # 퀴즈 목록
-│   │   └── QuizContentForm.tsx             # 퀴즈 작성/수정 폼
+│   │   └── QuizContentForm.tsx             # 퀴즈 작성/수정 폼 (에디터 통합)
 │   └── ui/                                 # shadcn/ui 컴포넌트
 │       ├── button.tsx
 │       ├── card.tsx
@@ -101,6 +134,7 @@ backoffice/
 │       └── tabs.tsx
 ├── lib/                                    # 유틸리티 함수
 │   ├── firebase.ts                         # Firebase 설정
+│   ├── markupParser.ts                     # 🆕 마크업 파서 (마크업 → HTML)
 │   └── utils.ts                            # Tailwind 유틸리티
 ├── public/                                 # 정적 파일
 └── package.json

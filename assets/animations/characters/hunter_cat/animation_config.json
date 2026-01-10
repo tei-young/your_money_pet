@@ -1,12 +1,12 @@
 {
   "characterGreetingLoop": {
-    "frameCount": 120,
+    "frameCount": 125,
     "frameDuration": 42,
     "loop": true,
     "description": "손 흔들며 인사 (약 5초)"
   },
   "characterSelected": {
-    "frameCount": 36,
+    "frameCount": 217,
     "frameDuration": 42,
     "loop": false,
     "description": "선택 반응 (약 1.5초)"
@@ -51,7 +51,7 @@
     "description": "성향 결과 축하 (약 3초)"
   },
   "homeIdle": {
-    "frameCount": 120,
+    "frameCount": 121,
     "frameDuration": 42,
     "loop": true,
     "description": "홈 기본 대기 - 복합 애니메이션 (약 5초)"

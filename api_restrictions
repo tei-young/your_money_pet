@@ -1,0 +1,42 @@
+# ===================================================
+# Money Pet - API Restrictions (권장 설정)
+# ===================================================
+# 업데이트: 2026-01-12
+#
+# 현재 설정에서 수정이 필요한 부분:
+# ❌ 제거 필요: Firebase Management API, App Distribution API,
+#               App Hosting API, App Testers API, Analytics Hub API
+#
+# ⚠️  Firebase Storage API는 존재하지 않음!
+#     → 정확한 이름: "Cloud Storage API" 또는
+#                   "Google Cloud Storage JSON API"
+#     → 현재 코드에서 미사용하므로 당장 활성화 불필요
+# ===================================================
+
+# === 필수 API (앱 동작에 꼭 필요) ===
+Firebase Installations API          # Firebase 기본 기능
+Cloud Firestore API                 # 데이터베이스
+Identity Toolkit API                # Firebase Auth
+Token Service API                   # Auth 토큰 관리
+
+# === 선택 API (현재 미사용, 향후 필요 시 추가) ===
+# Cloud Storage API (또는 Google Cloud Storage JSON API)
+# → Firebase Storage 기능 (현재 코드에서 미사용)
+# → 파일 업로드/다운로드 기능 구현 시 활성화 필요
+
+# === 권장 API (보안 및 기능 향상) ===
+Firebase App Check API              # 정품 앱 검증 (보안)
+
+# === 선택 API (필요 시 활성화) ===
+# Firebase Cloud Messaging API      # 푸시 알림 (현재 미사용)
+# Google Analytics API               # 앱 분석 (현재 미사용)
+# Firebase Dynamic Links API         # 딥링크 (현재 미사용)
+
+# ===================================================
+# 제거해야 할 API (현재 불필요)
+# ===================================================
+# ❌ Firebase Management API          # Firebase Console 관리용
+# ❌ Firebase App Distribution API    # 테스터 배포용
+# ❌ Firebase App Hosting API         # 웹 호스팅용
+# ❌ Firebase App Testers API         # 테스터 관리용
+# ❌ Analytics Hub API                # BigQuery 데이터 공유용

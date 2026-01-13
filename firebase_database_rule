@@ -1,0 +1,120 @@
+// ===================================================
+// Money Pet - Firestore Security Rules
+// ===================================================
+// 업데이트: 2026-01-12
+// 보안 수준: ✅ 안전 (개선 사항 반영됨)
+// ===================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // === Helper Functions ===
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // === User Data (사용자 데이터) ===
+    // 본인만 읽기/쓰기 가능
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      // 학습 진행 기록 (하위 컬렉션)
+      match /learning_progress/{dayId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // 퀴즈 결과 (하위 컬렉션)
+      match /quiz_results/{quizId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // === Learning Content (학습 콘텐츠) ===
+    // 옵션 1: 현재 설정 (무료 체험 가능, 미인증 사용자도 읽기 가능)
+    match /learning_contents/{contentId} {
+      allow read: if true;                    // 모두 읽기 가능
+      allow write: if isAdmin();              // 관리자만 쓰기
+    }
+
+    // 옵션 2: 보안 강화 (로그인 필수) - 필요시 위 규칙을 아래로 교체
+    // match /learning_contents/{contentId} {
+    //   allow read: if isAuthenticated();     // 인증된 사용자만 읽기
+    //   allow write: if isAdmin();            // 관리자만 쓰기
+    // }
+
+    // === Quiz Content (퀴즈 콘텐츠) ===
+    // 옵션 1: 현재 설정 (무료 체험 가능)
+    match /quiz_contents/{quizId} {
+      allow read: if true;                    // 모두 읽기 가능
+      allow write: if isAdmin();              // 관리자만 쓰기
+    }
+
+    // 옵션 2: 보안 강화 - 필요시 위 규칙을 아래로 교체
+    // match /quiz_contents/{quizId} {
+    //   allow read: if isAuthenticated();     // 인증된 사용자만 읽기
+    //   allow write: if isAdmin();            // 관리자만 쓰기
+    // }
+
+    // === Character Config (캐릭터 설정) ===
+    // 옵션 1: 현재 설정 (앱 시작 시 로그인 전 캐릭터 보기 가능)
+    match /character_configs/{characterId} {
+      allow read: if true;                    // 모두 읽기 가능
+      allow write: if isAdmin();              // 관리자만 쓰기
+    }
+
+    // 옵션 2: 보안 강화 - 필요시 위 규칙을 아래로 교체
+    // match /character_configs/{characterId} {
+    //   allow read: if isAuthenticated();     // 인증된 사용자만 읽기
+    //   allow write: if isAdmin();            // 관리자만 쓰기
+    // }
+
+    // === App Config (앱 설정) ===
+    // 옵션 1: 현재 설정 (앱 버전 정보 등 공개)
+    match /app_config/{configId} {
+      allow read: if true;                    // 모두 읽기 가능
+      allow write: if isAdmin();              // 관리자만 쓰기
+    }
+
+    // 옵션 2: 보안 강화 - 필요시 위 규칙을 아래로 교체
+    // match /app_config/{configId} {
+    //   allow read: if isAuthenticated();     // 인증된 사용자만 읽기
+    //   allow write: if isAdmin();            // 관리자만 쓰기
+    // }
+
+    // === 기본 거부 (명시되지 않은 모든 컬렉션) ===
+    match /{document=**} {
+      allow read, write: if false;            // 명시되지 않은 경로는 모두 차단
+    }
+  }
+}
+
+// ===================================================
+// 추가 권장 사항
+// ===================================================
+//
+// 1. Firebase Storage Rules 설정 필요
+//    - Firebase Console → Storage → Rules 탭
+//    - 사용자별 폴더 분리: /users/{userId}/*
+//
+// 2. Firebase App Check 활성화 (강력 권장)
+//    - Firebase Console → App Check
+//    - iOS: DeviceCheck 또는 App Attest 설정
+//
+// 3. 비즈니스 로직에 따른 선택
+//    - 무료 체험 필요: 옵션 1 유지 (allow read: if true)
+//    - 로그인 필수: 옵션 2로 변경 (allow read: if isAuthenticated)
+//
+// 4. 모니터링
+//    - Firebase Console → Firestore → Usage 탭
+//    - 비정상 트래픽 확인
+//
+// ===================================================

@@ -62,6 +62,10 @@ scripts/service-account-key.json
 scripts/node_modules/
 scripts/package-lock.json
 
+# Firebase Configuration (contains API keys)
+**/GoogleService-Info.plist
+**/google-services.json
+
 # Backoffice (Next.js)
 backoffice/node_modules/
 backoffice/.next/

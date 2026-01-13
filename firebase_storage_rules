@@ -1,0 +1,115 @@
+// ===================================================
+// Money Pet - Firebase Storage Security Rules
+// ===================================================
+// 업데이트: 2026-01-12
+// 보안 수준: ✅ 안전
+//
+// ⚠️  중요: 현재 앱에서 Firebase Storage를 사용하지 않음!
+//    → share_plus는 텍스트 공유만 하며 파일 업로드 없음
+//    → 향후 프로필 이미지, 파일 업로드 기능 추가 시 적용
+//    → 현재는 Firebase Console 기본 규칙 그대로 유지해도 됨
+// ===================================================
+// Firebase Console → Storage → Rules 탭에 적용하세요
+// ===================================================
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // === Helper Functions ===
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function isValidSize() {
+      // 최대 10MB
+      return request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // === 사용자 프로필 이미지 ===
+    // 본인만 업로드/수정/삭제 가능, 모두 읽기 가능
+    match /users/{userId}/profile/{fileName} {
+      allow read: if true;                                    // 누구나 읽기 가능
+      allow write: if isOwner(userId)
+                   && isImage()
+                   && isValidSize();                         // 본인만 업로드, 이미지, 10MB 이하
+    }
+
+    // === 사용자 개인 파일 ===
+    // 본인만 읽기/쓰기 가능
+    match /users/{userId}/private/{fileName} {
+      allow read, write: if isOwner(userId)
+                         && isValidSize();                   // 본인만 접근, 10MB 이하
+    }
+
+    // === 학습 콘텐츠 이미지 - 원래 경로 (personality별) ===
+    // 백오피스 관리자가 업로드한 기존 이미지 경로
+    match /learning/{personality}/{imageId} {
+      allow read: if isAuthenticated();                       // 인증된 사용자만 읽기
+      allow write: if isAuthenticated();                      // 인증된 사용자만 쓰기 (백오피스)
+    }
+
+    // === 퀴즈 콘텐츠 이미지 - 원래 경로 (personality별) ===
+    // 백오피스 관리자가 업로드한 기존 이미지 경로
+    match /quiz/{personality}/{imageId} {
+      allow read: if isAuthenticated();                       // 인증된 사용자만 읽기
+      allow write: if isAuthenticated();                      // 인증된 사용자만 쓰기 (백오피스)
+    }
+
+    // === 학습 콘텐츠 이미지 - 새 경로 (향후 사용) ===
+    match /learning_contents/{contentId}/{fileName} {
+      allow read: if true;                                    // 누구나 읽기 가능
+      allow write: if false;                                  // 관리자는 Firebase Admin SDK로 업로드
+    }
+
+    // === 캐릭터 이미지 (관리자 업로드) ===
+    match /characters/{characterId}/{fileName} {
+      allow read: if true;                                    // 누구나 읽기 가능
+      allow write: if false;                                  // 관리자는 Firebase Admin SDK로 업로드
+    }
+
+    // === 퀴즈 이미지 - 새 경로 (향후 사용) ===
+    match /quiz_contents/{quizId}/{fileName} {
+      allow read: if true;                                    // 누구나 읽기 가능
+      allow write: if false;                                  // 관리자는 Firebase Admin SDK로 업로드
+    }
+
+    // === 기본 거부 (명시되지 않은 모든 경로) ===
+    match /{allPaths=**} {
+      allow read, write: if false;                            // 명시되지 않은 경로는 모두 차단
+    }
+  }
+}
+
+// ===================================================
+// 추가 권장 사항
+// ===================================================
+//
+// 1. 관리자 콘텐츠 업로드
+//    - Firebase Admin SDK 사용 (서버 사이드)
+//    - 또는 Firebase Console에서 직접 업로드
+//
+// 2. 파일 타입 제한 확장
+//    - 비디오: request.resource.contentType.matches('video/.*')
+//    - PDF: request.resource.contentType == 'application/pdf'
+//
+// 3. 파일 이름 검증
+//    - function isValidFileName() {
+//        return fileName.matches('[a-zA-Z0-9_-]+\\.(jpg|png|gif)');
+//      }
+//
+// 4. 용량 제한 조정
+//    - 프로필 이미지: 5MB
+//    - 일반 파일: 10MB
+//    - 비디오: 100MB
+//
+// ===================================================

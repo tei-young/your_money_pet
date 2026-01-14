@@ -93,18 +93,20 @@ assets/data/
 
 ## 🔄 백오피스 연동
 
-### Phase 1: JSON 파일 (현재)
-- 이 폴더의 JSON 파일을 앱에서 직접 로드
-- `pubspec.yaml`에 assets 경로 등록 필요
+### Phase 1: JSON 파일 (Deprecated)
+- ⚠️ **사용 중단**: 초기 개발용 템플릿만 보관
+- 실제 앱에서는 Firestore 데이터를 사용합니다
 
-### Phase 2: Firestore 업로드
-- JSON 파일을 Firestore로 일괄 업로드
-- 백오피스에서 관리 가능
+### Phase 2: Firestore 기반 (✅ 현재)
+- ✅ **백오피스 구현 완료** (2026-01-04)
+- ✅ 백오피스 UI에서 직접 생성/수정
+- ✅ Firestore에 저장
+- ✅ 앱에서 실시간 업데이트
 
-### Phase 3: 백오피스 완성
-- 백오피스 UI에서 직접 생성/수정
-- Firestore에 저장
-- 앱에서 실시간 업데이트
+**현재 구조:**
+- 백오피스 → Firestore 저장
+- 앱 → Firestore에서 로드 및 캐싱
+- 콘텐츠 수정 시 앱 재배포 불필요
 
 ## 📚 참고 문서
 

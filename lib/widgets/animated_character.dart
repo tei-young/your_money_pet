@@ -41,7 +41,7 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
     with TickerProviderStateMixin {
   AnimationController? _controller;
   CharacterFrameAnimation? _animation;
-  int _currentFrame = 0;
+  final ValueNotifier<int> _frameNotifier = ValueNotifier<int>(0); // 성능 최적화: setState 제거
   bool _hasFrames = true; // 프레임 파일 존재 여부
   bool _isLoading = true; // JSON 로딩 상태
 
@@ -85,10 +85,9 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
         final progress = _controller!.value;
         final frameIndex = (progress * _animation!.frameCount).floor();
 
-        if (frameIndex != _currentFrame) {
-          setState(() {
-            _currentFrame = frameIndex.clamp(0, _animation!.frameCount - 1);
-          });
+        if (frameIndex != _frameNotifier.value) {
+          // 성능 최적화: setState 대신 ValueNotifier 사용
+          _frameNotifier.value = frameIndex.clamp(0, _animation!.frameCount - 1);
         }
       });
 
@@ -129,7 +128,7 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
     // 상태가 변경되면 애니메이션 재설정
     if (oldWidget.state != widget.state ||
         oldWidget.characterType != widget.characterType) {
-      _currentFrame = 0;
+      _frameNotifier.value = 0;
       _currentState = widget.state; // 외부 상태 변경 반영
       setState(() {
         _isLoading = true;
@@ -171,6 +170,7 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
 
   @override
   void dispose() {
+    _frameNotifier.dispose();
     _controller?.dispose();
     super.dispose();
   }
@@ -181,52 +181,64 @@ class _AnimatedCharacterState extends State<AnimatedCharacter>
     final isSelected = _activeState == CharacterAnimationState.characterSelected;
     final dialogue = widget.customDialogue ?? config.introDialogue;
 
-    return GestureDetector(
-      onTap: widget.onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 캐릭터 애니메이션 (로딩 중에도 계속 표시)
-          if (_hasFrames && _animation != null)
-            _buildFrameAnimation() // 프레임 애니메이션
-          else
-            _buildPlaceholder(), // 프레임 없음
+    // 성능 최적화: RepaintBoundary로 불필요한 rebuild 방지
+    return RepaintBoundary(
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 캐릭터 애니메이션 (로딩 중에도 계속 표시)
+            if (_hasFrames && _animation != null)
+              _buildFrameAnimation() // 프레임 애니메이션
+            else
+              _buildPlaceholder(), // 프레임 없음
 
-          // 말풍선 (선택된 경우에만)
-          if (isSelected) ...[
-            const SizedBox(height: 8),
-            SpeechBubble(text: dialogue),
+            // 말풍선 (선택된 경우에만)
+            if (isSelected) ...[
+              const SizedBox(height: 8),
+              SpeechBubble(text: dialogue),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
 
   /// 프레임 기반 애니메이션
   Widget _buildFrameAnimation() {
-    return SizedBox(
-      width: widget.size,
-      height: widget.size,
-      child: Image.asset(
-        _animation!.getFramePath(_currentFrame),
-        width: widget.size,
-        height: widget.size,
-        fit: BoxFit.contain,
-        gaplessPlayback: true, // 깜빡임 방지
-        errorBuilder: (context, error, stackTrace) {
-          // 프레임 파일이 없으면 Placeholder로 fallback
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted && _hasFrames) {
-              setState(() {
-                _hasFrames = false;
+    // 성능 최적화: ValueListenableBuilder로 프레임만 업데이트
+    return ValueListenableBuilder<int>(
+      valueListenable: _frameNotifier,
+      builder: (context, currentFrame, child) {
+        return SizedBox(
+          width: widget.size,
+          height: widget.size,
+          child: Image.asset(
+            _animation!.getFramePath(currentFrame),
+            width: widget.size,
+            height: widget.size,
+            fit: BoxFit.contain,
+            gaplessPlayback: true, // 깜빡임 방지
+            // 성능 최적화: 이미지 캐시 크기 제한으로 메모리 절약
+            cacheWidth: (widget.size * 2).toInt(),
+            cacheHeight: (widget.size * 2).toInt(),
+            errorBuilder: (context, error, stackTrace) {
+              // 프레임 파일이 없으면 Placeholder로 fallback
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted && _hasFrames) {
+                  setState(() {
+                    _hasFrames = false;
+                  });
+                  // 애니메이션 정지 (불필요한 프레임 로드 시도 방지)
+                  _controller?.stop();
+                }
               });
-              // 애니메이션 정지 (불필요한 프레임 로드 시도 방지)
-              _controller?.stop();
-            }
-          });
-          return _buildPlaceholder();
-        },
-      ),
+              return _buildPlaceholder();
+            },
+          ),
+        );
+      },
     );
   }
 

@@ -32,17 +32,21 @@ service cloud.firestore {
     }
 
     // === Learning Content (학습 콘텐츠) ===
-    // 모두 읽기, 관리자만 쓰기
+    // 개발용: 로그인한 사용자 모두 읽기/쓰기 허용
+    // TODO: 프로덕션 배포 전 isAdmin()으로 변경
     match /learning_contents/{contentId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated(); // 개발용
+      // allow write: if isAdmin(); // 프로덕션용
     }
 
     // === Quiz Content (퀴즈 콘텐츠) ===
-    // 모두 읽기, 관리자만 쓰기
+    // 개발용: 로그인한 사용자 모두 읽기/쓰기 허용
+    // TODO: 프로덕션 배포 전 isAdmin()으로 변경
     match /quiz_contents/{quizId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAuthenticated(); // 개발용
+      // allow write: if isAdmin(); // 프로덕션용
     }
 
     // === Character Config (캐릭터 설정) ===

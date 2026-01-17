@@ -1,5 +1,112 @@
 # MoneyPet 개발 로그
 
+## 📅 2026-01-18 세션: 데이터 영속성 및 마크업 파싱 구현
+
+### 🎯 목표
+MVP 출시를 위한 1순위 작업 완료: 데이터 영속성 구현 및 텍스트 마크업 파싱 확장
+
+### 📋 완료된 작업
+
+#### 1. 텍스트 마크업 파싱 확장 ✅
+**파일:** `lib/utils/text_renderer.dart`
+
+**변경 사항:**
+- ✅ 5개 마크업 추가 (기존 볼드 포함 총 6개)
+  - 이탤릭: `*텍스트*`
+  - 밑줄: `__텍스트__`
+  - 취소선: `~~텍스트~~`
+  - 색상: `[color:#FF0000]텍스트[/color]`
+  - 크기: `[size:20]텍스트[/size]`
+- ✅ 통합 정규식 패턴으로 모든 마크업 동시 처리
+- ✅ `_parseColor()` 헬퍼 메서드 추가 (헥스 색상 변환)
+- ✅ `ContentMarkupGuide` 업데이트 (6가지 문법 설명)
+- ✅ 사용하지 않는 TODO 메서드 삭제
+
+**효과:**
+- 백오피스에서 작성한 모든 마크업 문법을 앱에서 정상 렌더링 가능
+- 학습 콘텐츠 표현력 대폭 향상
+
+---
+
+#### 2. SharedPreferences 로컬 저장 구현 ✅
+**파일:** `lib/providers/user_provider.dart`
+
+**변경 사항:**
+- ✅ `loadUser()` 완전 구현 (JSON 파싱 포함)
+- ✅ `_saveToStorage()` 완전 구현 (JSON 직렬화 포함)
+- ✅ `logout()` SharedPreferences 클리어 추가
+- ✅ try-catch 에러 핸들링 추가
+- ✅ `_userKey` 상수 추가 (`'user_data'`)
+
+**효과:**
+- 앱 재시작 후에도 사용자 데이터 유지
+- 온보딩 한 번만 진행하면 됨
+- 로그인 전에도 로컬 데이터 저장 가능
+
+---
+
+#### 3. Firestore 사용자 데이터 동기화 구현 ✅
+**파일:**
+- `lib/models/user_model.dart`
+- `lib/providers/user_provider.dart`
+- `lib/services/user_service.dart` (신규 생성)
+
+**변경 사항:**
+
+**3-1. UserModel 확장**
+- ✅ `firebaseUid` 필드 추가 (옵셔널)
+- ✅ `fromJson()`, `toJson()`, `copyWith()`에 firebaseUid 포함
+
+**3-2. UserService 생성**
+- ✅ Firestore CRUD 작업 전담 서비스
+- ✅ 메서드:
+  - `createUserProfile()` - 회원가입 시 Firestore에 프로필 생성
+  - `loadUserProfile()` - 로그인 시 Firestore에서 프로필 로드
+  - `updateUserProfile()` - 사용자 데이터 업데이트
+  - `deleteUserProfile()` - 프로필 삭제
+  - `watchUserProfile()` - 실시간 스트림
+  - `userExists()` - 존재 여부 확인
+
+**3-3. UserProvider Firebase 동기화**
+- ✅ `loginWithFirebase()` 메서드 추가
+  - Firestore에 프로필 있으면 로드
+  - 없으면 로컬 데이터를 Firestore로 이동
+  - 로컬 데이터도 없으면 온보딩 필요
+- ✅ `_saveToStorage()` 확장
+  - SharedPreferences 저장 (로컬 캐시)
+  - firebaseUid 있으면 Firestore에도 저장
+- ✅ `isFirebaseUser` getter 추가
+
+**데이터 흐름:**
+1. 온보딩 중: 메모리 (Provider)
+2. 로그인 전: SharedPreferences (임시)
+3. 로그인 후: Firestore (영구) + SharedPreferences (캐시)
+
+**효과:**
+- 여러 기기에서 동일 계정으로 데이터 동기화
+- 클라우드 백업으로 데이터 손실 방지
+- 오프라인에서도 SharedPreferences 캐시로 동작
+
+---
+
+### 📊 진행 상황 업데이트
+
+**TODO.md 업데이트:**
+- ✅ 항목 4 (데이터 영속성 구현) 삭제
+- ✅ 항목 5 (마크업 파싱 구현) 삭제
+- ✅ 번호 재조정 (6→4, 7→5, 8→6, 9→7, 10→8, 11→9)
+- ✅ 진행 상황: 16% → 36% (20% 증가)
+- ✅ MVP 출시 조건: 7개 → 5개
+
+**남은 MVP 필수 작업:**
+1. 학습 콘텐츠 작성 (40개)
+2. 퀴즈 콘텐츠 작성 (200문항)
+3. 애니메이션 제작 (16개)
+4. Firestore 콘텐츠 로딩 시스템 완성
+5. 통합 테스트
+
+---
+
 ## 📅 2026-01-01 세션: Firestore 백오피스 통합 구현
 
 ### 🎯 목표

@@ -1,825 +1,417 @@
-# 📋 TODO & Task Tracking
+# 📋 MoneyPet MVP 출시 체크리스트
 
-> **실시간 업데이트 문서** - 개발 진행 상황과 남은 작업 추적
+> MVP v1.0 실제 유저 출시를 위한 작업 목록
 
-마지막 업데이트: 2026-01-14 (iOS 빌드 설정 완료 + 성능 최적화 완료)
-
----
-
-## 🚨 긴급 (High Priority)
-
-### 0. iOS 빌드 설정 및 성능 최적화 ⭐⭐⭐
-**상태:** ✅ 완료 (2026-01-14)
-**우선순위:** P0 (필수)
-**담당:** 개발팀
-**실제 소요:** 1일
-
-**완료된 작업:**
-- [x] **iOS Xcode 프로젝트 설정**
-  - [x] Bundle ID 통일: `com.moneypet.app` (Firebase와 일치)
-  - [x] Google Sign-In URL Scheme 추가 (Info.plist)
-  - [x] GoogleService-Info.plist 구성 완료
-  - [x] CocoaPods 의존성 설정 완료
-  - [x] iOS Simulator 빌드 성공
-- [x] **Firebase 보안 강화**
-  - [x] .gitignore에 GoogleService-Info.plist 추가
-  - [x] API 제한 문서화 (`api_restrictions`)
-  - [x] Firestore Rules 검증 및 문서화 (`firebase_database_rule`)
-  - [x] Storage Rules 작성 및 경로 호환성 확보 (`firebase_storage_rules`)
-- [x] **성능 최적화 구현**
-  - [x] AnimatedCharacter 위젯 최적화
-    - [x] RepaintBoundary 추가 (불필요한 rebuild 방지)
-    - [x] ValueListenableBuilder 전환 (setState() 제거)
-    - [x] Image cacheWidth/cacheHeight 추가 (메모리 50% 절감)
-  - [x] CharacterAnimationPreloader 점진적 로딩
-    - [x] 첫 캐릭터 전체 로딩, 나머지 10프레임만
-    - [x] 480프레임 → 150프레임 (75% 감소)
-
-**성능 개선 효과:**
-- 초기 로딩: 75% 단축 (3-5초 → 1-2초)
-- 메모리 사용: 50-60% 절감
-- 시뮬레이터: 30-50% 성능 향상
-- 실제 기기: 10-20% 성능 향상
-
-**관련 파일:**
-- `lib/widgets/animated_character.dart` - 179, 211-242, 224-225줄
-- `lib/services/character_animation_preloader.dart` - 16-33줄
-- `ios/Runner.xcodeproj/project.pbxproj` - Bundle ID 수정
-- `ios/Runner/Info.plist` - URL Scheme 추가
-- `ios/Runner/GoogleService-Info.plist` - Firebase 설정
-- `.gitignore` - Firebase 설정 파일 제외
-- `api_restrictions`, `firebase_database_rule`, `firebase_storage_rules` - 보안 문서
-
-**참고 문서:**
-- `performance_optimization_guide.md` - 성능 최적화 완료 내역
+마지막 업데이트: 2026-01-18
 
 ---
 
-### 1. Google 로그인/회원가입 구현 ⭐⭐⭐
-**상태:** ✅ 완료 (2025-11-27, Android 테스트 완료)
-**우선순위:** P0 (필수)
-**담당:** TBD
-**예상 소요:** 1-2일 (Firebase Auth 연동)
-**실제 완료:**
-- UI 구현 0.5일 (2025-01-15)
-- Firebase 기본 설정 0.5일 (2025-11-26)
-- AuthService 구현 0.5일 (2025-11-27)
-- Google Sign-In 테스트 완료 (Android, 2025-11-27)
+## 🎯 MVP 출시 기준
 
-**요구사항:**
-- Firebase Authentication 연동 ✅
-- Google OAuth 로그인 ✅
-- 직접 회원가입 (이메일/비밀번호) ✅
-- 온보딩 완료 후 → 홈 화면 진입 전 필수 로그인 ✅
-- ✅ 강제 로그인 방식 확정 ("나중에 하기" 없음)
-
-**구현 화면:** ✅ 완료
-```
-온보딩 완료 → [로그인/회원가입 화면] → 홈 화면
-                ↓
-        ┌─────────────────┐
-        │  학습을 시작해봐요! │
-        │  로그인이 필요해요  │
-        │                 │
-        │  로그인 | 회원가입 │ ← 탭 전환
-        │                 │
-        │ [이메일 입력]    │
-        │ [비밀번호 입력]  │
-        │                 │
-        │ [로그인하기]     │
-        │                 │
-        │ ──── 또는 ──── │
-        │                 │
-        │ [Google 로그인]  │
-        └─────────────────┘
-```
-
-**완료된 작업:**
-- [x] `lib/screens/auth/login_screen.dart` 생성 ✅
-- [x] 로그인/회원가입 탭 전환 UI (토글 방식) ✅
-- [x] 이메일/비밀번호 입력 폼 + 검증 ✅
-- [x] Google 로그인 버튼 ✅
-- [x] 목표 설정 → 로그인 화면 네비게이션 ✅
-- [x] 목표 설정 시 UserProvider.createUser() 호출 ✅
-- [x] **Firebase 기본 설정 완료** ✅ (2025-11-26)
-  - [x] `firebase_options.dart` 생성 (FlutterFire CLI)
-  - [x] Android: google-services.json + build.gradle 설정
-  - [x] iOS: GoogleService-Info.plist 설정
-  - [x] main.dart: Firebase.initializeApp() 호출
-- [x] Firebase 패키지 업그레이드 (GoogleUtilities 8.x 지원) ✅
-  - [x] firebase_core: 2.27.0 → 3.6.0
-  - [x] cloud_firestore: 4.15.8 → 5.4.4
-  - [x] firebase_auth: 4.17.8 → 5.3.1
-  - [x] firebase_storage: 11.6.9 → 12.3.4
-  - [x] firebase_analytics: 10.8.9 → 11.3.3
-- [x] `firebase_auth`, `google_sign_in` 패키지 추가 ✅
-- [x] **`lib/services/auth_service.dart` 생성** ✅
-  - [x] Google Sign-In 구현
-  - [x] 이메일/비밀번호 회원가입/로그인
-  - [x] 한국어 에러 메시지 (14가지 Firebase 에러)
-  - [x] 로그아웃 기능
-- [x] **login_screen.dart에 AuthService 통합** ✅
-  - [x] 이메일 로그인/회원가입 연동
-  - [x] Google Sign-In 버튼 연동
-  - [x] 에러 핸들링 및 로딩 상태
-- [x] iOS CocoaPods 설정 (ios/Podfile) ✅
-- [x] Android SHA-1 지문 추가 (Firebase Console) ✅
-- [x] **Google Sign-In 테스트 완료 (Android)** ✅
-
-**다음 작업 (Firestore 연동):**
-- [ ] UserProvider에 Firebase UID 매핑
-- [ ] 로그인 후 사용자 데이터 Firestore 동기화
-- [ ] 회원가입 시 Firestore에 프로필 생성
-- [ ] AuthStateChanges 리스너 추가
-
-**참고:**
-- Firestore Security Rules: `/users/{userId}` 본인만 읽기/쓰기
-- 로그인 없이 온보딩 내용은 로컬 메모리에 임시 저장
-- 로그인 시 Firestore에 영구 저장
+**목표:** 최소 기능으로 실제 유저에게 학습 경험 제공
+- Day 1-10 학습 콘텐츠 (4개 성향)
+- 온보딩부터 학습까지 완전한 플로우
+- 안정적인 데이터 저장 및 로드
 
 ---
 
-### 2. 프레임 기반 캐릭터 애니메이션 구현
-**상태:** 🔴 코드 재설계 필요 (2025-12-24) / 🟡 애니메이션 제작 대기
-**우선순위:** P0 (긴급) ⭐⭐⭐
-**담당:**
-  - 개발팀: 13-state 시스템 코드 재설계 필요
-  - 디자인팀: Midjourney/Runway로 통합 애니메이션 제작
+## 🚨 Critical (필수 - MVP 출시 불가능)
 
-**전략 변경:** Rive → 프레임 기반 PNG 시퀀스 (2025-12-13) → **통합 애니메이션 방식 (2025-12-24)**
-- **배경:** 개별 상태 조합 시 프레임 불일치로 전환이 끊기는 UX 문제 발견
-- **해결:** 화면별 통합 애니메이션 제작 (예: quiz_correct_flow = thinking → happy → idle 복귀를 하나의 애니메이션으로)
-- **상세 문서:** `docs/FRAME_ANIMATION_GUIDE.md`, `docs/ANIMATION_UPDATE_2025-12-13.md`
-
-**애니메이션 사양 (2025-12-24 재설계):**
-- **포맷:** PNG (600x600px, 투명 배경) → WebP 변환 (40% 용량 절감)
-- **프레임 레이트:** 24fps (영화급 부드러움)
-- **제작 툴:** Midjourney Video / Runway → ffmpeg PNG 추출 → WebP 변환
-- **총 상태:** 13개 (기존 10개 → 13개)
-- **총 용량:** ~192MB (PNG) / ~96MB (WebP 변환 시)
-- **핵심 변경:** 개별 상태 조합 방식 → 화면별 통합 애니메이션 방식
-
-**완료된 개발 작업:**
-- [x] 2025-12-13: 프레임 기반 애니메이션 시스템 구현
-  - [x] `lib/models/character_frame_animation.dart` 생성
-  - [x] `lib/widgets/animated_character.dart` 완전 재작성
-  - [x] `lib/services/character_animation_preloader.dart` 생성
-  - [x] `CharacterAnimationState` enum 확장 (idle, selected, happy, thinking, confused)
-  - [x] 폴더 구조 생성 (`assets/animations/characters/`)
-  - [x] `pubspec.yaml` asset 경로 등록
-  - [x] Fallback 로직 (프레임 없을 시 Placeholder)
-  - [x] Progressive loading 전략 구현
-- [x] 2025-12-16: JSON 설정 시스템 구축
-  - [x] `lib/services/animation_config_loader.dart` 생성 (JSON 로더)
-  - [x] `animation_config.json` 4개 생성 (캐릭터별)
-  - [x] `CharacterFrameAnimation.forStateAsync()` 추가
-  - [x] `AnimatedCharacter` async 로딩 지원
-  - [x] 코드 수정 없이 프레임 수 변경 가능
-- [x] 2025-12-19: PNG 지원 및 버그 수정
-  - [x] PNG 포맷 지원 (`.webp` → `.png`)
-  - [x] 상태 전환 에러 방지 로직
-  - [x] Placeholder fallback 개선
-  - [x] **AnimationController 크래시 수정** (치명적 버그)
-  - [x] SingleTickerProviderStateMixin → TickerProviderStateMixin
-  - [x] Controller 재사용 패턴 도입
-  - [x] **Placeholder 깜빡임 제거** (상태 전환 시)
-  - [x] **온보딩 캐릭터 크기 증가**
-    - 캐릭터 선택: 100→180, 성향 결과: 150→270, 성향 테스트: 80→160
-  - [x] **오버플로우 수정** (패딩/간격 최적화)
-  - [x] **성향 테스트 레이아웃 조정** (116px 상단 이동)
-  - [x] hunter_cat idle/selected 테스트 완료
-- [x] 2025-12-23: 애니메이션 상태 체계 재설계 (10-state)
-  - [x] `CharacterAnimationState` enum 확장 (8개 → 14개, 실제 사용 10개)
-  - [x] **idle → greeting 이름 변경** (기존 손 흔드는 애니메이션)
-  - [x] **새로운 idle 개념 도입** (5초 복합 애니메이션, 캐릭터 성향 표현)
-  - [x] **홈 화면 상태 4개 추가** (home_studying, home_excited, home_sleepy, home_celebration)
-  - [x] 폴더 구조 변경 (idle/ → greeting/, 신규 폴더 5개 생성)
-  - [x] animation_config.json 업데이트 (4개 캐릭터)
-  - [x] pubspec.yaml 업데이트 (신규 폴더 경로 등록)
-  - [x] 코드 사용처 업데이트 (idle → greeting/thinking)
-  - [x] 문서 전면 개편 (FRAME_ANIMATION_GUIDE.md, README.md)
-- [ ] 2025-12-24: **통합 애니메이션 방식 재설계 (13-state)** 🟡 진행 중
-  - [x] **CharacterAnimationState enum 재설계** (14개 → 13개) ✅ 2025-12-24
-    - [x] 기존 상태 삭제: `thinking`, `happy`, `confused`, `reactionPositive/Negative/Neutral` (6개)
-    - [x] 새로운 상태 추가: `personalityIdle`, `personalitySelected`, `quizIdle`, `quizCorrectFlow`, `quizWrongFlow`, `resultCelebration` (6개)
-    - [x] 이름 변경: `greeting` → `characterGreetingLoop`, `selected` → `characterSelected`, `idle` → `homeIdle` (3개)
-    - [x] 결과: 13개 상태 (통합 애니메이션 방식)
-    - [x] 파일: `lib/models/character_animation_config.dart:1-25`
-    - [x] Commit: 1695ecc
-  - [x] **Enum → 폴더명 변환 로직 구현** ✅ 2025-12-24
-    - [x] `_stateToFolderName()` 헬퍼 함수 추가 (13개 상태 모두 매핑)
-    - [x] `getFramePath()` 메서드 업데이트 (snake_case 폴더명 사용)
-    - [x] `forState()` fallback 메서드 13개 상태로 재작성
-    - [x] 파일: `lib/models/character_frame_animation.dart:22-224`
-    - [x] Commit: 5e2f0b3
-  - [x] **자동 전환 로직 구현** ✅ 2025-12-24
-    - [x] `CharacterFrameAnimation`에 `autoTransitionTo` 필드 추가
-    - [x] `AnimationConfigLoader`에서 JSON `autoTransitionTo` 읽기 지원
-    - [x] `AnimatedCharacter`에 자동 전환 처리 로직 구현
-    - [x] `_handleAutoTransition()`, `_stringToState()` 메서드 추가
-    - [x] 파일: `lib/models/character_frame_animation.dart:7-27`, `lib/services/animation_config_loader.dart:65-72`, `lib/widgets/animated_character.dart:40-236`
-    - [x] Commit: a6c6108
-  - [x] **폴더 구조 재편 (git mv)** ✅ 2025-12-24
-    - [x] 이름 변경: `greeting/` → `character_greeting_loop/`, `selected/` → `character_selected/`
-    - [x] 삭제: `idle/`, `thinking/`, `happy/`, `confused/` (빈 폴더 또는 통합 애니메이션에 포함)
-    - [x] 신규 생성 (7개): `personality_idle/`, `personality_selected/`, `quiz_idle/`, `quiz_correct_flow/`, `quiz_wrong_flow/`, `result_celebration/`, `home_idle/`
-    - [x] 최종 결과: 4개 캐릭터 × 13개 상태 = 52개 폴더 완성
-    - [x] 파일: `assets/animations/characters/*/`
-    - [x] Commit: 088b510
-  - [x] **animation_config.json 재작성** ✅ 2025-12-24
-    - [x] 13개 상태로 업데이트
-    - [x] `autoTransitionTo` 필드 추가 (personalitySelected, quizCorrectFlow, quizWrongFlow, homeCelebration)
-    - [x] 유연한 타이밍 정책 반영 ("약 X초" 형식, 정확한 프레임 수는 제작 후 확정)
-    - [x] 파일: `assets/animations/characters/*/animation_config.json` (4개)
-    - [x] Commit: e5ab1c6
-  - [x] **화면별 State 사용 업데이트** ✅ 2025-12-24
-    - [x] 캐릭터 선택: `greeting` → `characterGreetingLoop`, `selected` → `characterSelected`
-    - [x] 성향 퀴즈: `thinking` → `personalityIdle`
-    - [x] 성향 결과: `selected` → `resultCelebration`
-    - [x] 프리로더: `greeting/selected/happy/thinking/confused` → 13-state 온보딩 상태들
-    - [x] 파일: `character_preview_screen.dart`, `personality_test_screen.dart`, `personality_result_screen.dart`, `character_animation_preloader.dart`
-    - [x] Commit: bb8d045
-  - [x] **pubspec.yaml 업데이트** ✅ 2025-12-24
-    - [x] 52개 폴더 경로 등록 (4캐릭터 × 13상태)
-    - [x] 10-state 경로 삭제 및 13-state 경로 등록
-    - [x] Commit: 5950ff5
-  - [x] **문서 전면 수정** ✅ 2025-12-24
-    - [x] DEVELOPMENT_LOG.md: 2025-12-24 섹션 추가 (Task #1-7 완료 내역)
-    - [x] FRAME_ANIMATION_GUIDE.md: 13-state, 통합 애니메이션 (이미 업데이트됨)
-    - [x] ANIMATION_UPDATE_2025-12-13.md: 최종 스펙 업데이트 (Commit 4c3359a)
-    - [x] README.md: 13-state 시스템, Rive → 프레임 애니메이션 변경
-    - [x] assets/animations/characters/README.md: 폴더 구조 업데이트 (이미 업데이트됨)
-
-**디자인팀 작업 (2025-12-24 재설계 - 13-state 통합 애니메이션):**
-
-**⚠️ 중요 변경사항:**
-- **타이밍 정책:** "정확히 XX프레임" → "약 X초" (유연한 정책)
-- **프레임 수:** 제작 후 실제 프레임 수를 JSON에 기록
-- **통합 애니메이션:** thinking/happy/confused는 별도 제작 안 함 (quiz_correct_flow/quiz_wrong_flow에 포함)
-
-**Phase 1: 온보딩 (4개 × 4캐릭터 = 16개) 🎯 최우선**
-- [ ] **character_greeting_loop** (약 5초, loop)
-  - [x] hunter_cat: 125프레임 ✅ (기존 greeting 재활용)
-  - [ ] money_bear, save_sheep, chaser_fox
-- [ ] **character_selected** (약 1-2초, one-shot)
-  - [ ] hunter_cat: 재제작 필요 ⚠️ (기존 200프레임은 너무 김)
-  - [ ] money_bear, save_sheep, chaser_fox
-- [ ] **personality_idle** (약 3초, loop)
-  - [ ] 조용한 숨쉬기 + 호기심 표정
-  - [ ] 모든 캐릭터
-- [ ] **personality_selected** (약 2초, one-shot → auto to personality_idle)
-  - [ ] 0-1초: 고개 끄덕임
-  - [ ] 1-2초: idle 복귀
-  - [ ] 모든 캐릭터
-
-**Phase 2: 학습 퀴즈 (4개 × 4캐릭터 = 16개)**
-- [ ] **quiz_idle** (약 3초, loop)
-  - [ ] 조용한 숨쉬기 + 집중 표정
-  - [ ] 모든 캐릭터
-- [ ] **quiz_correct_flow** (약 4-6초, one-shot → auto to quiz_idle) ⭐ 통합 애니메이션
-  - [ ] 0-1초: thinking (고민 표정)
-  - [ ] 1-3초: happy (정답! 기쁨)
-  - [ ] 3-4초: idle 복귀
-  - [ ] 모든 캐릭터
-- [ ] **quiz_wrong_flow** (약 4-6초, one-shot → auto to quiz_idle) ⭐ 통합 애니메이션
-  - [ ] 0-1초: thinking (고민 표정)
-  - [ ] 1-3초: confused (오답.. 당황)
-  - [ ] 3-4초: idle 복귀
-  - [ ] 모든 캐릭터
-- [ ] **result_celebration** (약 3초, one-shot)
-  - [ ] 0-2초: happy 유지
-  - [ ] 2-3초: idle 전환
-  - [ ] 모든 캐릭터
-
-**Phase 3: 홈 화면 (5개 × 4캐릭터 = 20개)**
-- [ ] **home_idle** (약 5초, loop)
-  - [ ] 숨쉬기 + 윙크 + 캐릭터 성향 제스처
-  - [ ] 모든 캐릭터
-- [ ] **home_studying** (약 3초, loop)
-  - [ ] 책 읽기 + 페이지 넘김
-  - [ ] 모든 캐릭터
-- [ ] **home_excited** (약 2초, loop)
-  - [ ] 통통 튀기 + 신나는 표정
-  - [ ] 모든 캐릭터
-- [ ] **home_sleepy** (약 3초, loop)
-  - [ ] 하품 + 눈 비비기
-  - [ ] 모든 캐릭터
-- [ ] **home_celebration** (약 2초, one-shot → auto to home_idle)
-  - [ ] 점프 + 컨페티 + 승리 포즈
-  - [ ] 모든 캐릭터
-
----
-
-### 추가 작업 (2025-12-26): 홈 화면 랜덤 애니메이션 로직 ✅ 완료
-
-**완료된 작업:**
-- [x] **홈 화면 진입 시 5개 home state 중 랜덤 선택** ✅
-  - [x] `_selectRandomHomeState()` 메서드 구현
-  - [x] 5개 상태 중 랜덤 선택: `homeIdle`, `homeStudying`, `homeExcited`, `homeSleepy`, `homeCelebration`
-  - [x] 매번 홈 화면 진입 시 다른 캐릭터 모습 표시
-  - [x] 파일: `lib/screens/home/home_screen.dart`
-  - [x] Commit: 068f974
-- [x] **Icon 위젯 → AnimatedCharacter 위젯으로 교체** ✅
-  - [x] 기존: `Icon(Icons.pets)` placeholder
-  - [x] 변경: `AnimatedCharacter(state: _currentHomeState)`
-  - [x] 프레임 애니메이션 준비 완료
-- [x] **추후 유저 상태 기반 로직 확장 구조 설계** ✅
-  - [x] 주석으로 확장 방향 명시 (학습 완료, 연속일, 시간대 등)
-  - [x] 현재: 랜덤 선택
-  - [x] 추후: 유저 상태에 따라 적절한 애니메이션 선택
-
-**확인 사항:**
-- [x] 성향 진단 퀴즈 화면: `AnimatedCharacter` 정상 사용 중 (`personalityIdle`)
-- [x] 성향 진단 완료 화면: `AnimatedCharacter` 정상 사용 중 (`resultCelebration`)
-- ⚠️ 두 화면 모두 프레임 파일 없어서 placeholder 표시 (코드는 정상)
-
-**다음 단계:**
-- [ ] 디자인팀에서 52개 애니메이션 프레임 제작 시 즉시 적용
-- [ ] v1.1+: 유저 상태 기반 애니메이션 선택 로직 추가
-
----
-
-**제작 워크플로우:**
-1. Midjourney/Runway로 영상 제작 (목표 시간대로, 정확한 프레임 수는 무시)
-2. ffmpeg로 PNG 추출: `ffmpeg -i input.mp4 -vf "fps=24,scale=600:600:flags=lanczos" frame_%02d.png`
-3. rembg로 배경 제거 (투명 배경)
-4. cwebp로 WebP 변환: `cwebp -q 85 input.png -o output.webp`
-5. 실제 프레임 수 카운트 후 JSON에 기록
-6. 폴더명 확인: snake_case (예: `character_greeting_loop/`, `quiz_correct_flow/`)
-
-**총 제작 물량: 52개 애니메이션 (4캐릭터 × 13상태)**
-- Phase 1: 16개 (온보딩 테스트 가능)
-- Phase 2: 16개 (메인 기능 테스트 가능)
-- Phase 3: 20개 (완성)
-
-**파일 배치 예시 (2025-12-24 재설계 - 13-state):**
-```
-assets/animations/characters/
-├── hunter_cat/
-│   ├── animation_config.json           (13개 상태 설정)
-│   ├── character_greeting_loop/        (약 5초, ~120 frames)
-│   │   ├── frame_01.webp
-│   │   ├── frame_02.webp
-│   │   └── ... (실제 프레임 수는 제작 후 확정)
-│   ├── character_selected/             (약 1-2초, ~24-48 frames)
-│   ├── personality_idle/               (약 3초, ~72 frames)
-│   ├── personality_selected/           (약 2초, ~48 frames)
-│   ├── quiz_idle/                      (약 3초, ~72 frames)
-│   ├── quiz_correct_flow/              (약 4-6초, ~96-144 frames) ⭐ 통합
-│   ├── quiz_wrong_flow/                (약 4-6초, ~96-144 frames) ⭐ 통합
-│   ├── result_celebration/             (약 3초, ~72 frames)
-│   ├── home_idle/                      (약 5초, ~120 frames)
-│   ├── home_studying/                  (약 3초, ~72 frames)
-│   ├── home_excited/                   (약 2초, ~48 frames)
-│   ├── home_sleepy/                    (약 3초, ~72 frames)
-│   └── home_celebration/               (약 2초, ~48 frames)
-├── money_bear/                         (동일한 13개 폴더)
-├── save_sheep/                         (동일한 13개 폴더)
-└── chaser_fox/                         (동일한 13개 폴더)
-```
-
-**파일명 규칙:**
-- 폴더명: snake_case (예: `character_greeting_loop/`, `quiz_correct_flow/`)
-- 파일명: `frame_01.webp`, `frame_02.webp`, ... (01부터 시작, 2자리 패딩)
-- 포맷: WebP 권장 (PNG도 지원)
-
-**테스트 방법:**
-1. 프레임 파일 배치
-2. `flutter pub get` 실행
-3. 앱 실행 → 해당 캐릭터/상태 확인
-4. 프레임 없으면 자동으로 Placeholder 표시
-
-**참고:**
-- 파일만 배치하면 자동 인식 (추가 코드 불필요)
-- `CharacterFrameAnimation.forState()`에 프리셋 설정 완료
-
----
-
-### 3. SharedPreferences 영구 저장
-**상태:** 🟡 부분 구현 (TODO 주석만)
-**우선순위:** P1
-**담당:** TBD
-**예상 소요:** 0.5일
-
-**현재 문제:**
-- 사용자 데이터가 메모리에만 저장
-- 앱 재시작 시 온보딩부터 다시 시작
-- `UserProvider._saveToStorage()` 미구현
-
-**구현 내용:**
-- [ ] `shared_preferences` 패키지 추가
-- [ ] `UserProvider.loadUser()`에서 로컬 데이터 로드
-- [ ] `UserProvider._saveToStorage()` 구현
-- [ ] JSON 직렬화/역직렬화
-- [ ] 로그인 전: SharedPreferences 사용
-- [ ] 로그인 후: Firestore 동기화
-
-**관련 파일:**
-- `lib/providers/user_provider.dart:32-46` (loadUser)
-- `lib/providers/user_provider.dart:132-140` (_saveToStorage)
-
----
-
-## ✅ 이미 완료된 핵심 기능 (개발팀)
-
-> **개발팀 작업 완료**: 모든 핵심 화면 구조 완성. 외부 콘텐츠/애니메이션 대기 중.
-
-### ~~홈 화면~~ (완료)
-**상태:** ✅ 기본 구조 완료 (개발팀)
-- 캐릭터 표시 (Placeholder - Rive 파일 대기)
-- 오늘의 학습 카드
-- 스트릭 카운터
-- 통계 영역 (학습일수, 포인트, 연속)
-- SNS 공유 버튼
-
-### ~~학습 화면~~ (완료)
-**상태:** ✅ 기본 구조 + 디자인 완료 (개발팀)
-- 콘텐츠 카드 스와이프 (PageView)
-- 페이지 인디케이터
-- 다음/이전 버튼
-- 학습 완료 플로우
-- ✅ **디자인 개선 완료** (2025-12-02)
-  - 1차: 성향별 컬러 시스템, 캐릭터 상호작용, 타이포그래피, 애니메이션
-  - 2차: 통일된 다크 퍼플 테마, 헤더 압축 (AppBar 제거), 공간 최적화
-  - 배경: 진한 다크 퍼플 (Color(0xFF1A1625))
-  - 액센트: 파스텔 보라 (Color(0xFFB794F6))
-  - 헤더 압축: 208px → 124px (84px 절약)
-- **Firestore 연동 필요** (현재 더미 데이터)
-
-### ~~퀴즈 화면~~ (완료)
-**상태:** ✅ 기본 구조 + 디자인 완료 (개발팀)
-- 5문항 객관식 퀴즈
-- 정답/오답 즉시 피드백
-- 진행 바
-- 점수 계산 및 보상
-- ✅ **디자인 개선 완료** (2025-12-02)
-  - 1차: 학습 화면과 동일한 3단계 개선, 정답/오답 캐릭터 반응
-  - 2차: 통일된 다크 테마, 헤더 압축, **피드백 영역 완전 제거**
-  - 피드백은 캐릭터 말풍선에서만 표시
-  - 해설 카드만 깔끔하게 표시
-  - 한 화면에 모든 내용 표시 가능
-- **Firestore 연동 필요** (현재 더미 데이터)
-
-### ~~학습 탭 (진도 관리)~~ (완료)
-**상태:** ✅ 기본 구조 완료 (개발팀)
-- 진행 상황 카드
-- Day 목록
-- Month별 분류
-
-### ~~설정 화면~~ (완료)
-**상태:** ✅ 기본 구조 완료 (개발팀)
-- 프로필 카드
-- 설정 옵션들
-
----
-
-## 🟠 중요 (Medium Priority)
-
-### 4. 실제 학습 콘텐츠 작성
-**상태:** 🔴 TODO (외부 전문가 작업)
-**우선순위:** P2
-**담당:** 콘텐츠 작성 전문가
-**예상 소요:** 2-4주
-**개발팀 작업:** 없음 (콘텐츠만 전달받음)
-
-**목표:**
-- Day 1-10: 각 성향별 콘텐츠 (총 40개)
-- 퀴즈 문항: 5문항 × 10일 × 4성향 = 200개
-
-**성향별 커리큘럼:**
-- **안전형**: 예적금, 복리, 채권
-- **밸런스형**: 예적금 + 펀드 기초
-- **공격형**: 주식 기초, ETF
-- **도전형**: 가상화폐, 선물옵션 입문
-
-**작성 형식:**
-- JSON 템플릿 준비 완료 (assets/data/)
-- 백오피스 웹에서 직접 입력 예정
-- **중요**: Firestore에 저장, 앱에서 실시간으로 불러옴
-
----
-
-### 5. Firebase Firestore 콘텐츠 시스템 구현
+### 1. 학습 콘텐츠 작성 (40개)
 **상태:** 🔴 TODO
-**우선순위:** P0 (필수) ⚠️
-**담당:** 개발팀
-**예상 소요:** 2-3일
+**담당:** 콘텐츠 작성 전문가
+**현재:** 더미 데이터만 존재
 
-**중요**: 학습 콘텐츠는 **반드시 Firestore에 저장**하고 앱에서 실시간으로 불러와야 함. 앱 재배포 없이 콘텐츠 업데이트가 가능해야 함.
+**필요 콘텐츠:**
+- Day 1-10 × 4성향 = 40개 학습 콘텐츠
+- 각 콘텐츠당 3-5개 학습 카드
 
-**구현 내용:**
-- [ ] Firebase 프로젝트 설정 (이미 완료)
-- [ ] Firestore Collections 설계:
-  - `learning_contents/{contentId}` - 학습 콘텐츠
-  - `quiz_contents/{quizId}` - 퀴즈 콘텐츠
-  - `users/{userId}/profile` - 사용자 프로필
-  - `users/{userId}/learning_progress/{dayId}` - 학습 진행 상황
-- [ ] `lib/services/content_service.dart` 구현
-  - Firestore에서 콘텐츠 불러오기
-  - 캐싱 전략 (오프라인 대응)
-  - 실시간 업데이트 감지
-- [ ] Security Rules 설정
-  - 콘텐츠: 모두 읽기, 관리자만 쓰기
-  - 사용자 데이터: 본인만 읽기/쓰기
-- [ ] LearningProvider/QuizProvider와 통합
+**성향별 주제:**
+- **안전형:** 예적금, 복리, 채권 기초
+- **밸런스형:** 예적금 + 펀드 입문
+- **공격형:** 주식 기초, ETF
+- **도전형:** 가상화폐, 고위험 투자 입문
+
+**작성 방법:**
+- 백오피스 웹에서 직접 입력
+- 마크업 문법 사용 가능 (볼드, 색상, 크기 등)
+- Firestore에 자동 저장
 
 **관련 문서:**
-- `docs/BACKOFFICE_DESIGN.md` - Firestore 구조 상세 설계
+- `docs/BACKOFFICE_DESIGN.md` - 콘텐츠 구조
+- `assets/data/README.md` - 데이터 가이드
 
 ---
 
-### 6. 홈 화면 구현
-**상태:** 🟡 스켈레톤만 존재
-**우선순위:** P2
-**담당:** TBD
-**예상 소요:** 1일
+### 2. 퀴즈 콘텐츠 작성 (200문항)
+**상태:** 🔴 TODO
+**담당:** 콘텐츠 작성 전문가
+**현재:** 더미 데이터만 존재
 
-**구현 화면:**
-```
-┌─────────────────────┐
-│ 🐻 [캐릭터 애니메이션] │
-│                     │
-│ Day 7 학습하기 📚   │
-│ 오늘의 주제: 복리의 힘│
-│                     │
-│ 🔥 7일 연속 학습 중  │
-│ ⭐ 350P             │
-│                     │
-│ [학습 시작하기]      │
-└─────────────────────┘
-```
+**필요 퀴즈:**
+- Day 1-10 × 4성향 × 5문항 = 200개 퀴즈 문항
+- 각 문항당 4개 선택지 + 해설
+
+**요구사항:**
+- 학습 내용에서 80% 이상 다룬 내용
+- 난이도: 쉬움~보통
+- 해설: 정답 이유를 친절하게 설명
+
+**작성 방법:**
+- 백오피스 웹에서 직접 입력
+- Firestore에 자동 저장
+
+---
+
+### 3. 캐릭터 애니메이션 제작 (최소 16개)
+**상태:** 🔴 진행 중 (hunter_cat 4/16 완료)
+**담당:** 디자인팀 (Midjourney/Runway)
+**우선순위:** Phase 1 온보딩 16개 최우선
+
+**제작 물량:**
+- **Phase 1 (MVP 필수):** 온보딩 4개 상태 × 4캐릭터 = 16개
+  - character_greeting_loop (약 5초, loop)
+  - character_selected (약 1-2초, one-shot)
+  - personality_idle (약 3초, loop)
+  - personality_selected (약 2초, one-shot)
+
+- **Phase 2 (학습 기능):** 퀴즈 4개 상태 × 4캐릭터 = 16개
+- **Phase 3 (홈 화면):** 홈 5개 상태 × 4캐릭터 = 20개
+
+**현재 완료:**
+- ✅ hunter_cat: 4개 상태 (character_greeting_loop, character_selected, home_idle, personality_selected 일부)
+- ⚠️ 나머지 3 캐릭터: 0개
+
+**제작 워크플로우:**
+1. Midjourney/Runway로 24fps 영상 제작
+2. ffmpeg로 PNG 추출 (600x600px)
+3. rembg로 배경 제거
+4. cwebp로 WebP 변환 (40% 용량 절감)
+5. `assets/animations/characters/{캐릭터}/{상태}/` 폴더에 배치
+6. `animation_config.json`에 실제 프레임 수 기록
+
+**관련 문서:**
+- `docs/FRAME_ANIMATION_GUIDE.md`
+- `docs/ANIMATION_UPDATE_2025-12-13.md`
+- `assets/animations/characters/README.md`
 
 **관련 파일:**
-- `lib/screens/home/home_screen.dart` (생성 필요)
+- `assets/animations/characters/*/animation_config.json`
 
 ---
 
-### 7. 학습 화면 구현
-**상태:** 🔴 TODO
-**우선순위:** P2
-**담당:** TBD
-**예상 소요:** 2일
+## ⚠️ Important (중요 - UX 품질에 영향)
 
-**기능:**
-- 콘텐츠 카드 스와이프 (PageView)
-- 페이지 인디케이터 (●●○○○)
-- 다음/이전 버튼
-- 학습 완료 시 퀴즈로 이동
-
----
-
-### 8. 퀴즈 화면 구현
-**상태:** 🔴 TODO
-**우선순위:** P2
-**담당:** TBD
-**예상 소요:** 1-2일
-
-**기능:**
-- 5문항 객관식
-- 정답/오답 즉시 피드백
-- 해설 표시
-- 점수 계산
-- 완료 시 보상 화면
-
----
-
-## 🟢 보통 (Low Priority)
-
-### 9. 학습 탭 (진도 관리)
-**상태:** 🔴 TODO
-**우선순위:** P3
+### 4. Firestore 콘텐츠 로딩 시스템
+**상태:** 🟡 부분 구현 (코드만 존재, 실제 콘텐츠 없음)
+**담당:** 개발팀
 **예상 소요:** 1일
 
-**기능:**
-- 월별 진도 카드
-- 전체 진도 (Day X/365)
-- Day 목록
-- 필터 (전체/완료/진행중/잠김)
+**현재 상태:**
+- ✅ `lib/services/learning_content_service.dart` - Firestore 연동 코드 완료
+- ✅ `lib/providers/learning_provider.dart` - 더미 데이터 fallback
+- 🔴 실제 Firestore에 콘텐츠 없음 (백오피스에서 작성 필요)
+
+**구현 내용:**
+- [ ] Firestore Collections 구조 확인
+  - `learning_contents/{contentId}` - 학습 콘텐츠
+  - `quiz_contents/{quizId}` - 퀴즈 콘텐츠
+- [ ] 캐싱 전략 구현 (오프라인 대응)
+- [ ] 로딩 인디케이터 UI 추가
+- [ ] 네트워크 에러 핸들링
+- [ ] 콘텐츠 버전 관리 (업데이트 감지)
+
+**Security Rules 확인:**
+```javascript
+// 콘텐츠: 모두 읽기, 관리자만 쓰기
+match /learning_contents/{contentId} {
+  allow read: if true;
+  allow write: if isAdmin();
+}
+```
+
+**관련 문서:**
+- `docs/BACKOFFICE_DESIGN.md`
+
+**관련 파일:**
+- `lib/services/learning_content_service.dart`
+- `lib/providers/learning_provider.dart`
+- `firestore.rules`
 
 ---
 
-### 10. 설정 화면 개선
-**상태:** 🟡 기본 구조만 존재
-**우선순위:** P3
-**예상 소요:** 0.5일
-
-**추가 기능:**
-- 알림 설정
-- 앱 버전 표시
-- 로그아웃
-- 데이터 초기화 (개발용)
-
----
-
-### 11. SNS 공유 기능
-**상태:** 🔴 TODO
-**우선순위:** P3 (MVP 필수이지만 우선순위 낮음)
+### 5. 에러 처리 개선
+**상태:** 🟡 부분 구현 (일부만 처리)
+**담당:** 개발팀
 **예상 소요:** 1일
 
-**기능:**
-- 학습 완료 시 이미지 생성
-- 카카오톡, 인스타그램, 페이스북 공유
-- 이미지 저장
+**현재 상태:**
+- ✅ Firebase Auth 에러 (14가지 한국어 메시지)
+- 🟡 네트워크 에러 (일부 화면만)
+- 🔴 콘텐츠 로딩 실패 처리 미흡
+- 🔴 전역 에러 핸들러 없음
+
+**구현 내용:**
+- [ ] 전역 에러 핸들러 추가 (`main.dart`)
+- [ ] 네트워크 에러 감지 및 재시도 로직
+- [ ] 콘텐츠 로딩 실패 시 fallback UI
+- [ ] 사용자 친화적 에러 메시지 (구어체)
+- [ ] 크래시 리포팅 (Firebase Crashlytics)
+
+**에러 메시지 예시:**
+- ✅ "로그인에 실패했어요. 다시 시도해주세요."
+- ✅ "네트워크 연결을 확인해주세요."
+- ❌ "Error: Network request failed"
+
+**관련 파일:**
+- `lib/main.dart`
+- `lib/services/*.dart`
 
 ---
 
-### 12. Day 30 완료 화면
+### 6. 통합 테스트
 **상태:** 🔴 TODO
-**우선순위:** P3
+**담당:** 개발팀
+**예상 소요:** 1일
+
+**테스트 시나리오:**
+
+**6-1. 온보딩 플로우**
+- [ ] 스플래시 → 앱 소개 → 캐릭터 선택 → 성향 진단 → 로그인 → 홈
+- [ ] 각 단계에서 뒤로가기 동작 확인
+- [ ] 데이터 영속성 확인 (앱 재시작)
+
+**6-2. 학습 플로우**
+- [ ] 홈 → 학습 시작 → 카드 스와이프 → 퀴즈 → 결과 → 홈
+- [ ] 학습 완료 후 포인트 적용 확인
+- [ ] 진도 업데이트 확인
+
+**6-3. 데이터 동기화**
+- [ ] 로그인 전/후 데이터 일관성
+- [ ] 여러 기기에서 동일 계정 로그인 시 동기화
+- [ ] 오프라인 → 온라인 전환 시 동기화
+
+**6-4. 에러 케이스**
+- [ ] 네트워크 끊김 상태에서 앱 사용
+- [ ] Firestore 콘텐츠 없을 때 동작
+- [ ] 잘못된 로그인 정보
+- [ ] 앱 강제 종료 후 재시작
+
+**테스트 환경:**
+- iOS Simulator
+- Android Emulator
+- 실제 기기 (iPhone, Android)
+
+**관련 도구:**
+- Flutter DevTools
+- Firebase Console
+- Xcode / Android Studio
+
+---
+
+## 💡 Nice-to-have (권장 - 성능 및 완성도)
+
+### 7. WebP 변환 (애니메이션 용량 40% 절감)
+**상태:** 🔴 TODO
+**담당:** 디자인팀 or 개발팀
+**예상 소요:** 0.5일 (스크립트 자동화)
+
+**현재:**
+- PNG: ~97KB/프레임
+- 총 용량: ~192MB (52개 애니메이션 × 평균 40프레임)
+
+**목표:**
+- WebP: ~30KB/프레임 (40% 절감)
+- 총 용량: ~96MB
+
+**변환 방법:**
+```bash
+# 일괄 변환 스크립트
+find assets/animations -name "*.png" -print0 | while IFS= read -r -d '' file; do
+  cwebp -q 85 "$file" -o "${file%.png}.webp"
+done
+```
+
+**코드 수정:**
+- `lib/models/character_frame_animation.dart` - 파일 확장자 변경
+
+**효과:**
+- 앱 크기 50% 감소
+- 초기 로딩 속도 30-40% 향상
+- 메모리 사용량 감소
+
+**관련 문서:**
+- `performance_optimization_guide.md`
+
+---
+
+### 8. ListView 최적화
+**상태:** 🔴 TODO
+**담당:** 개발팀
 **예상 소요:** 0.5일
 
-**화면:**
-```
-🎉 Month 1 완료!
+**적용 대상:**
+- 학습 탭 (Day 목록)
+- 설정 화면 (옵션 리스트)
 
-[다른 성향 체험하기]
-[학습 복습하기]
+**최적화 내용:**
+- [ ] `cacheExtent` 설정 (미리 렌더링)
+- [ ] `addAutomaticKeepAlives: true` (상태 유지)
+- [ ] 각 아이템에 고유 `key` 추가
+- [ ] Lazy loading (필요 시)
+
+**예시 코드:**
+```dart
+ListView.builder(
+  cacheExtent: 100,
+  addAutomaticKeepAlives: true,
+  itemBuilder: (context, index) {
+    return ItemWidget(
+      key: ValueKey(items[index].id),
+      item: items[index],
+    );
+  },
+)
 ```
+
+**효과:**
+- 스크롤 부드러움 향상
+- 메모리 효율 개선
+
+**관련 파일:**
+- `lib/screens/learning_tab/learning_tab_screen.dart`
+- `lib/screens/settings/settings_screen.dart`
 
 ---
 
-## 🔵 백로그 (Future)
+### 9. 사용자 피드백 수집
+**상태:** 🔴 TODO
+**담당:** 개발팀 + 기획팀
+**예상 소요:** 1일
 
-### v1.1 이후
-- [ ] 캐릭터 진화 시스템
-- [ ] 꾸미기 아이템
-- [ ] 실천 인증
-- [ ] 소셜 기능 (친구 초대)
-- [ ] 커뮤니티
-- [ ] 다크 모드
-- [ ] 오프라인 모드
+**구현 내용:**
+- [ ] 앱 내 피드백 버튼 (설정 화면)
+- [ ] Firebase Analytics 이벤트 추가
+  - 화면 진입 (screen_view)
+  - 학습 완료 (learning_complete)
+  - 퀴즈 완료 (quiz_complete)
+  - 캐릭터 선택 (character_select)
+- [ ] Crashlytics 연동 (자동 크래시 리포트)
+- [ ] 사용자 설문 (추후 구글 폼 링크)
 
-### 백오피스
-- [ ] 관리자 인증
-- [ ] 사용자 관리 페이지
-- [ ] 콘텐츠 관리 페이지 (WYSIWYG)
-- [ ] 퀴즈 관리 페이지
-- [ ] 통계 대시보드
+**Analytics 이벤트 예시:**
+```dart
+FirebaseAnalytics.instance.logEvent(
+  name: 'learning_complete',
+  parameters: {
+    'day': 1,
+    'personality': 'safe',
+    'duration': 180, // 초
+  },
+);
+```
+
+**효과:**
+- 사용자 행동 분석
+- 이탈 지점 파악
+- 개선 방향 도출
+
+**관련 패키지:**
+- `firebase_analytics`
+- `firebase_crashlytics`
 
 ---
 
 ## 📊 진행 상황
 
-### MVP v1.0 완료율 (현실적 평가)
+**전체 완료율:**
 ```
-온보딩:          ████████░░ 80% (기본 완료, UX 개선 필요)
-핵심 화면:       ██████░░░░ 60% (구조 완료, 완성도↓ 테스트↓)
-게이미피케이션:  ██████░░░░ 60% (로직 완료, UI/테스트 개선 필요)
-콘텐츠:          ░░░░░░░░░░  0% (더미 데이터만, 템플릿은 준비됨)
-애니메이션:      ██░░░░░░░░ 20% (Placeholder만, Rive 제작 대기)
-Firebase:        ██████░░░░ 60% (Auth 완료, Firestore 영속화 대기)
-예외처리/완성도: ███░░░░░░░ 30% (일부 구현, 통합 테스트 필요)
-──────────────────────────────────────────
-전체:            ████░░░░░░ 44% (구조는 완성, 완성도/테스트 필요)
+1. 학습 콘텐츠 작성        ░░░░░░░░░░  0%
+2. 퀴즈 콘텐츠 작성        ░░░░░░░░░░  0%
+3. 애니메이션 제작         ██░░░░░░░░ 20% (hunter_cat 일부)
+4. Firestore 로딩 시스템   ████░░░░░░ 40% (코드 완료, 콘텐츠 없음)
+5. 에러 처리 개선          ███░░░░░░░ 30%
+6. 통합 테스트             ░░░░░░░░░░  0%
+7. WebP 변환               ░░░░░░░░░░  0%
+8. ListView 최적화         ░░░░░░░░░░  0%
+9. 사용자 피드백 수집      ░░░░░░░░░░  0%
+────────────────────────────────────
+전체 MVP 완료율:          ████░░░░░░ 36%
 ```
 
-**⚠️ 현실 체크**:
-- ✅ 모든 핵심 화면 **구조** 완성
-- 🔴 프로덕션 수준 **완성도** 미달
-- 🔴 실제 콘텐츠, 예외 처리, 통합 테스트 필요
+**Critical 항목 (1-3):** 7% 완료
+**Important 항목 (4-6):** 23% 완료
+**Nice-to-have 항목 (7-9):** 0% 완료
 
-### 완료된 작업 ✅
+**✅ 최근 완료 (2026-01-18):**
+- 데이터 영속성 구현 (SharedPreferences + Firestore) - 100% 완료
+- 텍스트 마크업 파싱 구현 (6가지 문법) - 100% 완료
+
+---
+
+## ✅ 이미 완료된 작업
+
+### 코어 기능 (개발팀)
 - [x] Flutter 프로젝트 초기 설정
-- [x] 기본 UI 컴포넌트 구축
-- [x] 테마 시스템 구현
-- [x] 스플래시 화면
-- [x] 앱 소개 화면 (3 슬라이드)
-- [x] 캐릭터 선택 화면
-- [x] 성향 퀴즈 화면
-- [x] 성향 결과 화면
-- [x] 이름 설정 화면
-- [x] 목표 설정 화면
-- [x] CharacterProvider 구현
-- [x] AnimatedCharacter 위젯 (Placeholder)
-- [x] SpeechBubble 위젯
-- [x] 캐릭터 우선 플로우 리팩토링
-- [x] 스크롤 바운스 효과 제거
-- [x] 구어체 톤앤매너 적용
-- [x] 문서화 (DEVELOPMENT_LOG.md, BACKOFFICE_DESIGN.md, TODO.md)
-- [x] **로그인/회원가입 화면 UI** (2025-01-15)
-  - [x] 토글 방식 (로그인 ↔ 회원가입)
-  - [x] 이메일/비밀번호 검증
-  - [x] Google 로그인 버튼 (Firebase 대기)
-  - [x] 목표 설정 → 로그인 화면 네비게이션
-- [x] **Firebase 기본 설정** (2025-11-26)
-  - [x] firebase_options.dart 생성
-  - [x] Android/iOS 네이티브 설정
-  - [x] Firebase 초기화 (main.dart)
-- [x] **Firebase Authentication 구현** (2025-11-27)
-  - [x] AuthService 생성 (Google + 이메일/비밀번호)
-  - [x] login_screen.dart 통합
-  - [x] 한국어 에러 메시지
-  - [x] Android Google Sign-In 테스트 완료
-- [x] **핵심 화면 구현** (기존에 구현되어 있음)
-  - [x] MainScreen (하단 탭 네비게이션)
-  - [x] HomeScreen (캐릭터, 학습 카드, 통계)
-  - [x] LearningTabScreen (진도 관리)
-  - [x] LearningScreen (카드 스와이프)
-  - [x] QuizScreen (5문항 객관식)
-  - [x] SettingsScreen (프로필, 설정)
-- [x] **PersonalityType 런타임 에러 수정** (2025-11-29)
-  - [x] Extension → Enhanced Enum 변환
-  - [x] compile-time 필드로 변경 (color, lightColor, displayName 등)
-  - [x] 프로덕션 안정성 확보
-- [x] **홈화면 UI 개선** (2025-11-29)
-  - [x] 성향별 캐릭터 이름 표시 제거 (Rive 애니메이션 준비)
-- [x] **학습/퀴즈 화면 디자인 대폭 개선** (2025-12-02)
-  - [x] 1차: 3단계 컬러 시스템, 캐릭터 상호작용, 타이포그래피, 애니메이션
-  - [x] 2차: 통일된 다크 퍼플 테마 + 헤더 압축 최적화
-    - [x] 캐릭터 네이밍 최신화 (세이브쉽, 헌터캣, 체이서폭스)
-    - [x] 진한 다크 퍼플 배경 (Color(0xFF1A1625)) + 파스텔 보라 액센트
-    - [x] 헤더 압축 (AppBar → 미니멀 헤더, 84px 절약)
-    - [x] 퀴즈 피드백 영역 완전 제거 (캐릭터 말풍선만 사용)
-    - [x] 한 화면에 모든 내용 표시 가능하도록 최적화
+- [x] 온보딩 플로우 전체 (스플래시, 앱 소개, 캐릭터 선택, 성향 진단, 이름/목표 설정)
+- [x] Firebase Authentication (Google + 이메일/비밀번호)
+- [x] 메인 화면 (하단 탭 네비게이션)
+- [x] 홈 화면 (기본 구조)
+- [x] 학습 화면 (카드 스와이프)
+- [x] 퀴즈 화면 (5문항 객관식)
+- [x] 학습 탭 (진도 관리)
+- [x] 설정 화면
+- [x] 프레임 기반 애니메이션 시스템 (13-state)
+- [x] 성능 최적화 (RepaintBoundary, ValueListenableBuilder, Image 캐싱)
+
+### 디자인 (디자인팀 + 개발팀)
+- [x] 다크 퍼플 테마
+- [x] 성향별 컬러 시스템
+- [x] 캐릭터 상호작용 UI
+- [x] 말풍선 위젯
+- [x] 학습/퀴즈 화면 디자인 개선
+
+### 백오피스 (2026-01-04 완료)
+- [x] Next.js 15 기반 웹 백오피스
+- [x] WYSIWYG 에디터 (학습 콘텐츠)
+- [x] 모바일 실시간 프리뷰
+- [x] 마크업 파서 (6가지 문법)
+- [x] Firestore 연동
+
+**참고:** 백오피스는 이미 완성되어 있으므로, 콘텐츠 작성자가 바로 사용 가능
 
 ---
 
-## 🐛 알려진 이슈
+## 🎯 MVP 출시 조건
 
-### Critical
-- ✅ **해결됨 (2025-11-29)**: PersonalityType.color 런타임 에러
-  - **문제**: Extension 기반으로 구현된 PersonalityType 속성이 특정 Flutter 환경에서 런타임에 인식되지 않음
-  - **증상**: "Class 'PersonalityType' has no instance getter 'color'" 에러, 빨간 화면
-  - **해결**: Extension → Enhanced Enum으로 변환하여 compile-time 필드로 보장
+**최소 요구사항 (모두 완료 시 출시 가능):**
+1. ⬜ Day 1-10 학습 콘텐츠 (40개) 작성 완료
+2. ⬜ Day 1-10 퀴즈 (200문항) 작성 완료
+3. ⬜ 온보딩 애니메이션 (16개) 제작 완료
+4. ⬜ Firestore 콘텐츠 로딩 완료
+5. ⬜ 통합 테스트 완료
 
-### Minor
-- 없음
+**권장 사항 (품질 향상):**
+- 에러 처리 개선
+- WebP 변환
+- 사용자 피드백 수집
 
----
-
-## 📌 특이사항 & 메모
-
-### 설계 결정 사항
-
-#### 1. 캐릭터 우선 온보딩 (2025-01-15)
-**이유:** 게이미피케이션 특색, 캐릭터 유대감 형성
-**영향:**
-- CharacterProvider에 `selectedCharacter` vs `finalPersonality` 분리
-- 성향 결과 화면에서 캐릭터 이름 제거 (성향 중심)
-- 이름 설정 시 선택한 캐릭터 기본 이름 사용
-
-#### 2. 성향 변경 정책
-- 성향 변경 시 Day 1부터 재시작
-- 기존 학습 기록은 `personality.history`에 보관
-- 변경 시 확인 팝업 필수
-
-#### 3. 포인트 시스템
-- MVP: 획득만 (사용처 없음)
-- v1.1: 꾸미기 아이템 상점
-- v1.2: 캐릭터 진화 시스템
-
-#### 4. 퀴즈 재개 없음
-- 5문항으로 짧아서 처음부터 다시 풀기
-- 개발 복잡도 감소
-
-### 기술 결정 사항
-
-#### 1. Provider vs Riverpod
-- **선택:** Provider
-- **이유:** 간단한 상태 관리, 충분한 기능, 낮은 러닝 커브
-
-#### 2. Rive vs Lottie
-- **선택:** Rive
-- **이유:** 인터랙티브 애니메이션 지원, 상태 전환 용이
-
-#### 3. SharedPreferences vs Hive
-- **선택:** SharedPreferences (로그인 전) + Firestore (로그인 후)
-- **이유:** 간단한 데이터 구조, Firebase 우선
-
-#### 4. 스크롤 물리 효과
-- **ClampingScrollPhysics** 전역 적용
-- iOS 바운스 효과 제거 (디자인 일관성)
-
-### 개발 중 주의사항
-
-1. **구어체 톤앤매너**
-   - 안내/설명: "~해요" 어미 사용
-   - 예: "같이 시작해요!", "우리 딱 맞는 것 같아요!"
-
-2. **캐릭터 대사**
-   - 각 캐릭터마다 고유한 말투
-   - `CharacterAnimationConfig`에 정의
-
-3. **애니메이션 성능**
-   - `RepaintBoundary` 사용
-   - 60 FPS 유지
-
-4. **Firebase Security Rules**
-   - `/users/{userId}`: 본인만 읽기/쓰기
-   - 콘텐츠: 모두 읽기, 관리자만 쓰기
+**✅ 이미 완료 (2026-01-18):**
+- 데이터 영속성 구현 (SharedPreferences + Firestore)
+- 텍스트 마크업 파싱 구현 (6가지 문법)
 
 ---
 
 ## 🔗 관련 문서
 
-- [README.md](../README.md) - 프로젝트 전체 개요
+- [DESIGN_DECISIONS.md](./DESIGN_DECISIONS.md) - 설계 및 기술 결정사항
 - [DEVELOPMENT_LOG.md](./DEVELOPMENT_LOG.md) - 상세 개발 로그
 - [BACKOFFICE_DESIGN.md](./BACKOFFICE_DESIGN.md) - 백오피스 설계
-- [docs/strategy.md](./strategy.md) - 전략 기획서
-- [docs/app_spec.md](./app_spec.md) - 앱 상세 기획서
+- [FRAME_ANIMATION_GUIDE.md](./FRAME_ANIMATION_GUIDE.md) - 애니메이션 가이드
+- [README.md](../README.md) - 프로젝트 개요
 
 ---
 
-**작성일:** 2025-01-15
-**마지막 업데이트:** 2025-01-15
-**다음 업데이트:** Google 로그인 구현 완료 시
+**작성일:** 2026-01-18
+**마일스톤:** MVP v1.0 출시
+**목표 출시일:** 콘텐츠 및 애니메이션 제작 완료 후

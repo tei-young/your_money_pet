@@ -3,6 +3,7 @@ import '../utils/constants.dart';
 /// 사용자 데이터 모델
 class UserModel {
   final String id;
+  final String? firebaseUid; // Firebase Authentication UID (로그인 시)
   final String name;
   final PersonalityType personalityType;
   final String goal;
@@ -15,6 +16,7 @@ class UserModel {
 
   const UserModel({
     required this.id,
+    this.firebaseUid,
     required this.name,
     required this.personalityType,
     required this.goal,
@@ -50,6 +52,7 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       id: json['id'] as String,
+      firebaseUid: json['firebaseUid'] as String?,
       name: json['name'] as String,
       personalityType: PersonalityType.values.firstWhere(
         (type) => type.name == json['personalityType'],
@@ -71,6 +74,7 @@ class UserModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'firebaseUid': firebaseUid,
       'name': name,
       'personalityType': personalityType.name,
       'goal': goal,
@@ -86,6 +90,7 @@ class UserModel {
   /// 복사 with 수정
   UserModel copyWith({
     String? id,
+    String? firebaseUid,
     String? name,
     PersonalityType? personalityType,
     String? goal,
@@ -98,6 +103,7 @@ class UserModel {
   }) {
     return UserModel(
       id: id ?? this.id,
+      firebaseUid: firebaseUid ?? this.firebaseUid,
       name: name ?? this.name,
       personalityType: personalityType ?? this.personalityType,
       goal: goal ?? this.goal,

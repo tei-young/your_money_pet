@@ -164,6 +164,50 @@
 
 ---
 
+## ⚙️ 개발 환경 설정
+
+### Firebase 보안 규칙 (개발용)
+
+백오피스를 로컬에서 실행하려면 Firebase Console에서 보안 규칙을 완화해야 합니다.
+
+#### 1. Firestore Rules
+- **위치**: Firebase Console → Firestore Database → 규칙
+- **변경 내용**: 관리자 체크(`isAdmin()`)를 로그인 체크(`isAuthenticated()`)로 완화
+
+```javascript
+// 개발용
+match /learning_contents/{contentId} {
+  allow read: if true;
+  allow write: if request.auth != null;
+}
+
+match /quiz_contents/{quizId} {
+  allow read: if true;
+  allow write: if request.auth != null;
+}
+```
+
+⚠️ **프로덕션 배포 전**: `request.auth.token.admin == true`로 변경 필수
+
+#### 2. Storage Rules
+- **위치**: Firebase Console → Storage → 규칙
+- **상태**: 이미 올바르게 설정됨 ✅
+
+```javascript
+match /learning/{personality}/{imageId} {
+  allow read: if request.auth != null;
+  allow write: if request.auth != null;
+}
+```
+
+#### 3. 로컬 규칙 파일
+- `firestore.rules`: 개발용 설정 적용됨 (커밋: c856c3b)
+- `storage.rules`: 이미 올바르게 설정됨
+
+**배포 방법**: Firebase Console에서 수동 배포 (로컬 파일을 복사하여 붙여넣기)
+
+---
+
 ## 📁 주요 파일 구조
 
 ```

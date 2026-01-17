@@ -42,6 +42,42 @@ npm run dev
 
 브라우저에서 `http://localhost:3000` 접속
 
+### 4. Firebase 보안 규칙 설정 (개발용)
+
+**중요**: 개발 환경에서는 Firebase Console에서 보안 규칙을 완화해야 합니다.
+
+#### Firestore Rules 업데이트
+1. https://console.firebase.google.com/ 접속
+2. **moneypet-74066** 프로젝트 선택
+3. **Firestore Database** → **규칙** 탭
+4. 다음 부분을 수정:
+
+```javascript
+// 개발용 설정
+match /learning_contents/{contentId} {
+  allow read: if true;
+  allow write: if request.auth != null;  // 로그인한 사용자 허용
+}
+
+match /quiz_contents/{quizId} {
+  allow read: if true;
+  allow write: if request.auth != null;  // 로그인한 사용자 허용
+}
+```
+
+5. **게시** 버튼 클릭
+
+⚠️ **프로덕션 배포 시**: `request.auth != null` → `request.auth.token.admin == true`로 변경 필요
+
+#### Storage Rules 확인
+Storage 규칙은 이미 올바르게 설정되어 있습니다:
+```javascript
+match /learning/{personality}/{imageId} {
+  allow read: if request.auth != null;
+  allow write: if request.auth != null;
+}
+```
+
 ## 주요 기능
 
 ### 콘텐츠 관리

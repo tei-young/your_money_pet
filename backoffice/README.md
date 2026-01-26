@@ -122,6 +122,11 @@ match /learning/{personality}/{imageId} {
   - [x] 실시간 마크업 표시
 
 ### 향후 계획
+- [ ] JSON Import 기능 (구현 예정)
+  - [ ] 학습 콘텐츠 JSON Import
+  - [ ] 퀴즈 JSON Import
+  - [ ] 파일 업로드 / 텍스트 붙여넣기
+  - [ ] 검증 및 중복 처리 (덮어쓰기 확인)
 - [ ] 사용자 통계 대시보드
 - [ ] 캐릭터 설정 관리
 - [ ] 콘텐츠 버전 관리

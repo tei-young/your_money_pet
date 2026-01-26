@@ -702,6 +702,80 @@ TextStyle(
 
 ---
 
+## 6. JSON Import 기능 (구현 예정)
+
+### 목적
+콘텐츠 제작팀이 JSON 형식으로 작성한 학습 콘텐츠 및 퀴즈를 백오피스에 직접 업로드
+
+### UI 배치
+- **위치**: 학습/퀴즈 목록 페이지 상단
+- **버튼**: `[새 콘텐츠 작성] [JSON Import]`
+
+### 입력 방식
+1. **파일 업로드**: `.json` 파일 선택
+2. **텍스트 붙여넣기**: JSON 텍스트 직접 입력
+
+### 동작 플로우
+```
+1. [JSON Import] 버튼 클릭
+   ↓
+2. 모달 열림 (탭: 파일 업로드 / JSON 붙여넣기)
+   ↓
+3. JSON 입력
+   ↓
+4. 검증 실행
+   - 필수 필드 체크
+   - 타입 검증
+   - 값 범위 검증
+   ↓
+5. 검증 성공 → 데이터 요약 표시
+   - 예: "Day 1: 투자가 뭐예요? (5개 카드)"
+   ↓
+6. 중복 day 체크
+   - 중복 있음: ⚠️ 경고 팝업 (취소/덮어쓰기)
+   - 중복 없음: 바로 저장
+   ↓
+7. Firestore 저장 완료 → 목록 새로고침
+```
+
+### 검증 항목
+
+#### 학습 콘텐츠
+- `day`, `personality`, `title`, `estimatedMinutes`, `points` 필수
+- `cards` 배열 최소 1개 이상
+- 각 카드: `order`, `type`, `content` 필수
+- `type`: "text" | "image" | "quiz_link"
+
+#### 퀴즈
+- `day`, `personality`, `totalPoints`, `passingScore` 필수
+- `questions` 배열 최소 1개 이상
+- 각 질문: `order`, `question`, `points`, `options` 필수
+- `options` 배열 최소 2개 이상
+- 정답(`isCorrect: true`) 최소 1개 존재
+
+### 에러 처리
+- JSON 파싱 에러: "유효하지 않은 JSON 형식입니다"
+- 필드 누락: "필수 필드 'title'이 누락되었습니다"
+- 타입 에러: "'day'는 숫자여야 합니다"
+- 배열 관련: "cards 배열이 비어있습니다"
+
+### 중복 처리
+```
+⚠️ "Day 1 학습 콘텐츠가 이미 존재합니다. 덮어쓰시겠습니까?"
+
+[취소] - 저장 안 함, 모달 유지
+[덮어쓰기] - 기존 문서 업데이트 (updateDoc)
+```
+
+### 컴포넌트
+- `backoffice/components/import/LearningJsonImport.tsx`
+- `backoffice/components/import/QuizJsonImport.tsx`
+
+### 상세 스펙
+**문서**: `docs/JSON_IMPORT_SPEC.md`
+
+---
+
 ## 백오피스 체크리스트
 
 ### 콘텐츠 관리자용

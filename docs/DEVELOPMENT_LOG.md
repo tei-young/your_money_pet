@@ -3312,7 +3312,7 @@ npx create-next-app@latest backoffice
 
 **환경 변수:** `backoffice/.env.local`
 ```bash
-NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyAGQtxbbHxGMENh9XSsma-b9Lqoiewk-OY
+NEXT_PUBLIC_FIREBASE_API_KEY=YOUR_FIREBASE_API_KEY
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=moneypet-74066.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=moneypet-74066
 # ... (기타 Firebase 설정)

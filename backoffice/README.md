@@ -121,12 +121,21 @@ match /learning/{personality}/{imageId} {
   - [x] 정답/오답 인터랙션
   - [x] 실시간 마크업 표시
 
+### 📥 JSON Import (2026-02-06 구현 완료)
+- [x] JSON Import 기능 (Phase 1 완료)
+  - [x] 학습 콘텐츠 JSON Import
+  - [x] 퀴즈 JSON Import
+  - [x] 파일 업로드 / 텍스트 붙여넣기
+  - [x] 검증 및 중복 처리 (덮어쓰기 확인)
+  - [x] 목록 페이지 통합 ([JSON Import] 버튼)
+  - [x] personality 검증 수정 (safe, balanced, aggressive, challenger)
+
 ### 향후 계획
-- [ ] JSON Import 기능 (구현 예정)
-  - [ ] 학습 콘텐츠 JSON Import
-  - [ ] 퀴즈 JSON Import
-  - [ ] 파일 업로드 / 텍스트 붙여넣기
-  - [ ] 검증 및 중복 처리 (덮어쓰기 확인)
+- [ ] JSON Import Phase 2
+  - [ ] 미리보기 기능 (MobilePreview/QuizPreview 재사용)
+  - [ ] 일괄 Import (여러 JSON 파일 동시 업로드)
+  - [ ] Import 히스토리
+  - [ ] JSON Export 기능
 - [ ] 사용자 통계 대시보드
 - [ ] 캐릭터 설정 관리
 - [ ] 콘텐츠 버전 관리

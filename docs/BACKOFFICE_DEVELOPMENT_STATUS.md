@@ -238,6 +238,54 @@ backoffice/
 
 ---
 
+## 5. ✅ JSON Import 기능
+
+**구현 일자**: 2026-02-06
+
+#### JSON Import 모달
+- **파일**:
+  - `backoffice/components/import/LearningJsonImport.tsx`
+  - `backoffice/components/import/QuizJsonImport.tsx`
+- **기능**:
+  - 파일 업로드 탭: `.json` 파일 선택 및 자동 로드
+  - JSON 붙여넣기 탭: 텍스트 직접 입력
+  - 실시간 검증 (필수 필드, 타입, 값 범위)
+  - 검증 결과 표시 (성공/실패 메시지)
+  - 중복 day 체크 및 덮어쓰기 확인 팝업
+
+#### 검증 로직
+- **학습 콘텐츠**:
+  - 필수 필드: day, personality, title, estimatedMinutes, points, cards
+  - personality: safe, balanced, aggressive, challenger
+  - cards 최소 1개, order 연속성 검증
+- **퀴즈**:
+  - 필수 필드: day, personality, totalPoints, passingScore, questions
+  - questions 최소 1개, options 최소 2개
+  - 정답 존재 여부 검증 (isCorrect: true)
+  - order 연속성 검증
+
+#### Firestore 연동
+- 중복 체크: `where("personality", "==", personality) && where("day", "==", day)`
+- 새 문서 생성: `addDoc` + `createdAt`, `updatedAt`
+- 기존 문서 덮어쓰기: `updateDoc` + `updatedAt`
+
+#### 페이지 통합
+- **학습 콘텐츠 목록**: `/dashboard/[personality]` (학습 탭)
+  - [JSON Import] 버튼 추가
+  - FileJson 아이콘 사용
+  - 저장 후 목록 자동 새로고침
+- **퀴즈 목록**: `/dashboard/[personality]` (퀴즈 탭)
+  - [JSON Import] 버튼 추가
+  - 저장 후 목록 자동 새로고침
+
+#### 주요 개선 사항
+- **Personality 검증 수정** (2026-02-06):
+  - 기존: `safe`, `aggressive`, `hunter_cat` (잘못된 검증)
+  - 수정: `safe`, `balanced`, `aggressive`, `challenger` (올바른 검증)
+  - `hunter_cat`는 characterId이지 personality가 아님
+
+---
+
 ## 🚀 다음 단계
 
 ### Flutter 팀 작업 대기
@@ -246,6 +294,11 @@ backoffice/
 - ⏳ 실제 콘텐츠로 테스트
 
 ### 백오피스 추가 기능 (향후)
+- 📋 JSON Import Phase 2
+  - 미리보기 기능 (MobilePreview/QuizPreview 재사용)
+  - 일괄 Import (여러 JSON 파일 동시 업로드)
+  - Import 히스토리
+  - JSON Export 기능
 - 📋 콘텐츠 버전 관리
 - 📋 콘텐츠 복사 기능
 - 📋 일괄 편집 기능
@@ -270,7 +323,12 @@ backoffice/
 - `827f545` - Improve: Increase color picker size and spacing
 - `352be9e` - Refine: Reduce color picker box size for better proportions
 
+### JSON Import 기능
+- `95c45284` - Fix: Correct personality validation in JSON Import components
+- `521ee06e` - Feat: Connect JSON Import to list pages (Phase 1 - 2/2)
+
 ---
 
-**백오피스 개발 완료!** 🎉
+**백오피스 Phase 1 개발 완료!** 🎉
+**JSON Import 기능 추가 완료!** 📥
 **Flutter 구현을 기다립니다.** 🚀

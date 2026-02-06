@@ -6,7 +6,8 @@ import { collection, query, where, orderBy, getDocs, deleteDoc, doc, Timestamp }
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, FileJson } from "lucide-react";
+import QuizJsonImport from "@/components/import/QuizJsonImport";
 
 interface QuizOption {
   text: string;
@@ -44,6 +45,7 @@ export default function QuizContentList({ personality }: QuizContentListProps) {
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   const [dayFilter, setDayFilter] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [isJsonImportOpen, setIsJsonImportOpen] = useState(false);
 
   useEffect(() => {
     loadQuizzes();
@@ -118,12 +120,21 @@ export default function QuizContentList({ personality }: QuizContentListProps) {
             정렬: {sortOrder === "asc" ? "오름차순" : "내림차순"}
           </Button>
         </div>
-        <Button
-          onClick={() => router.push(`/dashboard/${personality}/quiz/new`)}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          퀴즈 추가
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setIsJsonImportOpen(true)}
+          >
+            <FileJson className="mr-2 h-4 w-4" />
+            JSON Import
+          </Button>
+          <Button
+            onClick={() => router.push(`/dashboard/${personality}/quiz/new`)}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            퀴즈 추가
+          </Button>
+        </div>
       </div>
 
       {/* 퀴즈 목록 */}
@@ -224,6 +235,17 @@ export default function QuizContentList({ personality }: QuizContentListProps) {
           </Card>
         </div>
       )}
+
+      {/* JSON Import 모달 */}
+      <QuizJsonImport
+        personality={personality}
+        isOpen={isJsonImportOpen}
+        onClose={() => setIsJsonImportOpen(false)}
+        onSuccess={() => {
+          loadQuizzes();
+          setIsJsonImportOpen(false);
+        }}
+      />
     </div>
   );
 }

@@ -6,7 +6,8 @@ import { collection, query, where, getDocs, deleteDoc, doc, orderBy } from "fire
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, FileJson } from "lucide-react";
+import LearningJsonImport from "@/components/import/LearningJsonImport";
 
 interface LearningCard {
   order: number;
@@ -38,6 +39,7 @@ export default function LearningContentList({ personality }: LearningContentList
   const [selectedDay, setSelectedDay] = useState<string>("all");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [isJsonImportOpen, setIsJsonImportOpen] = useState(false);
 
   // Firestore에서 데이터 로드
   useEffect(() => {
@@ -127,12 +129,21 @@ export default function LearningContentList({ personality }: LearningContentList
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>학습 콘텐츠 목록</CardTitle>
-            <Button
-              onClick={() => router.push(`/dashboard/${personality}/learning/new`)}
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              새 학습 콘텐츠 추가
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsJsonImportOpen(true)}
+              >
+                <FileJson className="mr-2 h-4 w-4" />
+                JSON Import
+              </Button>
+              <Button
+                onClick={() => router.push(`/dashboard/${personality}/learning/new`)}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                새 학습 콘텐츠 추가
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -289,6 +300,17 @@ export default function LearningContentList({ personality }: LearningContentList
           </Card>
         </div>
       )}
+
+      {/* JSON Import 모달 */}
+      <LearningJsonImport
+        personality={personality}
+        isOpen={isJsonImportOpen}
+        onClose={() => setIsJsonImportOpen(false)}
+        onSuccess={() => {
+          fetchContents();
+          setIsJsonImportOpen(false);
+        }}
+      />
     </div>
   );
 }

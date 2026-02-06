@@ -702,14 +702,14 @@ TextStyle(
 
 ---
 
-## 6. JSON Import 기능 (구현 예정)
+## 6. JSON Import 기능 ✅ (구현 완료 - 2026-02-06)
 
 ### 목적
 콘텐츠 제작팀이 JSON 형식으로 작성한 학습 콘텐츠 및 퀴즈를 백오피스에 직접 업로드
 
 ### UI 배치
 - **위치**: 학습/퀴즈 목록 페이지 상단
-- **버튼**: `[새 콘텐츠 작성] [JSON Import]`
+- **버튼**: `[JSON Import] [새 콘텐츠 작성]`
 
 ### 입력 방식
 1. **파일 업로드**: `.json` 파일 선택
@@ -742,12 +742,14 @@ TextStyle(
 
 #### 학습 콘텐츠
 - `day`, `personality`, `title`, `estimatedMinutes`, `points` 필수
+- `personality`: "safe" | "balanced" | "aggressive" | "challenger"
 - `cards` 배열 최소 1개 이상
 - 각 카드: `order`, `type`, `content` 필수
 - `type`: "text" | "image" | "quiz_link"
 
 #### 퀴즈
 - `day`, `personality`, `totalPoints`, `passingScore` 필수
+- `personality`: "safe" | "balanced" | "aggressive" | "challenger"
 - `questions` 배열 최소 1개 이상
 - 각 질문: `order`, `question`, `points`, `options` 필수
 - `options` 배열 최소 2개 이상
@@ -767,9 +769,14 @@ TextStyle(
 [덮어쓰기] - 기존 문서 업데이트 (updateDoc)
 ```
 
-### 컴포넌트
-- `backoffice/components/import/LearningJsonImport.tsx`
-- `backoffice/components/import/QuizJsonImport.tsx`
+### 구현 완료 항목 (Phase 1)
+- ✅ `backoffice/components/import/LearningJsonImport.tsx`
+- ✅ `backoffice/components/import/QuizJsonImport.tsx`
+- ✅ 목록 페이지 통합 (버튼 추가)
+- ✅ 파일 업로드 / 텍스트 붙여넣기 탭
+- ✅ 전체 검증 로직 구현
+- ✅ 중복 체크 및 덮어쓰기 확인
+- ✅ Personality 검증 수정 (safe, balanced, aggressive, challenger)
 
 ### 상세 스펙
 **문서**: `docs/JSON_IMPORT_SPEC.md`

@@ -1,7 +1,7 @@
 # JSON Import 기능 구현 스펙
 
 **작성일**: 2026-01-04
-**상태**: 📝 구현 예정
+**상태**: ✅ Phase 1 구현 완료 (2026-02-06)
 **담당**: 백오피스 팀
 
 ---
@@ -168,7 +168,7 @@
 #### 필수 필드
 ```typescript
 ✓ day: number (양수)
-✓ personality: "safe" | "aggressive" | "hunter_cat"
+✓ personality: "safe" | "balanced" | "aggressive" | "challenger"
 ✓ title: string (비어있지 않음)
 ✓ estimatedMinutes: number (양수)
 ✓ points: number (양수)
@@ -186,7 +186,7 @@
 
 #### 추가 검증
 ```typescript
-✓ personality 값이 유효한지 ("safe", "aggressive", "hunter_cat")
+✓ personality 값이 유효한지 ("safe", "balanced", "aggressive", "challenger")
 ✓ cards의 order가 중복되지 않는지
 ✓ cards의 order가 연속적인지 (1, 2, 3, ...)
 ```
@@ -196,7 +196,7 @@
 #### 필수 필드
 ```typescript
 ✓ day: number (양수)
-✓ personality: "safe" | "aggressive" | "hunter_cat"
+✓ personality: "safe" | "balanced" | "aggressive" | "challenger"
 ✓ totalPoints: number (양수)
 ✓ passingScore: number (0~100 사이)
 ✓ questions: array (최소 1개 이상)
@@ -254,7 +254,7 @@
 ```
 "'day'는 양수여야 합니다. (현재: -1)"
 "'passingScore'는 0~100 사이여야 합니다. (현재: 150)"
-"'personality'는 'safe', 'aggressive', 'hunter_cat' 중 하나여야 합니다."
+"'personality'는 'safe', 'balanced', 'aggressive', 'challenger' 중 하나여야 합니다."
 ```
 
 ### 배열 관련 에러
@@ -503,34 +503,35 @@ interface QuizJsonImportProps {
 ## 📝 구현 체크리스트
 
 ### UI 컴포넌트
-- [ ] LearningJsonImport 모달 컴포넌트
-- [ ] QuizJsonImport 모달 컴포넌트
-- [ ] 탭 UI (파일 업로드 / JSON 붙여넣기)
-- [ ] 파일 업로드 input
-- [ ] JSON 텍스트 textarea
-- [ ] 검증 결과 표시 영역
-- [ ] 중복 확인 팝업 (Alert/Confirm)
+- [x] LearningJsonImport 모달 컴포넌트
+- [x] QuizJsonImport 모달 컴포넌트
+- [x] 탭 UI (파일 업로드 / JSON 붙여넣기)
+- [x] 파일 업로드 input
+- [x] JSON 텍스트 textarea
+- [x] 검증 결과 표시 영역
+- [x] 중복 확인 팝업 (Alert/Confirm)
 
 ### 검증 로직
-- [ ] JSON.parse() 에러 처리
-- [ ] 필수 필드 검증
-- [ ] 타입 검증
-- [ ] 값 범위 검증
-- [ ] 배열 검증 (빈 배열, 최소 개수)
-- [ ] 퀴즈 정답 존재 여부
-- [ ] order 연속성 검증
+- [x] JSON.parse() 에러 처리
+- [x] 필수 필드 검증
+- [x] 타입 검증
+- [x] 값 범위 검증
+- [x] 배열 검증 (빈 배열, 최소 개수)
+- [x] 퀴즈 정답 존재 여부
+- [x] order 연속성 검증
+- [x] personality 검증 (safe, balanced, aggressive, challenger)
 
 ### Firestore 연동
-- [ ] 중복 day 조회 쿼리
-- [ ] addDoc (새 문서 생성)
-- [ ] updateDoc (기존 문서 덮어쓰기)
-- [ ] 저장 성공/실패 처리
+- [x] 중복 day 조회 쿼리
+- [x] addDoc (새 문서 생성)
+- [x] updateDoc (기존 문서 덮어쓰기)
+- [x] 저장 성공/실패 처리
 
 ### 통합
-- [ ] 학습 콘텐츠 목록 페이지에 버튼 추가
-- [ ] 퀴즈 목록 페이지에 버튼 추가
-- [ ] 모달 열기/닫기 상태 관리
-- [ ] 저장 후 목록 새로고침
+- [x] 학습 콘텐츠 목록 페이지에 버튼 추가
+- [x] 퀴즈 목록 페이지에 버튼 추가
+- [x] 모달 열기/닫기 상태 관리
+- [x] 저장 후 목록 새로고침
 
 ---
 
@@ -543,4 +544,17 @@ interface QuizJsonImportProps {
 ---
 
 **작성**: 백오피스 팀
-**최종 업데이트**: 2026-01-04
+**최종 업데이트**: 2026-02-06 (Phase 1 구현 완료)
+
+---
+
+## 📋 구현 히스토리
+
+### 2026-02-06: Phase 1 완료
+- ✅ 컴포넌트 구현 완료 (`LearningJsonImport.tsx`, `QuizJsonImport.tsx`)
+- ✅ 목록 페이지 통합 완료 (JSON Import 버튼)
+- ✅ Personality 검증 수정 (safe, balanced, aggressive, challenger)
+- ✅ 모든 검증 로직 구현
+- ✅ Firestore 중복 체크 및 덮어쓰기 기능
+- 📦 **커밋**: `521ee06e` - "Feat: Connect JSON Import to list pages (Phase 1 - 2/2)"
+- 📦 **커밋**: `95c45284` - "Fix: Correct personality validation in JSON Import components"

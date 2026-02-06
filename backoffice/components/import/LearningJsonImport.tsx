@@ -130,8 +130,8 @@ export default function LearningJsonImport({
       if (data.day <= 0) {
         throw new Error(`'day'는 양수여야 합니다. (현재: ${data.day})`);
       }
-      if (!["safe", "aggressive", "hunter_cat"].includes(data.personality)) {
-        throw new Error(`'personality'는 'safe', 'aggressive', 'hunter_cat' 중 하나여야 합니다. (현재: ${data.personality})`);
+      if (!["safe", "balanced", "aggressive", "challenger"].includes(data.personality)) {
+        throw new Error(`'personality'는 'safe', 'balanced', 'aggressive', 'challenger' 중 하나여야 합니다. (현재: ${data.personality})`);
       }
       if (data.title.trim() === "") {
         throw new Error("'title'은 비어있지 않아야 합니다.");

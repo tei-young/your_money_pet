@@ -3,7 +3,7 @@
 **작성일**: 2026-01-04
 **업데이트**: 2026-01-04 (백오피스 구현 완료)
 **담당**: 백오피스 팀 → Flutter 팀
-**상태**: 🟢 백오피스 완료, Flutter 구현 대기
+**상태**: 🟢 백오피스 완료, Flutter 구현 완료
 
 ---
 
@@ -17,9 +17,13 @@
 - ✅ 6가지 마크업 문법 지원 (Bold, Italic, Underline, Strikethrough, Color, Size)
 - ✅ 학습 콘텐츠 및 퀴즈 전체 적용 완료
 
-**Flutter 구현 필요사항**:
-- 🚧 색상, 크기, 이탤릭, 밑줄, 취소선 파싱 로직 추가
-- ✅ 볼드(`**텍스트**`)는 이미 구현됨
+**Flutter 구현 완료**:
+- ✅ 볼드(`**텍스트**`)
+- ✅ 이탤릭(`*텍스트*`)
+- ✅ 밑줄(`__텍스트__`)
+- ✅ 취소선(`~~텍스트~~`)
+- ✅ 색상(`[color:#HEX]텍스트[/color]`)
+- ✅ 크기(`[size:숫자]텍스트[/size]`)
 
 **목표**:
 - 백오피스에서 입력한 모든 마크업을 Flutter 앱에서 정확히 렌더링
@@ -49,15 +53,15 @@
 
 ---
 
-### 3. 밑줄 (Underline) - 🆕 신규
+### 3. 밑줄 (Underline) - ✅ 구현 완료
 ```
-[u]텍스트[/u]
+__텍스트__
 ```
 **Flutter 렌더링**: `decoration: TextDecoration.underline`
 
 **참고**:
-- 표준 마크다운 준수 위해 `__텍스트__` 대신 HTML 스타일 사용
-- `__`는 마크다운에서 볼드를 의미하므로 혼동 방지
+- 더블 언더스코어(`__`) 사용
+- 백오피스 에디터에서 Underline 버튼 클릭 시 자동 삽입
 
 ---
 
@@ -88,31 +92,34 @@ final colorPattern = RegExp(r'\[color:(#[0-9A-Fa-f]{6})\](.+?)\[/color\]');
 
 ---
 
-### 6. 크기 (Size) - 🆕 신규
+### 6. 크기 (Size) - ✅ 구현 완료
 ```
-[size:large]큰 글씨[/size]
-[size:normal]보통 글씨[/size]
-[size:small]작은 글씨[/size]
+[size:20]큰 글씨[/size]
+[size:17]보통 글씨[/size]
+[size:14]작은 글씨[/size]
 ```
 
-**크기 매핑 (사전 정의)**:
-| 키워드 | 픽셀 크기 | 비고 |
+**권장 크기 값**:
+| 용도 | 픽셀 크기 | 비고 |
 |--------|----------|------|
-| `large` | 20px | 강조 제목 |
-| `normal` | 17px | 기본값 (현재 사용 중) |
-| `small` | 14px | 작은 설명 |
+| 강조 제목 | 20 | large |
+| 기본 본문 | 17 | normal (기본값) |
+| 작은 설명 | 14 | small |
 
 **Flutter 렌더링**: `fontSize: 20.0`
 
 **규칙**:
-- 허용된 값: `large`, `normal`, `small`만 (대소문자 구분 없음)
-- 잘못된 크기 → 마크업 무시, 일반 텍스트로 표시
-- 예: `[size:huge]텍스트[/size]` → 그냥 `[size:huge]텍스트[/size]` 표시
+- 숫자만 입력 (단위 없음)
+- 잘못된 값 → 기본 크기(14) 적용
 
 **정규식 예시**:
 ```dart
-final sizePattern = RegExp(r'\[size:(large|normal|small)\](.+?)\[/size\]', caseSensitive: false);
+final sizePattern = RegExp(r'\[size:(\d+)\](.+?)\[/size\]');
 ```
+
+**백오피스 에디터**:
+- 드롭다운에서 large/normal/small 선택
+- 자동으로 숫자 마크업 생성 (large → `[size:20]`, normal → `[size:17]`, small → `[size:14]`)
 
 ---
 
@@ -377,8 +384,7 @@ fontSize: 14.0   // small
 - 실시간 미리보기 구현
 - 학습 콘텐츠 및 퀴즈 통합
 
-**Flutter 구현 요청**: 🚀 지금 시작 가능
-**예상 소요**: 2-3일 (파싱 로직 + 테스트)
+**Flutter 구현**: ✅ 완료 (2026-01-18)
 
 ---
 
@@ -482,22 +488,19 @@ docs/CONTENT_MARKUP_GUIDE.md
 
 ---
 
-## 🚀 다음 단계
+## ✅ 구현 완료
 
-**Flutter 팀 작업 사항**:
-1. `lib/utils/text_renderer.dart`에 5가지 마크업 파싱 로직 추가
+**Flutter 구현 완료 (2026-01-18)**:
+1. `lib/utils/text_renderer.dart`에 6가지 마크업 파싱 로직 구현 완료
+   - 볼드 (`**텍스트**`)
    - 이탤릭 (`*텍스트*`)
-   - 밑줄 (`[u]텍스트[/u]`)
+   - 밑줄 (`__텍스트__`)
    - 취소선 (`~~텍스트~~`)
    - 색상 (`[color:#HEX]텍스트[/color]`)
-   - 크기 (`[size:large|normal|small]텍스트[/size]`)
+   - 크기 (`[size:숫자]텍스트[/size]`)
 
 2. 중첩 마크업 처리
-   - `TextDecoration.combine([])` 활용
-   - 복합 스타일 적용 테스트
+   - 단일 정규식으로 모든 마크업 순차 처리
+   - 복합 스타일 적용 지원
 
-3. 테스트
-   - 백오피스에서 생성한 실제 콘텐츠로 테스트
-   - 문서의 테스트 케이스 참고
-
-**백오피스는 준비 완료! Flutter 구현만 기다립니다.** 🎉
+**백오피스 + Flutter 모두 완료!** 🎉
